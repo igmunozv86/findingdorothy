@@ -42,6 +42,17 @@ export function periodLabel(hour) {
 }
 
 export function placeStatus(hours, when) {
+  if (hours == null) {
+    return {
+      open: true,
+      unconfirmed: true,
+      text: 'Hours not confirmed',
+      patternDay: when.weekday,
+      minutesLeft: null,
+      phase: clockPhase(when.hour, null),
+    };
+  }
+
   if (hours === '24h') {
     return {
       open: true,

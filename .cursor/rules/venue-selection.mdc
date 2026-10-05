@@ -1,0 +1,16 @@
+---
+description: How to scan and select venues when a city is added or its list changes
+alwaysApply: true
+---
+
+# Venue selection
+
+When a city is added or its venues change, follow `services/ingestion/select-venues.md`. Do not ask for those rules again.
+
+- `venue.city` must match `name` in `data/cities.json`. Set `live` only after the venue pass.
+- Search in English and in the city's language, and log the language.
+- Select from the venue's own site, its official Instagram, or the city's official tourism page. Drop a venue if those sources disagree on the address or say it closed.
+- `hours_verified` is true only when that own site or official Instagram states a full open and close, with `source_url`. Otherwise `hours` is null and `hours_note` says why. Never store `{}`.
+- Coordinates come from Nominatim for the street address. Do not invent them. Do not store a phone number.
+- Categories: `bar`, `sauna`, `cruise`, `sex`. Do not add a venue only to fill a section.
+- Run `node scripts/select-venues.mjs`, then `node scripts/build-web.mjs`.

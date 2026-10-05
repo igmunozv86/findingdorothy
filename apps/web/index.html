@@ -187,8 +187,6 @@
     .world.is-open .acc-item:nth-child(2) { transition-delay: 80ms; }
     .world.is-open .acc-item:nth-child(3) { transition-delay: 120ms; }
     .world.is-open .acc-item:nth-child(4) { transition-delay: 160ms; }
-    .world.is-open .acc-item:nth-child(5) { transition-delay: 200ms; }
-    .world.is-open .acc-item:nth-child(6) { transition-delay: 240ms; }
     .acc-link, .acc-toggle {
       display: flex;
       align-items: center;
@@ -383,6 +381,8 @@
     .card-pills {
       display: inline-flex;
       flex: none;
+      flex-wrap: wrap;
+      justify-content: flex-end;
       align-items: center;
       gap: 0.35rem;
     }
@@ -405,7 +405,7 @@
       text-transform: capitalize;
     }
     .badge.closed { color: #111; }
-    .badge.closing { color: #111; border-color: #ff7a18; }
+    .badge.closing, .badge.unconfirmed { color: #111; border-color: #ff7a18; }
     .neighborhood, .address { margin: 0.15rem 0 0; }
     .neighborhood { color: var(--muted); }
     .hours { margin: 0.4rem 0 0; font-size: 16px; font-weight: 500; }
@@ -472,12 +472,6 @@
     .why {
       margin: 0.35rem 0 0;
       font-size: 16px;
-    }
-    .sources {
-      margin: 0.3rem 0 0;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 500;
     }
     .week-label { margin-top: 0.95rem; }
     .week {
@@ -823,7 +817,7 @@
         <h1>Know where the <span class="fun">fun</span> is going.</h1>
         <p class="subhead">Gay Guys travel intel, powered by real data.</p>
         <div class="hero-cta">
-          <button type="button" class="btn solid" id="share-location">See tonight's forecast where you are</button>
+          <button type="button" class="btn solid" id="share-location">See what's going on where you are</button>
           <button type="button" class="btn ghost" id="browse-world" aria-expanded="false" aria-controls="world">Browse the world</button>
         </div>
         <p class="loc-note" id="loc-status" role="status"></p>
@@ -831,18 +825,7 @@
           <div class="world-clip">
             <ul class="acc">
             <li class="acc-item"><a class="acc-link" href="#san-francisco">San Francisco, USA<span>Open</span></a></li>
-            <li class="acc-item">
-              <button type="button" class="acc-toggle" data-city="madrid" aria-expanded="false">Madrid, Spain<span class="chev" aria-hidden="true"></span></button>
-              <div class="acc-panel"><div class="acc-panel-clip"><p>Next. This city will use the same page.</p></div></div>
-            </li>
-            <li class="acc-item">
-              <button type="button" class="acc-toggle" data-city="paris" aria-expanded="false">Paris, France<span class="chev" aria-hidden="true"></span></button>
-              <div class="acc-panel"><div class="acc-panel-clip"><p>Next. This city will use the same page.</p></div></div>
-            </li>
-            <li class="acc-item">
-              <button type="button" class="acc-toggle" data-city="cologne" aria-expanded="false">Cologne, Germany<span class="chev" aria-hidden="true"></span></button>
-              <div class="acc-panel"><div class="acc-panel-clip"><p>Next. This city will use the same page.</p></div></div>
-            </li>
+            <li class="acc-item"><a class="acc-link" href="#madrid">Madrid, Spain<span>Open</span></a></li>
             <li class="acc-item"><a class="acc-link" href="#santiago">Santiago, Chile<span>Open</span></a></li>
             <li class="acc-item"><a class="acc-link" href="#sao-paulo">São Paulo, Brazil<span>Open</span></a></li>
             </ul>
@@ -887,7 +870,7 @@
       <h1>San Francisco, USA</h1>
       <p class="lede" data-date>Monday, October 5, 2026</p>
       <p class="now-line" data-weather data-lat="37.7749" data-lon="-122.4194">
-        <span class="now-time" data-clock data-tz="America/Los_Angeles">12:08 AM</span>
+        <span class="now-time" data-clock data-tz="America/Los_Angeles">12:55 AM</span>
         <span class="now-temp" data-temp>18°C</span>
         <span class="rain" data-rain hidden role="img" aria-label="Rain likely"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.4 15h11.3a3.5 3.5 0 0 0 .4-7 5.1 5.1 0 0 0-9.9-1.2A4 4 0 0 0 6.4 15z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M8.2 17.2v2.3M12 17.2v3.1M15.8 17.2v2.3"/></svg></span>
       </p>
@@ -916,15 +899,14 @@
           <div class="meter">
             <div class="meter-head">
               <p class="meter-title">Expected busyness right now</p>
-              <p class="score">7.9/10</p>
+              <p class="score">4.8/10</p>
             </div>
-            <div class="bar" role="img" aria-label="Expected busyness 7.9/10, from quiet to packed">
-              <span style="width:79%"></span>
+            <div class="bar" role="img" aria-label="Expected busyness 4.8/10, from quiet to packed">
+              <span style="width:48%"></span>
             </div>
             <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
             <p class="signal">Not enough live signal</p>
-            <p class="why">Weekend pattern for a Castro bar, in the busy part of the night. Reviews mention loud dance floor. No live count.</p>
-            <p class="sources">Posted hours · Category prior · Hour prior · Recurring reviews · Weather</p>
+            <p class="why">Weekend pattern for a Castro bar, near closing. No live count.</p>
           </div>
           <p class="week-label">This week</p>
           <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
@@ -948,15 +930,14 @@
           <div class="meter">
             <div class="meter-head">
               <p class="meter-title">Expected busyness right now</p>
-              <p class="score">7.9/10</p>
+              <p class="score">4.8/10</p>
             </div>
-            <div class="bar" role="img" aria-label="Expected busyness 7.9/10, from quiet to packed">
-              <span style="width:79%"></span>
+            <div class="bar" role="img" aria-label="Expected busyness 4.8/10, from quiet to packed">
+              <span style="width:48%"></span>
             </div>
             <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
             <p class="signal">Not enough live signal</p>
-            <p class="why">Weekend pattern for a Castro bar, in the busy part of the night. Reviews mention packed dance floor. No live count.</p>
-            <p class="sources">Posted hours · Category prior · Hour prior · Recurring reviews · Weather</p>
+            <p class="why">Weekend pattern for a Castro bar, near closing. No live count.</p>
           </div>
           <p class="week-label">This week</p>
           <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
@@ -980,15 +961,14 @@
           <div class="meter">
             <div class="meter-head">
               <p class="meter-title">Expected busyness right now</p>
-              <p class="score">7.1/10</p>
+              <p class="score">4.8/10</p>
             </div>
-            <div class="bar" role="img" aria-label="Expected busyness 7.1/10, from quiet to packed">
-              <span style="width:71%"></span>
+            <div class="bar" role="img" aria-label="Expected busyness 4.8/10, from quiet to packed">
+              <span style="width:48%"></span>
             </div>
             <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
             <p class="signal">Not enough live signal</p>
-            <p class="why">Weekend pattern for a Castro bar, in the busy part of the night. No live count.</p>
-            <p class="sources">Posted hours · Category prior · Hour prior · Recurring reviews · Weather</p>
+            <p class="why">Weekend pattern for a Castro bar, near closing. No live count.</p>
           </div>
           <p class="week-label">This week</p>
           <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
@@ -1012,15 +992,14 @@
           <div class="meter">
             <div class="meter-head">
               <p class="meter-title">Expected busyness right now</p>
-              <p class="score">7.1/10</p>
+              <p class="score">4.8/10</p>
             </div>
-            <div class="bar" role="img" aria-label="Expected busyness 7.1/10, from quiet to packed">
-              <span style="width:71%"></span>
+            <div class="bar" role="img" aria-label="Expected busyness 4.8/10, from quiet to packed">
+              <span style="width:48%"></span>
             </div>
             <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
             <p class="signal">Not enough live signal</p>
-            <p class="why">Weekend pattern for a Castro bar, in the busy part of the night. No live count.</p>
-            <p class="sources">Posted hours · Category prior · Hour prior · Recurring reviews · Weather</p>
+            <p class="why">Weekend pattern for a Castro bar, near closing. No live count.</p>
           </div>
           <p class="week-label">This week</p>
           <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
@@ -1044,15 +1023,14 @@
           <div class="meter">
             <div class="meter-head">
               <p class="meter-title">Expected busyness right now</p>
-              <p class="score">7.1/10</p>
+              <p class="score">4.8/10</p>
             </div>
-            <div class="bar" role="img" aria-label="Expected busyness 7.1/10, from quiet to packed">
-              <span style="width:71%"></span>
+            <div class="bar" role="img" aria-label="Expected busyness 4.8/10, from quiet to packed">
+              <span style="width:48%"></span>
             </div>
             <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
             <p class="signal">Not enough live signal</p>
-            <p class="why">Weekend pattern for a Castro bar, in the busy part of the night. No live count.</p>
-            <p class="sources">Posted hours · Category prior · Hour prior · Recurring reviews · Weather</p>
+            <p class="why">Weekend pattern for a Castro bar, near closing. No live count.</p>
           </div>
           <p class="week-label">This week</p>
           <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
@@ -1127,7 +1105,6 @@
             <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
             <p class="signal">Not enough live signal</p>
             <p class="why">Weeknight pattern for a Berkeley bathhouse, in the busy part of the night. No live count.</p>
-            <p class="sources">Posted hours · Category prior · Hour prior · Recurring reviews · Weather</p>
           </div>
           <p class="week-label">This week</p>
           <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
@@ -1156,15 +1133,14 @@
           <div class="meter">
             <div class="meter-head">
               <p class="meter-title">Expected busyness right now</p>
-              <p class="score">7.3/10</p>
+              <p class="score">4.9/10</p>
             </div>
-            <div class="bar" role="img" aria-label="Expected busyness 7.3/10, from quiet to packed">
-              <span style="width:73%"></span>
+            <div class="bar" role="img" aria-label="Expected busyness 4.9/10, from quiet to packed">
+              <span style="width:49.00000000000001%"></span>
             </div>
             <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
             <p class="signal">Not enough live signal</p>
-            <p class="why">Weekend pattern for a SoMa cruising bar, in the busy part of the night. No live count.</p>
-            <p class="sources">Posted hours · Category prior · Hour prior · Recurring reviews · Weather</p>
+            <p class="why">Weekend pattern for a SoMa cruising bar, near closing. No live count.</p>
           </div>
           <p class="week-label">This week</p>
           <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
@@ -1188,15 +1164,14 @@
           <div class="meter">
             <div class="meter-head">
               <p class="meter-title">Expected busyness right now</p>
-              <p class="score">7.3/10</p>
+              <p class="score">4.9/10</p>
             </div>
-            <div class="bar" role="img" aria-label="Expected busyness 7.3/10, from quiet to packed">
-              <span style="width:73%"></span>
+            <div class="bar" role="img" aria-label="Expected busyness 4.9/10, from quiet to packed">
+              <span style="width:49.00000000000001%"></span>
             </div>
             <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
             <p class="signal">Not enough live signal</p>
-            <p class="why">Weekend pattern for a SoMa cruising bar, in the busy part of the night. No live count.</p>
-            <p class="sources">Posted hours · Category prior · Hour prior · Recurring reviews · Weather</p>
+            <p class="why">Weekend pattern for a SoMa cruising bar, near closing. No live count.</p>
           </div>
           <p class="week-label">This week</p>
           <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
@@ -1248,6 +1223,204 @@
     </section>
     <button type="button" class="menu-back" hidden>Menu</button>
   </main>
+  <main class="view" id="madrid" hidden>
+    <section class="city-hero block">
+      <p class="back"><a href="#home">Home</a></p>
+      <p class="eyebrow" data-period>This morning</p>
+      <h1>Madrid, Spain</h1>
+      <p class="lede" data-date>Monday, October 5, 2026</p>
+      <p class="now-line" data-weather data-lat="40.4168" data-lon="-3.7038">
+        <span class="now-time" data-clock data-tz="Europe/Madrid">9:55 AM</span>
+        <span class="now-temp" data-temp>16°C</span>
+        <span class="rain" data-rain hidden role="img" aria-label="Rain likely"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.4 15h11.3a3.5 3.5 0 0 0 .4-7 5.1 5.1 0 0 0-9.9-1.2A4 4 0 0 0 6.4 15z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M8.2 17.2v2.3M12 17.2v3.1M15.8 17.2v2.3"/></svg></span>
+      </p>
+      <nav class="jump-menu" id="jump-menu-madrid" aria-label="Jump to a section">
+        <button type="button" data-jump="group-madrid-dance"><span class="group-icon dance" role="img" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="7.4" cy="17.4" rx="2.8" ry="2.15" transform="rotate(-18 7.4 17.4)"/><ellipse cx="16.6" cy="15.3" rx="2.8" ry="2.15" transform="rotate(-18 16.6 15.3)"/><path d="M9.7 5.1v11.2M18.9 3.1v11.1M9.7 5.1 18.9 3.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"/></svg></span><span>Drinks and Dance</span></button>
+        <button type="button" data-jump="group-madrid-sauna"><span class="group-icon sauna" role="img" aria-hidden="true"><svg viewBox="0 0 248.914 248.914" fill="currentColor" aria-hidden="true"><path d="M185.05,137.067c0.905,0.784,2.016,1.167,3.127,1.167c1.335,0,2.669-0.561,3.612-1.643c0.737-0.859,17.978-21.112,4.909-37.563c-7.257-9.126-1.899-14.433-0.728-15.422c2.035-1.647,2.361-4.63,0.728-6.681c-1.643-2.067-4.662-2.403-6.72-0.758c-5.013,3.991-11.621,15.145-0.766,28.808c8.139,10.242-4.527,25.214-4.648,25.359C182.838,132.321,183.052,135.341,185.05,137.067z"/><path d="M226.381,130.328c-1.727,1.993-1.512,5.013,0.485,6.739c0.905,0.784,2.017,1.167,3.127,1.167c1.335,0,2.67-0.561,3.612-1.643c0.738-0.859,17.979-21.112,4.91-37.563c-7.258-9.126-1.899-14.433-0.729-15.422c2.035-1.647,2.362-4.63,0.729-6.681c-1.643-2.067-4.662-2.403-6.721-0.758c-5.013,3.991-11.621,15.145-0.766,28.808C239.169,115.216,226.503,130.184,226.381,130.328z"/><path d="M55.165,76.162c-2.065-1.641-5.076-1.305-6.721,0.758c-1.634,2.051-1.305,5.034,0.716,6.681c1.176,0.989,6.524,6.293-0.716,15.422c-13.065,16.456,4.163,36.709,4.907,37.559c0.943,1.092,2.28,1.652,3.615,1.652c1.108,0,2.221-0.393,3.125-1.167c1.998-1.731,2.212-4.751,0.488-6.744c-0.128-0.145-12.788-15.116-4.651-25.358C66.776,91.307,60.168,80.152,55.165,76.162z"/><path d="M11.535,136.592c0.943,1.092,2.28,1.643,3.615,1.643c1.108,0,2.221-0.383,3.125-1.167c1.998-1.727,2.212-4.746,0.488-6.739c-0.128-0.145-12.788-15.117-4.651-25.358c10.849-13.663,4.24-24.817-0.763-28.808c-2.065-1.641-5.075-1.305-6.721,0.758c-1.633,2.051-1.304,5.034,0.717,6.681c1.176,0.989,6.524,6.296-0.717,15.422C-6.443,115.479,10.79,135.732,11.535,136.592z"/><circle cx="124.165" cy="56.452" r="24.468"/><path d="M14.337,194.454h72.188c5.276,0,9.558-4.284,9.558-9.559v-11.71v-6.356c0-0.145,0.037-0.275,0.037-0.42c-0.028-7.892,6.394-14.313,14.3-14.313c6.55,0,12.031,4.452,13.74,10.463c1.696-6.011,7.18-10.463,13.742-10.463c7.893,0,14.314,6.422,14.328,14.313c-0.032,0.145,0.01,0.275,0.01,0.42v6.356v11.71c0,5.274,4.274,9.559,9.558,9.559h72.778c7.925,0,14.338-6.272,14.338-14.021c0-7.747-6.413-14.024-14.338-14.024h-54.623c2.212-2.739,2.847-6.585,1.27-9.997l-25.688-55.557c-0.438-0.938-1.036-1.736-1.699-2.457c-2.623-9.29-11.92-13.581-23.083-13.581h-13.189c-10.79,0-19.81,4.042-22.766,12.701c-1.076,0.884-1.988,1.988-2.616,3.337l-25.688,55.557c-1.575,3.412-0.94,7.258,1.271,9.997H14.337C6.422,166.409,0,172.687,0,180.434C0,188.182,6.422,194.454,14.337,194.454z M154.648,162.904v-18.416l9.227,19.942c0.331,0.732,0.803,1.372,1.288,1.979h-10.818C154.518,165.266,154.648,164.1,154.648,162.904z M83.849,164.431l9.819-21.24v19.714c0,1.195,0.131,2.361,0.306,3.505H82.549C83.046,165.803,83.503,165.163,83.849,164.431z"/><path d="M100.867,166.461v40.911c0,5.274,4.277,9.559,9.558,9.559c5.276,0,9.558-4.284,9.558-9.559v-40.911c0-5.283-4.282-9.559-9.558-9.559C105.14,156.902,100.867,161.178,100.867,166.461z"/><path d="M128.347,166.461v40.911c0,5.274,4.277,9.559,9.556,9.559c5.279,0,9.559-4.284,9.559-9.559v-40.911c0-5.283-4.279-9.559-9.559-9.559C132.619,156.902,128.347,161.178,128.347,166.461z"/></svg></span><span>Saunas and Bathhouses</span></button>
+        <button type="button" data-jump="group-madrid-fun"><span class="group-icon fun" role="img" aria-hidden="true"><svg viewBox="0 0 92.27 122.88" aria-hidden="true"><path fill="#EC6F59" d="M18.61,54.89C15.7,28.8,30.94,10.45,59.52,0C42.02,22.71,74.44,47.31,76.23,70.89c4.19-7.15,6.57-16.69,7.04-29.45c21.43,33.62,3.66,88.57-43.5,80.67c-4.33-0.72-8.5-2.09-12.3-4.13C10.27,108.8,0,88.79,0,69.68C0,57.5,5.21,46.63,11.95,37.99C12.85,46.45,14.77,52.76,18.61,54.89z"/><path fill="#FAD15C" d="M33.87,92.58c-4.86-12.55-4.19-32.82,9.42-39.93c0.1,23.3,23.05,26.27,18.8,51.14c3.92-4.44,5.9-11.54,6.25-17.15c6.22,14.24,1.34,25.63-7.53,31.43c-26.97,17.64-50.19-18.12-34.75-37.72C26.53,84.73,31.89,91.49,33.87,92.58z"/></svg></span><span>Fun Fun</span></button>
+      </nav>
+    </section>
+    <section class="block city-body">
+      <section class="group" id="group-madrid-dance">
+        <h3><span class="group-icon dance" role="img" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="7.4" cy="17.4" rx="2.8" ry="2.15" transform="rotate(-18 7.4 17.4)"/><ellipse cx="16.6" cy="15.3" rx="2.8" ry="2.15" transform="rotate(-18 16.6 15.3)"/><path d="M9.7 5.1v11.2M18.9 3.1v11.1M9.7 5.1 18.9 3.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"/></svg></span>Drinks and Dance</h3>
+        <div class="cards">
+        <article class="card" id="venue-mad-black-white">
+          <div class="card-top">
+            <h4>Black &amp; White</h4>
+            <span class="card-pills"><span class="badge low">low</span><span class="badge unconfirmed">Hours not confirmed</span></span>
+          </div>
+          <p class="neighborhood">Chueca</p>
+          <p class="address">Calle de la Libertad, 34, Chueca, Madrid, Spain</p>
+          <p class="hours open">Hours not confirmed</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=Black%20%26%20White%20Calle%20de%20la%20Libertad%2C%2034%2C%20Chueca%2C%20Madrid%2C%20Spain" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=Black%20%26%20White%20Calle%20de%20la%20Libertad%2C%2034%2C%20Chueca%2C%20Madrid%2C%20Spain" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <div class="meter">
+            <div class="meter-head">
+              <p class="meter-title">Expected busyness right now</p>
+              <p class="score">2.4/10</p>
+            </div>
+            <div class="bar" role="img" aria-label="Expected busyness 2.4/10, from quiet to packed">
+              <span style="width:24%"></span>
+            </div>
+            <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
+            <p class="signal">Not enough live signal</p>
+            <p class="why">Weeknight pattern for a Chueca bar, outside the usual busy hours. No live count.</p>
+          </div>
+          <p class="week-label">This week</p>
+          <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Cabaret and drag</li><li>Two floors</li><li>Downstairs dance floor</li></ul>
+        </article>
+        <article class="card" id="venue-mad-why-not">
+          <div class="card-top">
+            <h4>Why Not</h4>
+            <span class="card-pills"><span class="badge low">low</span><span class="badge unconfirmed">Hours not confirmed</span></span>
+          </div>
+          <p class="neighborhood">Chueca</p>
+          <p class="address">Calle de San Bartolomé, 7, Chueca, Madrid, Spain</p>
+          <p class="hours open">Hours not confirmed</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=Why%20Not%20Calle%20de%20San%20Bartolom%C3%A9%2C%207%2C%20Chueca%2C%20Madrid%2C%20Spain" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=Why%20Not%20Calle%20de%20San%20Bartolom%C3%A9%2C%207%2C%20Chueca%2C%20Madrid%2C%20Spain" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <div class="meter">
+            <div class="meter-head">
+              <p class="meter-title">Expected busyness right now</p>
+              <p class="score">2.4/10</p>
+            </div>
+            <div class="bar" role="img" aria-label="Expected busyness 2.4/10, from quiet to packed">
+              <span style="width:24%"></span>
+            </div>
+            <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
+            <p class="signal">Not enough live signal</p>
+            <p class="why">Weeknight pattern for a Chueca bar, outside the usual busy hours. No live count.</p>
+          </div>
+          <p class="week-label">This week</p>
+          <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Disco</li><li>Basement bar</li></ul>
+        </article>
+        <article class="card" id="venue-mad-delirio">
+          <div class="card-top">
+            <h4>Delirio</h4>
+            <span class="card-pills"><span class="badge closed">Closed</span></span>
+          </div>
+          <p class="neighborhood">Chueca</p>
+          <p class="address">Calle de Pelayo, 59, Chueca, Madrid, Spain</p>
+          <p class="hours closed">Closed now · Opens Tuesday at 12:00 AM</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=Delirio%20Calle%20de%20Pelayo%2C%2059%2C%20Chueca%2C%20Madrid%2C%20Spain" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=Delirio%20Calle%20de%20Pelayo%2C%2059%2C%20Chueca%2C%20Madrid%2C%20Spain" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <p class="week-label">This week</p>
+          <div class="week is-shut" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Drag and live shows</li><li>Cocktails</li><li>Downstairs dance floor</li></ul>
+        </article>
+        </div>
+      </section>
+      <section class="group" id="group-madrid-sauna">
+        <h3><span class="group-icon sauna" role="img" aria-hidden="true"><svg viewBox="0 0 248.914 248.914" fill="currentColor" aria-hidden="true"><path d="M185.05,137.067c0.905,0.784,2.016,1.167,3.127,1.167c1.335,0,2.669-0.561,3.612-1.643c0.737-0.859,17.978-21.112,4.909-37.563c-7.257-9.126-1.899-14.433-0.728-15.422c2.035-1.647,2.361-4.63,0.728-6.681c-1.643-2.067-4.662-2.403-6.72-0.758c-5.013,3.991-11.621,15.145-0.766,28.808c8.139,10.242-4.527,25.214-4.648,25.359C182.838,132.321,183.052,135.341,185.05,137.067z"/><path d="M226.381,130.328c-1.727,1.993-1.512,5.013,0.485,6.739c0.905,0.784,2.017,1.167,3.127,1.167c1.335,0,2.67-0.561,3.612-1.643c0.738-0.859,17.979-21.112,4.91-37.563c-7.258-9.126-1.899-14.433-0.729-15.422c2.035-1.647,2.362-4.63,0.729-6.681c-1.643-2.067-4.662-2.403-6.721-0.758c-5.013,3.991-11.621,15.145-0.766,28.808C239.169,115.216,226.503,130.184,226.381,130.328z"/><path d="M55.165,76.162c-2.065-1.641-5.076-1.305-6.721,0.758c-1.634,2.051-1.305,5.034,0.716,6.681c1.176,0.989,6.524,6.293-0.716,15.422c-13.065,16.456,4.163,36.709,4.907,37.559c0.943,1.092,2.28,1.652,3.615,1.652c1.108,0,2.221-0.393,3.125-1.167c1.998-1.731,2.212-4.751,0.488-6.744c-0.128-0.145-12.788-15.116-4.651-25.358C66.776,91.307,60.168,80.152,55.165,76.162z"/><path d="M11.535,136.592c0.943,1.092,2.28,1.643,3.615,1.643c1.108,0,2.221-0.383,3.125-1.167c1.998-1.727,2.212-4.746,0.488-6.739c-0.128-0.145-12.788-15.117-4.651-25.358c10.849-13.663,4.24-24.817-0.763-28.808c-2.065-1.641-5.075-1.305-6.721,0.758c-1.633,2.051-1.304,5.034,0.717,6.681c1.176,0.989,6.524,6.296-0.717,15.422C-6.443,115.479,10.79,135.732,11.535,136.592z"/><circle cx="124.165" cy="56.452" r="24.468"/><path d="M14.337,194.454h72.188c5.276,0,9.558-4.284,9.558-9.559v-11.71v-6.356c0-0.145,0.037-0.275,0.037-0.42c-0.028-7.892,6.394-14.313,14.3-14.313c6.55,0,12.031,4.452,13.74,10.463c1.696-6.011,7.18-10.463,13.742-10.463c7.893,0,14.314,6.422,14.328,14.313c-0.032,0.145,0.01,0.275,0.01,0.42v6.356v11.71c0,5.274,4.274,9.559,9.558,9.559h72.778c7.925,0,14.338-6.272,14.338-14.021c0-7.747-6.413-14.024-14.338-14.024h-54.623c2.212-2.739,2.847-6.585,1.27-9.997l-25.688-55.557c-0.438-0.938-1.036-1.736-1.699-2.457c-2.623-9.29-11.92-13.581-23.083-13.581h-13.189c-10.79,0-19.81,4.042-22.766,12.701c-1.076,0.884-1.988,1.988-2.616,3.337l-25.688,55.557c-1.575,3.412-0.94,7.258,1.271,9.997H14.337C6.422,166.409,0,172.687,0,180.434C0,188.182,6.422,194.454,14.337,194.454z M154.648,162.904v-18.416l9.227,19.942c0.331,0.732,0.803,1.372,1.288,1.979h-10.818C154.518,165.266,154.648,164.1,154.648,162.904z M83.849,164.431l9.819-21.24v19.714c0,1.195,0.131,2.361,0.306,3.505H82.549C83.046,165.803,83.503,165.163,83.849,164.431z"/><path d="M100.867,166.461v40.911c0,5.274,4.277,9.559,9.558,9.559c5.276,0,9.558-4.284,9.558-9.559v-40.911c0-5.283-4.282-9.559-9.558-9.559C105.14,156.902,100.867,161.178,100.867,166.461z"/><path d="M128.347,166.461v40.911c0,5.274,4.277,9.559,9.556,9.559c5.279,0,9.559-4.284,9.559-9.559v-40.911c0-5.283-4.279-9.559-9.559-9.559C132.619,156.902,128.347,161.178,128.347,166.461z"/></svg></span>Saunas and Bathhouses</h3>
+        <div class="cards">
+        <article class="card" id="venue-mad-sauna-center">
+          <div class="card-top">
+            <h4>Sauna Center</h4>
+            <span class="card-pills"><span class="badge low">low</span></span>
+          </div>
+          <p class="neighborhood">Malasaña</p>
+          <p class="address">Calle de Valverde, 32, Malasaña, Madrid, Spain</p>
+          <p class="hours open">Open 24 hours</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=Sauna%20Center%20Calle%20de%20Valverde%2C%2032%2C%20Malasa%C3%B1a%2C%20Madrid%2C%20Spain" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=Sauna%20Center%20Calle%20de%20Valverde%2C%2032%2C%20Malasa%C3%B1a%2C%20Madrid%2C%20Spain" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <div class="meter">
+            <div class="meter-head">
+              <p class="meter-title">Expected busyness right now</p>
+              <p class="score">3.1/10</p>
+            </div>
+            <div class="bar" role="img" aria-label="Expected busyness 3.1/10, from quiet to packed">
+              <span style="width:31%"></span>
+            </div>
+            <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
+            <p class="signal">Not enough live signal</p>
+            <p class="why">Weeknight pattern for a Malasaña bathhouse, early in its posted hours. No live count.</p>
+          </div>
+          <p class="week-label">This week</p>
+          <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:84.00000000000001%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:84.00000000000001%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:84.00000000000001%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Finnish sauna</li><li>Turkish steam</li><li>Bar</li></ul>
+        </article>
+        <article class="card" id="venue-mad-sauna-paraiso">
+          <div class="card-top">
+            <h4>Sauna Paraíso</h4>
+            <span class="card-pills"><span class="badge low">low</span><span class="badge unconfirmed">Hours not confirmed</span></span>
+          </div>
+          <p class="neighborhood">Noviciado</p>
+          <p class="address">Calle del Norte, 15, Noviciado, Madrid, Spain</p>
+          <p class="hours open">Hours not confirmed</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=Sauna%20Para%C3%ADso%20Calle%20del%20Norte%2C%2015%2C%20Noviciado%2C%20Madrid%2C%20Spain" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=Sauna%20Para%C3%ADso%20Calle%20del%20Norte%2C%2015%2C%20Noviciado%2C%20Madrid%2C%20Spain" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <div class="meter">
+            <div class="meter-head">
+              <p class="meter-title">Expected busyness right now</p>
+              <p class="score">3.1/10</p>
+            </div>
+            <div class="bar" role="img" aria-label="Expected busyness 3.1/10, from quiet to packed">
+              <span style="width:31%"></span>
+            </div>
+            <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
+            <p class="signal">Not enough live signal</p>
+            <p class="why">Weeknight pattern for a Noviciado bathhouse, outside the usual busy hours. No live count.</p>
+          </div>
+          <p class="week-label">This week</p>
+          <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:84.00000000000001%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:84.00000000000001%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:84.00000000000001%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Pool and jacuzzi</li><li>Private cabins</li><li>Dark rooms</li></ul>
+        </article>
+        </div>
+      </section>
+      <section class="group" id="group-madrid-fun">
+        <h3><span class="group-icon fun" role="img" aria-hidden="true"><svg viewBox="0 0 92.27 122.88" aria-hidden="true"><path fill="#EC6F59" d="M18.61,54.89C15.7,28.8,30.94,10.45,59.52,0C42.02,22.71,74.44,47.31,76.23,70.89c4.19-7.15,6.57-16.69,7.04-29.45c21.43,33.62,3.66,88.57-43.5,80.67c-4.33-0.72-8.5-2.09-12.3-4.13C10.27,108.8,0,88.79,0,69.68C0,57.5,5.21,46.63,11.95,37.99C12.85,46.45,14.77,52.76,18.61,54.89z"/><path fill="#FAD15C" d="M33.87,92.58c-4.86-12.55-4.19-32.82,9.42-39.93c0.1,23.3,23.05,26.27,18.8,51.14c3.92-4.44,5.9-11.54,6.25-17.15c6.22,14.24,1.34,25.63-7.53,31.43c-26.97,17.64-50.19-18.12-34.75-37.72C26.53,84.73,31.89,91.49,33.87,92.58z"/></svg></span>Fun Fun</h3>
+        <div class="cards">
+        <article class="card" id="venue-mad-shower">
+          <div class="card-top">
+            <h4>Shower &amp; Bar</h4>
+            <span class="card-pills"><span class="badge closed">Closed</span></span>
+          </div>
+          <p class="neighborhood">Chueca</p>
+          <p class="address">Calle de Pelayo, 25, Chueca, Madrid, Spain</p>
+          <p class="hours closed">Closed now · Opens Friday at 11:00 PM</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=Shower%20%26%20Bar%20Calle%20de%20Pelayo%2C%2025%2C%20Chueca%2C%20Madrid%2C%20Spain" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=Shower%20%26%20Bar%20Calle%20de%20Pelayo%2C%2025%2C%20Chueca%2C%20Madrid%2C%20Spain" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <p class="week-label">This week</p>
+          <div class="week is-shut" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:8%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:8%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:8%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:8%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:68%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:68%;opacity:1"></span></div><small>Sat</small></div><div class="week-col"><div class="week-track"><span style="height:8%;opacity:0.4"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Dark rooms</li><li>Private cabins</li><li>Glory holes</li></ul>
+        </article>
+        </div>
+      </section>
+    </section>
+    <button type="button" class="menu-back" hidden>Menu</button>
+  </main>
   <main class="view" id="santiago" hidden>
     <section class="city-hero block">
       <p class="back"><a href="#home">Home</a></p>
@@ -1255,7 +1428,7 @@
       <h1>Santiago, Chile</h1>
       <p class="lede" data-date>Monday, October 5, 2026</p>
       <p class="now-line" data-weather data-lat="-33.4489" data-lon="-70.6693">
-        <span class="now-time" data-clock data-tz="America/Santiago">4:08 AM</span>
+        <span class="now-time" data-clock data-tz="America/Santiago">4:55 AM</span>
         <span class="now-temp" data-temp>10°C</span>
         <span class="rain" data-rain hidden role="img" aria-label="Rain likely"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.4 15h11.3a3.5 3.5 0 0 0 .4-7 5.1 5.1 0 0 0-9.9-1.2A4 4 0 0 0 6.4 15z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M8.2 17.2v2.3M12 17.2v3.1M15.8 17.2v2.3"/></svg></span>
       </p>
@@ -1269,25 +1442,6 @@
       <section class="group" id="group-santiago-dance">
         <h3><span class="group-icon dance" role="img" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="7.4" cy="17.4" rx="2.8" ry="2.15" transform="rotate(-18 7.4 17.4)"/><ellipse cx="16.6" cy="15.3" rx="2.8" ry="2.15" transform="rotate(-18 16.6 15.3)"/><path d="M9.7 5.1v11.2M18.9 3.1v11.1M9.7 5.1 18.9 3.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"/></svg></span>Drinks and Dance</h3>
         <div class="cards">
-        <article class="card" id="venue-scl-dionisio">
-          <div class="card-top">
-            <h4>Dionisio</h4>
-            <span class="card-pills"><span class="badge closing">Closing Soon</span></span>
-          </div>
-          <p class="neighborhood">Bellavista</p>
-          <p class="address">Bombero Núñez 111, Recoleta, Santiago, Chile</p>
-          <p class="hours open">Open now · Closes at 4:45 AM</p>
-          <p class="maps">
-            <a href="https://www.google.com/maps/search/?api=1&query=Dionisio%20Bombero%20N%C3%BA%C3%B1ez%20111%2C%20Recoleta%2C%20Santiago%2C%20Chile" target="_blank" rel="noopener noreferrer">Google Maps</a>
-            <a href="https://maps.apple.com/?q=Dionisio%20Bombero%20N%C3%BA%C3%B1ez%20111%2C%20Recoleta%2C%20Santiago%2C%20Chile" target="_blank" rel="noopener noreferrer">Apple Maps</a>
-          </p>
-          <p class="week-label">This week</p>
-          <div class="week is-shut" role="img" aria-label="Expected busyness Monday through Sunday">
-            <div class="week-col is-today"><div class="week-track"><span style="height:8%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:8%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sun</small></div>
-          </div>
-          <p class="reviews-label">From reviews</p>
-          <ul class="features"><li>Drag and shows</li><li>Neighborhood bar</li></ul>
-        </article>
         <article class="card" id="venue-scl-club-soda">
           <div class="card-top">
             <h4>Club Soda</h4>
@@ -1306,6 +1460,25 @@
           </div>
           <p class="reviews-label">From reviews</p>
           <ul class="features"><li>Late-night dancing</li><li>DJs</li><li>Patio</li></ul>
+        </article>
+        <article class="card" id="venue-scl-dionisio">
+          <div class="card-top">
+            <h4>Dionisio</h4>
+            <span class="card-pills"><span class="badge closed">Closed</span></span>
+          </div>
+          <p class="neighborhood">Bellavista</p>
+          <p class="address">Bombero Núñez 111, Recoleta, Santiago, Chile</p>
+          <p class="hours closed">Closed now · Opens Wednesday at 9:00 PM</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=Dionisio%20Bombero%20N%C3%BA%C3%B1ez%20111%2C%20Recoleta%2C%20Santiago%2C%20Chile" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=Dionisio%20Bombero%20N%C3%BA%C3%B1ez%20111%2C%20Recoleta%2C%20Santiago%2C%20Chile" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <p class="week-label">This week</p>
+          <div class="week is-shut" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:8%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:8%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Drag and shows</li><li>Neighborhood bar</li></ul>
         </article>
         <article class="card" id="venue-scl-fausto">
           <div class="card-top">
@@ -1424,8 +1597,8 @@
       <h1>São Paulo, Brazil</h1>
       <p class="lede" data-date>Monday, October 5, 2026</p>
       <p class="now-line" data-weather data-lat="-23.5505" data-lon="-46.6333">
-        <span class="now-time" data-clock data-tz="America/Sao_Paulo">4:08 AM</span>
-        <span class="now-temp" data-temp>17°C</span>
+        <span class="now-time" data-clock data-tz="America/Sao_Paulo">4:55 AM</span>
+        <span class="now-temp" data-temp>16°C</span>
         <span class="rain" data-rain hidden role="img" aria-label="Rain likely"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.4 15h11.3a3.5 3.5 0 0 0 .4-7 5.1 5.1 0 0 0-9.9-1.2A4 4 0 0 0 6.4 15z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M8.2 17.2v2.3M12 17.2v3.1M15.8 17.2v2.3"/></svg></span>
       </p>
       <nav class="jump-menu" id="jump-menu-sao-paulo" aria-label="Jump to a section">
@@ -1437,15 +1610,342 @@
     <section class="block city-body">
       <section class="group" id="group-sao-paulo-dance">
         <h3><span class="group-icon dance" role="img" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="7.4" cy="17.4" rx="2.8" ry="2.15" transform="rotate(-18 7.4 17.4)"/><ellipse cx="16.6" cy="15.3" rx="2.8" ry="2.15" transform="rotate(-18 16.6 15.3)"/><path d="M9.7 5.1v11.2M18.9 3.1v11.1M9.7 5.1 18.9 3.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"/></svg></span>Drinks and Dance</h3>
-        <p class="empty">Nothing listed here yet.</p>
+        <div class="cards">
+        <article class="card" id="venue-sp-a-loca">
+          <div class="card-top">
+            <h4>A Lôca</h4>
+            <span class="card-pills"><span class="badge low">low</span><span class="badge unconfirmed">Hours not confirmed</span></span>
+          </div>
+          <p class="neighborhood">Consolação</p>
+          <p class="address">Rua Frei Caneca, 916, Consolação, São Paulo, Brazil</p>
+          <p class="hours open">Hours not confirmed</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=A%20L%C3%B4ca%20Rua%20Frei%20Caneca%2C%20916%2C%20Consola%C3%A7%C3%A3o%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=A%20L%C3%B4ca%20Rua%20Frei%20Caneca%2C%20916%2C%20Consola%C3%A7%C3%A3o%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <div class="meter">
+            <div class="meter-head">
+              <p class="meter-title">Expected busyness right now</p>
+              <p class="score">2.4/10</p>
+            </div>
+            <div class="bar" role="img" aria-label="Expected busyness 2.4/10, from quiet to packed">
+              <span style="width:24%"></span>
+            </div>
+            <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
+            <p class="signal">Not enough live signal</p>
+            <p class="why">Weeknight pattern for a Consolação bar, outside the usual busy hours. No live count.</p>
+          </div>
+          <p class="week-label">This week</p>
+          <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Dance floor</li><li>Drag shows</li></ul>
+        </article>
+        <article class="card" id="venue-sp-blue-space">
+          <div class="card-top">
+            <h4>Blue Space</h4>
+            <span class="card-pills"><span class="badge low">low</span><span class="badge unconfirmed">Hours not confirmed</span></span>
+          </div>
+          <p class="neighborhood">Barra Funda</p>
+          <p class="address">Rua Brigadeiro Galvão, 723, Barra Funda, São Paulo, Brazil</p>
+          <p class="hours open">Hours not confirmed</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=Blue%20Space%20Rua%20Brigadeiro%20Galv%C3%A3o%2C%20723%2C%20Barra%20Funda%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=Blue%20Space%20Rua%20Brigadeiro%20Galv%C3%A3o%2C%20723%2C%20Barra%20Funda%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <div class="meter">
+            <div class="meter-head">
+              <p class="meter-title">Expected busyness right now</p>
+              <p class="score">2.4/10</p>
+            </div>
+            <div class="bar" role="img" aria-label="Expected busyness 2.4/10, from quiet to packed">
+              <span style="width:24%"></span>
+            </div>
+            <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
+            <p class="signal">Not enough live signal</p>
+            <p class="why">Weeknight pattern for a Barra Funda bar, outside the usual busy hours. No live count.</p>
+          </div>
+          <p class="week-label">This week</p>
+          <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Drag shows</li><li>Electronic music</li></ul>
+        </article>
+        <article class="card" id="venue-sp-bubu">
+          <div class="card-top">
+            <h4>Bubu Lounge</h4>
+            <span class="card-pills"><span class="badge low">low</span><span class="badge unconfirmed">Hours not confirmed</span></span>
+          </div>
+          <p class="neighborhood">Pinheiros</p>
+          <p class="address">Rua dos Pinheiros, 791, Pinheiros, São Paulo, Brazil</p>
+          <p class="hours open">Hours not confirmed</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=Bubu%20Lounge%20Rua%20dos%20Pinheiros%2C%20791%2C%20Pinheiros%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=Bubu%20Lounge%20Rua%20dos%20Pinheiros%2C%20791%2C%20Pinheiros%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <div class="meter">
+            <div class="meter-head">
+              <p class="meter-title">Expected busyness right now</p>
+              <p class="score">2.4/10</p>
+            </div>
+            <div class="bar" role="img" aria-label="Expected busyness 2.4/10, from quiet to packed">
+              <span style="width:24%"></span>
+            </div>
+            <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
+            <p class="signal">Not enough live signal</p>
+            <p class="why">Weeknight pattern for a Pinheiros bar, outside the usual busy hours. No live count.</p>
+          </div>
+          <p class="week-label">This week</p>
+          <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Live music</li><li>Electronic dance floor</li></ul>
+        </article>
+        <article class="card" id="venue-sp-tunnel">
+          <div class="card-top">
+            <h4>Tunnel</h4>
+            <span class="card-pills"><span class="badge low">low</span><span class="badge unconfirmed">Hours not confirmed</span></span>
+          </div>
+          <p class="neighborhood">Bela Vista</p>
+          <p class="address">Rua dos Ingleses, 355, Bela Vista, São Paulo, Brazil</p>
+          <p class="hours open">Hours not confirmed</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=Tunnel%20Rua%20dos%20Ingleses%2C%20355%2C%20Bela%20Vista%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=Tunnel%20Rua%20dos%20Ingleses%2C%20355%2C%20Bela%20Vista%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <div class="meter">
+            <div class="meter-head">
+              <p class="meter-title">Expected busyness right now</p>
+              <p class="score">2.4/10</p>
+            </div>
+            <div class="bar" role="img" aria-label="Expected busyness 2.4/10, from quiet to packed">
+              <span style="width:24%"></span>
+            </div>
+            <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
+            <p class="signal">Not enough live signal</p>
+            <p class="why">Weeknight pattern for a Bela Vista bar, outside the usual busy hours. No live count.</p>
+          </div>
+          <p class="week-label">This week</p>
+          <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:38%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:65.99999999999999%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Drag shows</li><li>Pop and electronic</li></ul>
+        </article>
+        </div>
       </section>
       <section class="group" id="group-sao-paulo-sauna">
         <h3><span class="group-icon sauna" role="img" aria-hidden="true"><svg viewBox="0 0 248.914 248.914" fill="currentColor" aria-hidden="true"><path d="M185.05,137.067c0.905,0.784,2.016,1.167,3.127,1.167c1.335,0,2.669-0.561,3.612-1.643c0.737-0.859,17.978-21.112,4.909-37.563c-7.257-9.126-1.899-14.433-0.728-15.422c2.035-1.647,2.361-4.63,0.728-6.681c-1.643-2.067-4.662-2.403-6.72-0.758c-5.013,3.991-11.621,15.145-0.766,28.808c8.139,10.242-4.527,25.214-4.648,25.359C182.838,132.321,183.052,135.341,185.05,137.067z"/><path d="M226.381,130.328c-1.727,1.993-1.512,5.013,0.485,6.739c0.905,0.784,2.017,1.167,3.127,1.167c1.335,0,2.67-0.561,3.612-1.643c0.738-0.859,17.979-21.112,4.91-37.563c-7.258-9.126-1.899-14.433-0.729-15.422c2.035-1.647,2.362-4.63,0.729-6.681c-1.643-2.067-4.662-2.403-6.721-0.758c-5.013,3.991-11.621,15.145-0.766,28.808C239.169,115.216,226.503,130.184,226.381,130.328z"/><path d="M55.165,76.162c-2.065-1.641-5.076-1.305-6.721,0.758c-1.634,2.051-1.305,5.034,0.716,6.681c1.176,0.989,6.524,6.293-0.716,15.422c-13.065,16.456,4.163,36.709,4.907,37.559c0.943,1.092,2.28,1.652,3.615,1.652c1.108,0,2.221-0.393,3.125-1.167c1.998-1.731,2.212-4.751,0.488-6.744c-0.128-0.145-12.788-15.116-4.651-25.358C66.776,91.307,60.168,80.152,55.165,76.162z"/><path d="M11.535,136.592c0.943,1.092,2.28,1.643,3.615,1.643c1.108,0,2.221-0.383,3.125-1.167c1.998-1.727,2.212-4.746,0.488-6.739c-0.128-0.145-12.788-15.117-4.651-25.358c10.849-13.663,4.24-24.817-0.763-28.808c-2.065-1.641-5.075-1.305-6.721,0.758c-1.633,2.051-1.304,5.034,0.717,6.681c1.176,0.989,6.524,6.296-0.717,15.422C-6.443,115.479,10.79,135.732,11.535,136.592z"/><circle cx="124.165" cy="56.452" r="24.468"/><path d="M14.337,194.454h72.188c5.276,0,9.558-4.284,9.558-9.559v-11.71v-6.356c0-0.145,0.037-0.275,0.037-0.42c-0.028-7.892,6.394-14.313,14.3-14.313c6.55,0,12.031,4.452,13.74,10.463c1.696-6.011,7.18-10.463,13.742-10.463c7.893,0,14.314,6.422,14.328,14.313c-0.032,0.145,0.01,0.275,0.01,0.42v6.356v11.71c0,5.274,4.274,9.559,9.558,9.559h72.778c7.925,0,14.338-6.272,14.338-14.021c0-7.747-6.413-14.024-14.338-14.024h-54.623c2.212-2.739,2.847-6.585,1.27-9.997l-25.688-55.557c-0.438-0.938-1.036-1.736-1.699-2.457c-2.623-9.29-11.92-13.581-23.083-13.581h-13.189c-10.79,0-19.81,4.042-22.766,12.701c-1.076,0.884-1.988,1.988-2.616,3.337l-25.688,55.557c-1.575,3.412-0.94,7.258,1.271,9.997H14.337C6.422,166.409,0,172.687,0,180.434C0,188.182,6.422,194.454,14.337,194.454z M154.648,162.904v-18.416l9.227,19.942c0.331,0.732,0.803,1.372,1.288,1.979h-10.818C154.518,165.266,154.648,164.1,154.648,162.904z M83.849,164.431l9.819-21.24v19.714c0,1.195,0.131,2.361,0.306,3.505H82.549C83.046,165.803,83.503,165.163,83.849,164.431z"/><path d="M100.867,166.461v40.911c0,5.274,4.277,9.559,9.558,9.559c5.276,0,9.558-4.284,9.558-9.559v-40.911c0-5.283-4.282-9.559-9.558-9.559C105.14,156.902,100.867,161.178,100.867,166.461z"/><path d="M128.347,166.461v40.911c0,5.274,4.277,9.559,9.556,9.559c5.279,0,9.559-4.284,9.559-9.559v-40.911c0-5.283-4.279-9.559-9.559-9.559C132.619,156.902,128.347,161.178,128.347,166.461z"/></svg></span>Saunas and Bathhouses</h3>
-        <p class="empty">Nothing listed here yet.</p>
+        <div class="cards">
+        <article class="card" id="venue-sp-hotel-chilli">
+          <div class="card-top">
+            <h4>Hotel Chilli</h4>
+            <span class="card-pills"><span class="badge low">low</span></span>
+          </div>
+          <p class="neighborhood">Santa Cecília</p>
+          <p class="address">Largo do Arouche, 610, Santa Cecília, São Paulo, Brazil</p>
+          <p class="hours open">Open 24 hours</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=Hotel%20Chilli%20Largo%20do%20Arouche%2C%20610%2C%20Santa%20Cec%C3%ADlia%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=Hotel%20Chilli%20Largo%20do%20Arouche%2C%20610%2C%20Santa%20Cec%C3%ADlia%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <div class="meter">
+            <div class="meter-head">
+              <p class="meter-title">Expected busyness right now</p>
+              <p class="score">3.1/10</p>
+            </div>
+            <div class="bar" role="img" aria-label="Expected busyness 3.1/10, from quiet to packed">
+              <span style="width:31%"></span>
+            </div>
+            <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
+            <p class="signal">Not enough live signal</p>
+            <p class="why">Weeknight pattern for a Santa Cecília bathhouse, early in its posted hours. No live count.</p>
+          </div>
+          <p class="week-label">This week</p>
+          <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:84.00000000000001%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:84.00000000000001%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:84.00000000000001%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Men's hotel</li><li>Sauna and pools</li><li>Dark rooms</li></ul>
+        </article>
+        <article class="card" id="venue-sp-sauna-269">
+          <div class="card-top">
+            <h4>Sauna 269</h4>
+            <span class="card-pills"><span class="badge low">low</span><span class="badge unconfirmed">Hours not confirmed</span></span>
+          </div>
+          <p class="neighborhood">Consolação</p>
+          <p class="address">Rua Bela Cintra, 269, Consolação, São Paulo, Brazil</p>
+          <p class="hours open">Hours not confirmed</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=Sauna%20269%20Rua%20Bela%20Cintra%2C%20269%2C%20Consola%C3%A7%C3%A3o%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=Sauna%20269%20Rua%20Bela%20Cintra%2C%20269%2C%20Consola%C3%A7%C3%A3o%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <div class="meter">
+            <div class="meter-head">
+              <p class="meter-title">Expected busyness right now</p>
+              <p class="score">3.1/10</p>
+            </div>
+            <div class="bar" role="img" aria-label="Expected busyness 3.1/10, from quiet to packed">
+              <span style="width:31%"></span>
+            </div>
+            <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
+            <p class="signal">Not enough live signal</p>
+            <p class="why">Weeknight pattern for a Consolação bathhouse, outside the usual busy hours. No live count.</p>
+          </div>
+          <p class="week-label">This week</p>
+          <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:84.00000000000001%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:84.00000000000001%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:84.00000000000001%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Dark room</li><li>Lockers</li></ul>
+        </article>
+        <article class="card" id="venue-sp-lagoa">
+          <div class="card-top">
+            <h4>Lagoa Sauna</h4>
+            <span class="card-pills"><span class="badge closed">Closed</span></span>
+          </div>
+          <p class="neighborhood">Consolação</p>
+          <p class="address">Rua Pedro Taques, 130, Consolação, São Paulo, Brazil</p>
+          <p class="hours closed">Closed now · Opens at 3:00 PM</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=Lagoa%20Sauna%20Rua%20Pedro%20Taques%2C%20130%2C%20Consola%C3%A7%C3%A3o%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=Lagoa%20Sauna%20Rua%20Pedro%20Taques%2C%20130%2C%20Consola%C3%A7%C3%A3o%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <p class="week-label">This week</p>
+          <div class="week is-shut" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:50%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:84.00000000000001%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:84.00000000000001%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:84.00000000000001%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Steam sauna</li><li>Dry sauna</li><li>Lockers</li></ul>
+        </article>
+        </div>
       </section>
       <section class="group" id="group-sao-paulo-fun">
         <h3><span class="group-icon fun" role="img" aria-hidden="true"><svg viewBox="0 0 92.27 122.88" aria-hidden="true"><path fill="#EC6F59" d="M18.61,54.89C15.7,28.8,30.94,10.45,59.52,0C42.02,22.71,74.44,47.31,76.23,70.89c4.19-7.15,6.57-16.69,7.04-29.45c21.43,33.62,3.66,88.57-43.5,80.67c-4.33-0.72-8.5-2.09-12.3-4.13C10.27,108.8,0,88.79,0,69.68C0,57.5,5.21,46.63,11.95,37.99C12.85,46.45,14.77,52.76,18.61,54.89z"/><path fill="#FAD15C" d="M33.87,92.58c-4.86-12.55-4.19-32.82,9.42-39.93c0.1,23.3,23.05,26.27,18.8,51.14c3.92-4.44,5.9-11.54,6.25-17.15c6.22,14.24,1.34,25.63-7.53,31.43c-26.97,17.64-50.19-18.12-34.75-37.72C26.53,84.73,31.89,91.49,33.87,92.58z"/></svg></span>Fun Fun</h3>
-        <p class="empty">Nothing listed here yet.</p>
+        <div class="cards">
+        <article class="card" id="venue-sp-dedalos">
+          <div class="card-top">
+            <h4>Dédalos Bar</h4>
+            <span class="card-pills"><span class="badge low">low</span></span>
+          </div>
+          <p class="neighborhood">República</p>
+          <p class="address">Rua Bento Freitas, 38, República, São Paulo, Brazil</p>
+          <p class="hours open">Open 24 hours</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=D%C3%A9dalos%20Bar%20Rua%20Bento%20Freitas%2C%2038%2C%20Rep%C3%BAblica%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=D%C3%A9dalos%20Bar%20Rua%20Bento%20Freitas%2C%2038%2C%20Rep%C3%BAblica%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <div class="meter">
+            <div class="meter-head">
+              <p class="meter-title">Expected busyness right now</p>
+              <p class="score">2.5/10</p>
+            </div>
+            <div class="bar" role="img" aria-label="Expected busyness 2.5/10, from quiet to packed">
+              <span style="width:25%"></span>
+            </div>
+            <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
+            <p class="signal">Not enough live signal</p>
+            <p class="why">Weeknight pattern for a República cruising bar, early in its posted hours. No live count.</p>
+          </div>
+          <p class="week-label">This week</p>
+          <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:40%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:40%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:40%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:40%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:68%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:68%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:68%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Minicine</li><li>Glory holes</li><li>Cabins</li></ul>
+        </article>
+        <article class="card" id="venue-sp-cineclub">
+          <div class="card-top">
+            <h4>Cineclub</h4>
+            <span class="card-pills"><span class="badge low">low</span><span class="badge unconfirmed">Hours not confirmed</span></span>
+          </div>
+          <p class="neighborhood">República</p>
+          <p class="address">Rua Aurora, 706, República, São Paulo, Brazil</p>
+          <p class="hours open">Hours not confirmed</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=Cineclub%20Rua%20Aurora%2C%20706%2C%20Rep%C3%BAblica%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=Cineclub%20Rua%20Aurora%2C%20706%2C%20Rep%C3%BAblica%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <div class="meter">
+            <div class="meter-head">
+              <p class="meter-title">Expected busyness right now</p>
+              <p class="score">2.5/10</p>
+            </div>
+            <div class="bar" role="img" aria-label="Expected busyness 2.5/10, from quiet to packed">
+              <span style="width:25%"></span>
+            </div>
+            <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
+            <p class="signal">Not enough live signal</p>
+            <p class="why">Weeknight pattern for a República sex club, outside the usual busy hours. No live count.</p>
+          </div>
+          <p class="week-label">This week</p>
+          <div class="week" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:40%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:40%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:40%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:40%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:57.99999999999999%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:57.99999999999999%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:57.99999999999999%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Adult cinema</li><li>Darkroom</li><li>Cabins</li></ul>
+        </article>
+        <article class="card" id="venue-sp-eagle">
+          <div class="card-top">
+            <h4>Eagle São Paulo</h4>
+            <span class="card-pills"><span class="badge closed">Closed</span></span>
+          </div>
+          <p class="neighborhood">Consolação</p>
+          <p class="address">Rua Augusta, 538, Consolação, São Paulo, Brazil</p>
+          <p class="hours closed">Closed now · Opens Wednesday at 7:00 PM</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=Eagle%20S%C3%A3o%20Paulo%20Rua%20Augusta%2C%20538%2C%20Consola%C3%A7%C3%A3o%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=Eagle%20S%C3%A3o%20Paulo%20Rua%20Augusta%2C%20538%2C%20Consola%C3%A7%C3%A3o%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <p class="week-label">This week</p>
+          <div class="week is-shut" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:8%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:8%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:40%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:40%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:68%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:68%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:68%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Cruising bar</li><li>Darkroom</li><li>Video room</li></ul>
+        </article>
+        <article class="card" id="venue-sp-the-graus">
+          <div class="card-top">
+            <h4>The Graus Bar</h4>
+            <span class="card-pills"><span class="badge closed">Closed</span></span>
+          </div>
+          <p class="neighborhood">República</p>
+          <p class="address">Rua Aurora, 704, República, São Paulo, Brazil</p>
+          <p class="hours closed">Closed now · Opens at 12:00 PM</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=The%20Graus%20Bar%20Rua%20Aurora%2C%20704%2C%20Rep%C3%BAblica%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=The%20Graus%20Bar%20Rua%20Aurora%2C%20704%2C%20Rep%C3%BAblica%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <p class="week-label">This week</p>
+          <div class="week is-shut" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:40%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:40%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:40%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:40%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:68%;opacity:1"></span></div><small>Fri</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:68%;opacity:1"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:68%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Cruising bar</li><li>Adult cinema</li><li>Glory hole</li></ul>
+        </article>
+        <article class="card" id="venue-sp-zuno">
+          <div class="card-top">
+            <h4>ZUNO</h4>
+            <span class="card-pills"><span class="badge closed">Closed</span></span>
+          </div>
+          <p class="neighborhood">Santana</p>
+          <p class="address">Rua Dr. Olavo Egídio, 327, Santana, São Paulo, Brazil</p>
+          <p class="hours closed">Closed now · Opens Friday at 5:00 PM</p>
+          <p class="maps">
+            <a href="https://www.google.com/maps/search/?api=1&query=ZUNO%20Rua%20Dr.%20Olavo%20Eg%C3%ADdio%2C%20327%2C%20Santana%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a href="https://maps.apple.com/?q=ZUNO%20Rua%20Dr.%20Olavo%20Eg%C3%ADdio%2C%20327%2C%20Santana%2C%20S%C3%A3o%20Paulo%2C%20Brazil" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+          </p>
+          <p class="week-label">This week</p>
+          <div class="week is-shut" role="img" aria-label="Expected busyness Monday through Sunday">
+            <div class="week-col is-today"><div class="week-track"><span style="height:8%;opacity:0.4"></span></div><small>Mon</small></div><div class="week-col"><div class="week-track"><span style="height:8%;opacity:0.4"></span></div><small>Tue</small></div><div class="week-col"><div class="week-track"><span style="height:8%;opacity:0.4"></span></div><small>Wed</small></div><div class="week-col"><div class="week-track"><span style="height:8%;opacity:0.4"></span></div><small>Thu</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:57.99999999999999%;opacity:1"></span></div><small>Fri</small></div><div class="week-col"><div class="week-track"><span style="height:8%;opacity:0.4"></span></div><small>Sat</small></div><div class="week-col is-peak"><div class="week-track"><span style="height:57.99999999999999%;opacity:1"></span></div><small>Sun</small></div>
+          </div>
+          <p class="reviews-label">From reviews</p>
+          <ul class="features"><li>Dark room</li><li>Adult cinema</li><li>Glory holes</li></ul>
+        </article>
+        </div>
       </section>
     </section>
     <button type="button" class="menu-back" hidden>Menu</button>
@@ -1484,9 +1984,7 @@
           <h3>Cities</h3>
           <ul class="foot-list">
             <li><a href="#san-francisco">San Francisco, USA</a></li>
-            <li><a href="#home" data-open-world data-city="madrid">Madrid, Spain</a></li>
-            <li><a href="#home" data-open-world data-city="paris">Paris, France</a></li>
-            <li><a href="#home" data-open-world data-city="cologne">Cologne, Germany</a></li>
+            <li><a href="#madrid">Madrid, Spain</a></li>
             <li><a href="#santiago">Santiago, Chile</a></li>
             <li><a href="#sao-paulo">São Paulo, Brazil</a></li>
           </ul>
@@ -1506,9 +2004,9 @@
     </div>
   </footer>
   <script>
-    const cities = [{"id":"san-francisco","name":"San Francisco","country":"USA","lat":37.7749,"lon":-122.4194},{"id":"madrid","name":"Madrid","country":"Spain","lat":40.4168,"lon":-3.7038},{"id":"paris","name":"Paris","country":"France","lat":48.8566,"lon":2.3522},{"id":"cologne","name":"Cologne","country":"Germany","lat":50.9375,"lon":6.9603},{"id":"santiago","name":"Santiago","country":"Chile","lat":-33.4489,"lon":-70.6693},{"id":"sao-paulo","name":"São Paulo","country":"Brazil","lat":-23.5505,"lon":-46.6333}];
+    const cities = [{"id":"san-francisco","name":"San Francisco","country":"USA","lat":37.7749,"lon":-122.4194},{"id":"madrid","name":"Madrid","country":"Spain","lat":40.4168,"lon":-3.7038},{"id":"santiago","name":"Santiago","country":"Chile","lat":-33.4489,"lon":-70.6693},{"id":"sao-paulo","name":"São Paulo","country":"Brazil","lat":-23.5505,"lon":-46.6333}];
     const nearKm = 150;
-    const pages = new Set(["san-francisco","santiago","sao-paulo"]);
+    const pages = new Set(["san-francisco","madrid","santiago","sao-paulo"]);
     const header = document.querySelector('.site-header');
     const toggle = document.querySelector('.nav-toggle');
     const world = document.getElementById('world');

@@ -46,7 +46,7 @@ export function assembleForecast(venue, when, extras = {}) {
   const cat = PRIORS[venue.category] ?? PRIORS.bar;
   const features = venue.review_features || [];
   const sources = [
-    { name: 'Posted hours', kind: 'gate', detail: status.text },
+    { name: status.unconfirmed ? 'Hours' : 'Posted hours', kind: 'gate', detail: status.text },
   ];
 
   if (!status.open) {
@@ -73,11 +73,12 @@ export function assembleForecast(venue, when, extras = {}) {
   });
 
   const phase = status.phase || 'mid';
+  const timing = status.unconfirmed ? unconfirmedTiming(phase) : (PHASE_WORDS[phase] || phase);
   p *= HOUR_FACTOR[phase] ?? 1;
   sources.push({
     name: 'Hour prior',
     kind: 'prior',
-    detail: PHASE_WORDS[phase] || phase,
+    detail: timing,
   });
 
   const crowd = features.filter((feature) => /packed|lines|loud dance|dance floor/i.test(feature));
@@ -104,13 +105,13 @@ export function assembleForecast(venue, when, extras = {}) {
   }
 
   p = Math.min(0.92, Math.max(0.05, p));
-  const drivers = [PHASE_WORDS[phase], crowd[0] || `${dayWord} ${cat.name}`].filter(Boolean);
+  const drivers = [timing, crowd[0] || `${dayWord} ${cat.name}`].filter(Boolean);
   const scored = scoreForecast({ p_busy: p, n_obs: 12, drivers }, []);
   const { label } = labelFor(scored.score, scored.confidence);
   const where = venue.neighborhood ? `${venue.neighborhood} ${cat.name}` : cat.name;
   const reviewBit = crowd.length && phase === 'peak' ? ` Reviews mention ${crowd[0].toLowerCase()}.` : '';
   const rainBit = weather?.raining ? ` Rain is in the weather reading.` : '';
-  const summary = `${dayWord} pattern for a ${where}, ${PHASE_WORDS[phase]}.${reviewBit}${rainBit} No live count.`;
+  const summary = `${dayWord} pattern for a ${where}, ${timing}.${reviewBit}${rainBit} No live count.`;
 
   return {
     ...scored,
@@ -129,6 +130,13 @@ export const SOURCE_NOTES = [
   ['Weather', 'Open-Meteo, current conditions. Rain nudges patios down. Not a crowd count.'],
   ['Not used yet', 'Check-ins, venue counters, Popular Times, Google Trends, event calendar.'],
 ];
+
+function unconfirmedTiming(phase) {
+  if (phase === 'peak') return 'in the usual busy part of the night';
+  if (phase === 'mid') return 'in the evening';
+  if (phase === 'late') return 'late in the night';
+  return 'outside the usual busy hours';
+}
 
 function dayPrior(category, dow) {
   const weekend = dow === 0 || dow === 5 || dow === 6;

@@ -1,0 +1,8 @@
+[
+  { "id": "san-francisco", "name": "San Francisco", "country": "USA", "lat": 37.7749, "lon": -122.4194, "tz": "America/Los_Angeles", "live": true },
+  { "id": "madrid", "name": "Madrid", "country": "Spain", "lat": 40.4168, "lon": -3.7038, "tz": "Europe/Madrid", "live": true },
+  { "id": "paris", "name": "Paris", "country": "France", "lat": 48.8566, "lon": 2.3522, "tz": "Europe/Paris", "live": false },
+  { "id": "cologne", "name": "Cologne", "country": "Germany", "lat": 50.9375, "lon": 6.9603, "tz": "Europe/Berlin", "live": false },
+  { "id": "santiago", "name": "Santiago", "country": "Chile", "lat": -33.4489, "lon": -70.6693, "tz": "America/Santiago", "live": true },
+  { "id": "sao-paulo", "name": "São Paulo", "country": "Brazil", "lat": -23.5505, "lon": -46.6333, "tz": "America/Sao_Paulo", "live": true }
+]

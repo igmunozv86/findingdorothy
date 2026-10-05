@@ -1,9 +1,9 @@
 // scripts/build-web.mjs
-// Phase 0: score every seed venue for tonight and write a standalone page.
+// Phase 0: score every seed venue for right now and write one standalone page.
 // Run: node scripts/build-web.mjs
-// Home is the header, hero, and footer. Browse the world opens a city accordion here.
-// San Francisco is a separate page. The same city layout is what the next cities will use.
-// Priors match scripts/forecast-tonight.mjs. Phase 2 replaces them with mined data.
+// A city is one record in data/cities.json. Every live city uses cityPageHtml,
+// so card rules, sections, hours, and ranking apply to the next city automatically.
+// A venue belongs to a city when its city field matches that record's name.
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { periodLabel, placeStatus, zonedNow } from '../packages/forecast/open.js';
@@ -11,15 +11,8 @@ import { assembleForecast, dayScore, isShutdown } from '../packages/forecast/ass
 import { fetchWeather } from '../packages/forecast/weather.js';
 
 const seed = JSON.parse(readFileSync(new URL('../data/seed-venues.json', import.meta.url)));
-
-const CITIES = [
-  { id: 'san-francisco', name: 'San Francisco', country: 'USA', lat: 37.7749, lon: -122.4194, tz: 'America/Los_Angeles' },
-  { id: 'madrid', name: 'Madrid', country: 'Spain', lat: 40.4168, lon: -3.7038, tz: 'Europe/Madrid' },
-  { id: 'paris', name: 'Paris', country: 'France', lat: 48.8566, lon: 2.3522, tz: 'Europe/Paris' },
-  { id: 'cologne', name: 'Cologne', country: 'Germany', lat: 50.9375, lon: 6.9603, tz: 'Europe/Berlin' },
-  { id: 'santiago', name: 'Santiago', country: 'Chile', lat: -33.4489, lon: -70.6693, tz: 'America/Santiago' },
-  { id: 'sao-paulo', name: 'São Paulo', country: 'Brazil', lat: -23.5505, lon: -46.6333, tz: 'America/Sao_Paulo' },
-];
+const CITIES = JSON.parse(readFileSync(new URL('../data/cities.json', import.meta.url)));
+const LIVE = CITIES.filter((city) => city.live);
 const NEAR_CITY_KM = 150;
 
 const GROUPS = [
@@ -28,7 +21,6 @@ const GROUPS = [
   { id: 'fun', title: 'Fun Fun', categories: ['sex', 'cruise'], icon: 'fire' },
 ];
 
-const LIVE = new Set(['san-francisco', 'santiago', 'sao-paulo']);
 const weatherByCity = {};
 
 const RAIN_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.4 15h11.3a3.5 3.5 0 0 0 .4-7 5.1 5.1 0 0 0-9.9-1.2A4 4 0 0 0 6.4 15z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M8.2 17.2v2.3M12 17.2v3.1M15.8 17.2v2.3"/></svg>`;
@@ -108,8 +100,7 @@ ${hours}
 }
 
 function cardHtml(v, when, basic) {
-  const { score, confidence, label, summary, sources, status } = scoreVenue(v, when);
-  const sourceLine = sources.filter((source) => source.kind !== 'missing').map((source) => source.name).join(' · ');
+  const { score, confidence, label, summary, status } = scoreVenue(v, when);
   const width = Math.max(0, Math.min(100, (score / 10) * 100));
   const scoreText = `${score.toFixed(1)}/10`;
   const closingSoon = !basic && status.minutesLeft != null && status.minutesLeft <= 60;
@@ -120,6 +111,9 @@ function cardHtml(v, when, basic) {
     : closingSoon
       ? `<span class="badge closing">Closing Soon</span>`
       : `<span class="badge ${escapeHtml(confidence)}">${escapeHtml(confidence)}</span>`;
+  const hoursTag = status.unconfirmed
+    ? `<span class="badge unconfirmed">Hours not confirmed</span>`
+    : '';
   const features = (v.review_features || []).map((d) => `<li>${escapeHtml(d)}</li>`).join('');
   const reviews = features
     ? `          <p class="reviews-label">From reviews</p>
@@ -139,13 +133,12 @@ function cardHtml(v, when, basic) {
             <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
             <p class="signal">${escapeHtml(label)}</p>
             <p class="why">${escapeHtml(summary)}</p>
-            <p class="sources">${escapeHtml(sourceLine)}</p>
           </div>`;
 
   return `        <article class="card" id="venue-${escapeHtml(v.id)}">
           <div class="card-top">
             <h4>${escapeHtml(v.name)}</h4>
-            <span class="card-pills">${hot}${tag}</span>
+            <span class="card-pills">${hot}${tag}${hoursTag}</span>
           </div>
           <p class="neighborhood">${escapeHtml(v.neighborhood)}</p>
 ${mapLinks(v, when)}${meter}
@@ -154,18 +147,33 @@ ${reviews}
         </article>`;
 }
 
+function isClosingSoon(forecast) {
+  const { status } = forecast;
+  return Boolean(status.open) && !status.unconfirmed && status.minutesLeft != null && status.minutesLeft <= 60;
+}
+
 function groupHtml(group, venues, when, cityId) {
   const operating = venues.filter((venue) => !isShutdown(venue));
   const scored = operating.map((venue) => ({ venue, forecast: scoreVenue(venue, when) }));
+  const byScore = (a, b) => b.forecast.score - a.forecast.score || a.venue.name.localeCompare(b.venue.name);
+  const byName = (a, b) => a.venue.name.localeCompare(b.venue.name);
   const ranked = scored
-    .filter(({ forecast }) => forecast.status.open)
-    .sort((a, b) => b.forecast.score - a.forecast.score || a.venue.name.localeCompare(b.venue.name));
+    .filter(({ forecast }) => forecast.status.open && !forecast.status.unconfirmed && !isClosingSoon(forecast))
+    .sort(byScore);
+  const unconfirmed = scored
+    .filter(({ forecast }) => forecast.status.unconfirmed)
+    .sort(byName);
+  const closing = scored
+    .filter(({ forecast }) => isClosingSoon(forecast))
+    .sort((a, b) => a.forecast.status.minutesLeft - b.forecast.status.minutesLeft || byName(a, b));
   const shut = scored
     .filter(({ forecast }) => !forecast.status.open)
-    .sort((a, b) => a.venue.name.localeCompare(b.venue.name));
+    .sort(byName);
   const gone = venues.filter((venue) => isShutdown(venue));
   const cards = [
     ...ranked.map(({ venue }) => cardHtml(venue, when, false)),
+    ...unconfirmed.map(({ venue }) => cardHtml(venue, when, false)),
+    ...closing.map(({ venue }) => cardHtml(venue, when, false)),
     ...shut.map(({ venue }) => cardHtml(venue, when, true)),
   ];
   const empty = venues.length ? 'Nothing open right now.' : 'Nothing listed here yet.';
@@ -219,27 +227,18 @@ ${groups}
   </main>`;
 }
 
-const worldList = CITIES.map((city) => {
-  if (LIVE.has(city.id)) {
-    return `            <li class="acc-item"><a class="acc-link" href="#${escapeHtml(city.id)}">${escapeHtml(placeLabel(city))}<span>Open</span></a></li>`;
-  }
-  return `            <li class="acc-item">
-              <button type="button" class="acc-toggle" data-city="${escapeHtml(city.id)}" aria-expanded="false">${escapeHtml(placeLabel(city))}<span class="chev" aria-hidden="true"></span></button>
-              <div class="acc-panel"><div class="acc-panel-clip"><p>Next. This city will use the same page.</p></div></div>
-            </li>`;
+const worldList = LIVE.map((city) => {
+  return `            <li class="acc-item"><a class="acc-link" href="#${escapeHtml(city.id)}">${escapeHtml(placeLabel(city))}<span>Open</span></a></li>`;
 }).join('\n');
 
-const footerCities = CITIES.map((city) => {
-  if (LIVE.has(city.id)) {
-    return `            <li><a href="#${escapeHtml(city.id)}">${escapeHtml(placeLabel(city))}</a></li>`;
-  }
-  return `            <li><a href="#home" data-open-world data-city="${escapeHtml(city.id)}">${escapeHtml(placeLabel(city))}</a></li>`;
+const footerCities = LIVE.map((city) => {
+  return `            <li><a href="#${escapeHtml(city.id)}">${escapeHtml(placeLabel(city))}</a></li>`;
 }).join('\n');
 
-const cityLookup = JSON.stringify(CITIES.map(({ id, name, country, lat, lon }) => ({ id, name, country, lat, lon })));
+const cityLookup = JSON.stringify(LIVE.map(({ id, name, country, lat, lon }) => ({ id, name, country, lat, lon })));
 
 for (const city of CITIES) {
-  if (!LIVE.has(city.id)) continue;
+  if (!city.live) continue;
   try {
     weatherByCity[city.name] = await fetchWeather(city.lat, city.lon, city.tz);
   } catch (err) {
@@ -432,12 +431,7 @@ const html = `<!DOCTYPE html>
       transition: opacity 0.4s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .world.is-open .acc-item { opacity: 1; transform: none; }
-    .world.is-open .acc-item:nth-child(1) { transition-delay: 40ms; }
-    .world.is-open .acc-item:nth-child(2) { transition-delay: 80ms; }
-    .world.is-open .acc-item:nth-child(3) { transition-delay: 120ms; }
-    .world.is-open .acc-item:nth-child(4) { transition-delay: 160ms; }
-    .world.is-open .acc-item:nth-child(5) { transition-delay: 200ms; }
-    .world.is-open .acc-item:nth-child(6) { transition-delay: 240ms; }
+${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) { transition-delay: ${(index + 1) * 40}ms; }`).join('\n')}
     .acc-link, .acc-toggle {
       display: flex;
       align-items: center;
@@ -632,6 +626,8 @@ const html = `<!DOCTYPE html>
     .card-pills {
       display: inline-flex;
       flex: none;
+      flex-wrap: wrap;
+      justify-content: flex-end;
       align-items: center;
       gap: 0.35rem;
     }
@@ -654,7 +650,7 @@ const html = `<!DOCTYPE html>
       text-transform: capitalize;
     }
     .badge.closed { color: #111; }
-    .badge.closing { color: #111; border-color: #ff7a18; }
+    .badge.closing, .badge.unconfirmed { color: #111; border-color: #ff7a18; }
     .neighborhood, .address { margin: 0.15rem 0 0; }
     .neighborhood { color: var(--muted); }
     .hours { margin: 0.4rem 0 0; font-size: 16px; font-weight: 500; }
@@ -721,12 +717,6 @@ const html = `<!DOCTYPE html>
     .why {
       margin: 0.35rem 0 0;
       font-size: 16px;
-    }
-    .sources {
-      margin: 0.3rem 0 0;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 500;
     }
     .week-label { margin-top: 0.95rem; }
     .week {
@@ -1072,7 +1062,7 @@ const html = `<!DOCTYPE html>
         <h1>Know where the <span class="fun">fun</span> is going.</h1>
         <p class="subhead">Gay Guys travel intel, powered by real data.</p>
         <div class="hero-cta">
-          <button type="button" class="btn solid" id="share-location">See tonight's forecast where you are</button>
+          <button type="button" class="btn solid" id="share-location">See what's going on where you are</button>
           <button type="button" class="btn ghost" id="browse-world" aria-expanded="false" aria-controls="world">Browse the world</button>
         </div>
         <p class="loc-note" id="loc-status" role="status"></p>
@@ -1115,7 +1105,7 @@ ${worldList}
       </div>
     </section>
   </main>
-${CITIES.filter((city) => LIVE.has(city.id)).map((city) => cityPageHtml(city)).join('\n')}
+${LIVE.map((city) => cityPageHtml(city)).join('\n')}
 ${[['forecast', 'Scene Forecast'], ['pride', 'Pride Calendar'], ['venues', 'For Venues']].map(([id, title]) => `  <main class="view" id="${id}" hidden>
     <section class="block soon">
       <h1>${escapeHtml(title)}</h1>
@@ -1157,7 +1147,7 @@ ${footerCities}
   <script>
     const cities = ${cityLookup};
     const nearKm = ${NEAR_CITY_KM};
-    const pages = new Set(${JSON.stringify([...LIVE])});
+    const pages = new Set(${JSON.stringify(LIVE.map((city) => city.id))});
     const header = document.querySelector('.site-header');
     const toggle = document.querySelector('.nav-toggle');
     const world = document.getElementById('world');
@@ -1389,5 +1379,5 @@ ${footerCities}
 
 const outPath = new URL('../apps/web/index.html', import.meta.url);
 writeFileSync(outPath, html);
-const sfCount = seed.venues.filter((v) => v.city === 'San Francisco').length;
-console.log(`Wrote ${outPath.pathname} (${CITIES.length} cities, ${sfCount} San Francisco venues)`);
+const liveVenues = seed.venues.filter((venue) => LIVE.some((city) => city.name === venue.city)).length;
+console.log(`Wrote ${outPath.pathname} (${CITIES.length} cities, ${LIVE.length} live, ${liveVenues} venues on live pages)`);

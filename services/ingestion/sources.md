@@ -1,14 +1,36 @@
 # Venue sources
 
-Official APIs come first. A page fetch is only allowed after a ToS review, and only when `SOURCES_TOS_CHECK=1`. GayCities and Travel Gay break a tie when mainstream sources disagree that a place is a gay venue. Their claims still need `source_url` and `retrieved_at`.
+Official APIs come first. A page fetch is only allowed after a ToS review, and only when `SOURCES_TOS_CHECK=1`. GayCities, Travel Gay, and Misterb&b break a tie when mainstream sources disagree that a place is a gay venue. Their claims still need `source_url` and `retrieved_at`.
 
 Nothing here invents a fact. An empty response is logged as `no recent data` and the venue keeps what it already has.
 
-The client sends one request at a time, waits 1 second between calls, and stops the run on HTTP 429.
+The client sends one request at a time, waits 1 second between calls, and stops the run on HTTP 429. Overpass is never parallelized, and a repeated Overpass or Nominatim query is served from the in-memory cache.
+
+Run order: OpenStreetMap Overpass, Wikidata, Yelp, Foursquare, Google Places, Eventbrite, Reddit, Songkick, Ticketmaster, Bandsintown, then GayCities, Travel Gay, and Misterb&b. Resident Advisor, Scruff, and Grindr are manual. TripAdvisor stays manual. Forums stay without a universal API.
+
+A venue whose city is São Paulo, or any city string that names Brazil, is searched in English and in Portuguese. Each request records `query_language`.
 
 A stored signal matches `signals` in `infra/schema.sql` and also carries `source_url` and `retrieved_at` (those two columns live on `sources`). A record with no `source_url` is dropped.
 
 Aspects the table allows: `cleanliness`, `safety`, `crowd`, `facilities`, `staff`, `value`. `sentiment` is a number from -1 to 1. Hours, price, and a star rating are not stored as a signal until they can be tied to one of those aspects without a guess.
+
+## OpenStreetMap / Overpass
+
+- Docs: https://wiki.openstreetmap.org/wiki/Overpass_API and https://operations.osmfoundation.org/policies/nominatim/
+- Extract: `opening_hours`, address tags, coordinates from the element, and any `lgbtq` or `gay` tags. Those facts are not aspects, so they are not stored as a signal.
+- Auth: none.
+- Calls: `GET https://nominatim.openstreetmap.org/search` for the city bounding box, then `POST https://overpass-api.de/api/interpreter`. The box is the Nominatim `boundingbox`. It is not hardcoded. `{{bbox}}` in a dry run means that value is still unknown.
+- Rate limit: one request at a time. The public Overpass instance expects a User-Agent and no parallel calls. This client waits 1 second, caches by query text, and stops on 429.
+- ToS: use the public instance lightly and keep the results cached. Do not send overlapping Overpass requests.
+
+## Wikidata
+
+- Docs: https://www.wikidata.org/w/api.php
+- Extract: address (`P969`), coordinates (`P625`), inception (`P571`). Those claims are not aspects, so they are not stored as a signal.
+- Auth: none.
+- Calls: `action=wbsearchentities` by venue name and city, then `action=wbgetentities` with `props=claims` only after the search returns a Q-id. The id is not guessed.
+- Rate limit: no key. This client waits 1 second and stops on 429. A User-Agent is sent.
+- ToS: https://www.wikidata.org/wiki/Wikidata:Licensing — content is under CC0. Still send one request at a time.
 
 ## Yelp Fusion
 
@@ -49,6 +71,33 @@ Aspects the table allows: `cleanliness`, `safety`, `crowd`, `facilities`, `staff
 - Rate limit: the old search allowance is gone. Any live Eventbrite call still waits 1 second and stops on 429.
 - ToS: https://www.eventbrite.com/platform/api — city-wide public event distribution needs Eventbrite's partner program.
 
+## Songkick
+
+- Docs: https://www.songkick.com/developer/location-search and https://www.songkick.com/developer/upcoming-events-for-metro-area
+- Extract: metro-area concerts. An event becomes a signal only when the payload already has `aspect`, `sentiment`, and a Songkick `uri`.
+- Auth: `apikey` from `SONGKICK_API_KEY`.
+- Calls: `GET https://api.songkick.com/api/3.0/search/locations.json?query={city}&apikey=`, then `GET https://api.songkick.com/api/3.0/metro_areas/{metro_area_id}/calendar.json?apikey=` only after the location search returns a metro area id. The id is not guessed.
+- Rate limit: no fixed public quota in the docs. This client waits 1 second and stops on 429.
+- ToS: https://www.songkick.com/developer — the key stays in the query string and is redacted in dry-run output.
+
+## Ticketmaster Discovery
+
+- Docs: https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/
+- Extract: ticketed events, parties, and club nights for the city. An event becomes a signal only when the payload already has `aspect`, `sentiment`, and `url`.
+- Auth: `apikey` from `TICKETMASTER_API_KEY`.
+- Call: `GET https://app.ticketmaster.com/discovery/v2/events.json?keyword={name}&city={city}&apikey=`. `countryCode` is omitted.
+- Rate limit: quota is per API key on the Ticketmaster developer portal. This client waits 1 second and stops on 429.
+- ToS: https://developer.ticketmaster.com/products-and-docs/apis/getting-started/ — do not store event content beyond what the application terms allow.
+
+## Bandsintown
+
+- Docs: https://help.artists.bandsintown.com/en/articles/9186477-api-documentation
+- Extract: upcoming events for one artist. The city is read from the event's venue. There is no city-calendar endpoint, and one is not invented.
+- Auth: `app_id` from `BANDSINTOWN_API_KEY`.
+- Call, only when an artist name was provided: `GET https://rest.bandsintown.com/artists/{artist_name}/events/?app_id=`. A venue run with no artist sends nothing.
+- Rate limit: not published. This client waits 1 second and stops on 429.
+- ToS: the public API is artist events. Do not scrape the website to fake a city search.
+
 ## GayCities
 
 - Docs: no public API. Site: https://www.gaycities.com/
@@ -67,8 +116,49 @@ Aspects the table allows: `cleanliness`, `safety`, `crowd`, `facilities`, `staff
 - Rate limit: same as GayCities.
 - ToS: scraping is not approved by this repo. Read Travel Gay's terms and get permission before setting the flag. Same tiebreaker rule, same `source_url` and `retrieved_at` requirement.
 
+## Misterb&b
+
+- Docs: no public API. Site: https://www.misterbandb.com/
+- Extract, after ToS review: curated gay venue recommendations on a city guide. A listing becomes a signal only when it already has `aspect`, `sentiment`, and `source_url`.
+- Auth: none. Gate: `SOURCES_TOS_CHECK=1`. Without that flag the client does not send a request.
+- Confirmed page for São Paulo: `GET https://www.misterbandb.com/gay-guide/brazil/sao-paulo/`. Other cities are not requested, because a guide path is not guessed.
+- Rate limit: no published API quota. The same 1 second delay and 429 stop apply if a fetch is ever enabled.
+- ToS: scraping is not approved by this repo. Read Misterb&b's terms and get permission before setting the flag.
+
 ## TripAdvisor
 
 - Status: `MANUAL_ONLY`.
 - Nightlife reviews exist on the site. The Content API is partner-only and is not wired here.
 - No request is built and no page is fetched. A person can paste a review later, with the page URL and the date it was read.
+
+## Resident Advisor
+
+- Status: `MANUAL_ONLY`.
+- Site: https://ra.co/
+- Extract when a person reviews it: club nights and DJ lineups, with the page URL and the date it was read.
+- Auth: the API is partner-only. No key is wired.
+- No request is sent. The venue is marked for human review.
+
+## Scruff and Grindr
+
+- Status: `MANUAL_ONLY`.
+- Sites: https://www.scruff.com/ and https://www.grindr.com/
+- Extract when a person reviews it: in-app venue and event features, with a screenshot or page URL and the date it was read.
+- Auth: none. There is no public API.
+- No request is sent. The venue is marked for human review.
+
+## Reddit
+
+- Docs: https://www.reddit.com/dev/api/ and https://support.reddithelp.com/hc/en-us/articles/16160319875092-Reddit-Data-API-Wiki
+- Extract: post permalink and title. A post becomes a signal only when the payload already has `aspect` and `sentiment`. The title is not scored by guesswork.
+- Auth: app-only OAuth. `REDDIT_CLIENT_ID` and `REDDIT_CLIENT_SECRET`. `POST https://www.reddit.com/api/v1/access_token` with `grant_type=client_credentials`, then `GET https://oauth.reddit.com/search?q="{name}"+"{city}"&type=link&sort=new&limit=5`.
+- User-Agent: `FindingDorothy/phase0`. Reddit rejects calls without one.
+- Rate limit: about 100 requests per minute on the free OAuth tier. A 429 stops the run. The client still waits 1 second between calls.
+- ToS: https://www.redditinc.com/policies/data-api-terms — use the official API. Do not scrape www.reddit.com.
+
+## Forums
+
+- Status: `NO_UNIVERSAL_API`.
+- There is no API that searches every forum. This client does not crawl a guessed list of boards.
+- Forum posts that are on Reddit are covered by the Reddit search above.
+- A page from any other forum still needs `source_url` and `retrieved_at`, and it is not fetched here.
