@@ -1,0 +1,1 @@
+{"description":"Gay travel intel, powered by real reviews.","name":"findingdorothy","private":true,"type":"module","scripts":{"build":"echo 'Phase 0: static prototype — nothing to build yet'"},"version":"0.1.0","workspaces":["apps/*","packages/*","services/*"]}
