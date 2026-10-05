@@ -1,20 +1,24 @@
 // scripts/build-web.mjs
 // Phase 0: score every seed venue for tonight and write a standalone page.
 // Run: node scripts/build-web.mjs
-// Home offers location or a city you will visit. A city view groups venues into Drinks and Dance, Saunas and Bathhouses, and Fun Fun.
+// Home is the header, hero, and footer. Browse the world opens a city accordion here.
+// San Francisco is a separate page. The same city layout is what the next cities will use.
 // Priors match scripts/forecast-tonight.mjs. Phase 2 replaces them with mined data.
 
 import { readFileSync, writeFileSync } from 'node:fs';
-import { scoreForecast, labelFor } from '../packages/forecast/score.js';
+import { periodLabel, placeStatus, zonedNow } from '../packages/forecast/open.js';
+import { assembleForecast, dayScore, isShutdown } from '../packages/forecast/assemble.js';
+import { fetchWeather } from '../packages/forecast/weather.js';
 
 const seed = JSON.parse(readFileSync(new URL('../data/seed-venues.json', import.meta.url)));
 
 const CITIES = [
-  { id: 'san-francisco', name: 'San Francisco', lat: 37.7749, lon: -122.4194 },
-  { id: 'madrid', name: 'Madrid', lat: 40.4168, lon: -3.7038 },
-  { id: 'paris', name: 'Paris', lat: 48.8566, lon: 2.3522 },
-  { id: 'cologne', name: 'Cologne', lat: 50.9375, lon: 6.9603 },
-  { id: 'santiago', name: 'Santiago', lat: -33.4489, lon: -70.6693 },
+  { id: 'san-francisco', name: 'San Francisco', country: 'USA', lat: 37.7749, lon: -122.4194, tz: 'America/Los_Angeles' },
+  { id: 'madrid', name: 'Madrid', country: 'Spain', lat: 40.4168, lon: -3.7038, tz: 'Europe/Madrid' },
+  { id: 'paris', name: 'Paris', country: 'France', lat: 48.8566, lon: 2.3522, tz: 'Europe/Paris' },
+  { id: 'cologne', name: 'Cologne', country: 'Germany', lat: 50.9375, lon: 6.9603, tz: 'Europe/Berlin' },
+  { id: 'santiago', name: 'Santiago', country: 'Chile', lat: -33.4489, lon: -70.6693, tz: 'America/Santiago' },
+  { id: 'sao-paulo', name: 'São Paulo', country: 'Brazil', lat: -23.5505, lon: -46.6333, tz: 'America/Sao_Paulo' },
 ];
 const NEAR_CITY_KM = 150;
 
@@ -24,20 +28,14 @@ const GROUPS = [
   { id: 'fun', title: 'Fun Fun', categories: ['sex', 'cruise'], icon: 'fire' },
 ];
 
-const PRIORS = {
-  sauna: { weekend: { p: 0.95, drivers: ['Weekend pattern', '24h schedule'] }, weeknight: { p: 0.45, drivers: ['Weeknight pattern', '24h schedule'] } },
-  bar:   { weekend: { p: 0.7,  drivers: ['Weekend pattern', 'Castro foot traffic'] }, weeknight: { p: 0.4, drivers: ['Weeknight pattern', 'Castro foot traffic'] } },
-};
+const LIVE = new Set(['san-francisco', 'santiago', 'sao-paulo']);
+const weatherByCity = {};
 
-const now = new Date();
-const dow = now.getDay(); // 0=Sunday
-const isWeekend = dow === 0 || dow === 5 || dow === 6;
-const dayName = now.toLocaleDateString('en-US', {
-  weekday: 'long',
-  month: 'long',
-  day: 'numeric',
-  year: 'numeric',
-});
+const RAIN_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.4 15h11.3a3.5 3.5 0 0 0 .4-7 5.1 5.1 0 0 0-9.9-1.2A4 4 0 0 0 6.4 15z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M8.2 17.2v2.3M12 17.2v3.1M15.8 17.2v2.3"/></svg>`;
+
+function placeLabel(city) {
+  return `${city.name}, ${city.country}`;
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -47,13 +45,39 @@ function escapeHtml(value) {
     .replaceAll('"', '&quot;');
 }
 
-function scoreVenue(v) {
-  const cat = PRIORS[v.category] ?? PRIORS.bar;
-  const t = isWeekend ? cat.weekend : cat.weeknight;
-  const prior = { p_busy: t.p, n_obs: 12, drivers: t.drivers };
-  const { score, confidence, drivers } = scoreForecast(prior, []);
-  const { label } = labelFor(score, confidence);
-  return { score, confidence, drivers, label };
+function scoreVenue(v, when) {
+  return assembleForecast(v, when, { weather: weatherByCity[v.city] || null });
+}
+
+const WEEK = [
+  { dow: 1, label: 'Mon' },
+  { dow: 2, label: 'Tue' },
+  { dow: 3, label: 'Wed' },
+  { dow: 4, label: 'Thu' },
+  { dow: 5, label: 'Fri' },
+  { dow: 6, label: 'Sat' },
+  { dow: 0, label: 'Sun' },
+];
+
+function scoreForDow(v, day) {
+  return dayScore(v, day);
+}
+
+function weekHtml(v, when, shut) {
+  const days = WEEK.map((day) => ({ ...day, score: scoreForDow(v, day.dow) }));
+  const peak = Math.max(...days.map((day) => day.score));
+  const cols = days.map((day) => {
+    const height = Math.max(8, Math.min(100, (day.score / 10) * 100));
+    const opacity = day.score === peak ? 1 : 0.4;
+    const today = day.dow === when.weekday ? ' is-today' : '';
+    const peakClass = day.score === peak ? ' is-peak' : '';
+    return `<div class="week-col${today}${peakClass}"><div class="week-track"><span style="height:${height}%;opacity:${opacity}"></span></div><small>${day.label}</small></div>`;
+  }).join('');
+  const tone = shut ? ' is-shut' : '';
+  return `          <p class="week-label">This week</p>
+          <div class="week${tone}" role="img" aria-label="Expected busyness Monday through Sunday">
+            ${cols}
+          </div>`;
 }
 
 const ICONS = {
@@ -68,38 +92,45 @@ function groupIcon(group) {
   return `<span class="group-icon ${escapeHtml(group.id)}" role="img" aria-hidden="true">${svg}</span>`;
 }
 
-function mapLinks(v) {
-  if (!v.address) return '';
+function mapLinks(v, when) {
+  const status = placeStatus(v.hours, when);
+  const hours = `          <p class="hours ${status.open ? 'open' : 'closed'}">${escapeHtml(status.text)}</p>`;
+  if (!v.address) return hours;
   const query = encodeURIComponent(`${v.name} ${v.address}`);
   const google = `https://www.google.com/maps/search/?api=1&query=${query}`;
   const apple = `https://maps.apple.com/?q=${query}`;
   return `          <p class="address">${escapeHtml(v.address)}</p>
+${hours}
           <p class="maps">
             <a href="${google}" target="_blank" rel="noopener noreferrer">Google Maps</a>
             <a href="${apple}" target="_blank" rel="noopener noreferrer">Apple Maps</a>
           </p>`;
 }
 
-function cardHtml(v) {
-  const { score, confidence, label } = scoreVenue(v);
+function cardHtml(v, when, basic) {
+  const { score, confidence, label, summary, sources, status } = scoreVenue(v, when);
+  const sourceLine = sources.filter((source) => source.kind !== 'missing').map((source) => source.name).join(' · ');
   const width = Math.max(0, Math.min(100, (score / 10) * 100));
   const scoreText = `${score.toFixed(1)}/10`;
+  const closingSoon = !basic && status.minutesLeft != null && status.minutesLeft <= 60;
+  const quiet = basic || closingSoon;
+  const hot = !quiet && score >= 8 ? `<span class="hot">Hot</span>` : '';
+  const tag = basic
+    ? `<span class="badge closed">Closed</span>`
+    : closingSoon
+      ? `<span class="badge closing">Closing Soon</span>`
+      : `<span class="badge ${escapeHtml(confidence)}">${escapeHtml(confidence)}</span>`;
   const features = (v.review_features || []).map((d) => `<li>${escapeHtml(d)}</li>`).join('');
   const reviews = features
     ? `          <p class="reviews-label">From reviews</p>
           <ul class="features">${features}</ul>`
     : '';
-
-  return `        <article class="card" id="venue-${escapeHtml(v.id)}">
-          <div class="card-top">
-            <h4>${escapeHtml(v.name)}</h4>
-            <span class="badge ${escapeHtml(confidence)}">${escapeHtml(confidence)}</span>
-          </div>
-          <p class="neighborhood">${escapeHtml(v.neighborhood)}</p>
-${mapLinks(v)}
+  const meter = quiet
+    ? ''
+    : `
           <div class="meter">
             <div class="meter-head">
-              <p class="meter-title">Expected busyness tonight</p>
+              <p class="meter-title">Expected busyness right now</p>
               <p class="score">${escapeHtml(scoreText)}</p>
             </div>
             <div class="bar" role="img" aria-label="Expected busyness ${escapeHtml(scoreText)}, from quiet to packed">
@@ -107,196 +138,461 @@ ${mapLinks(v)}
             </div>
             <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
             <p class="signal">${escapeHtml(label)}</p>
+            <p class="why">${escapeHtml(summary)}</p>
+            <p class="sources">${escapeHtml(sourceLine)}</p>
+          </div>`;
+
+  return `        <article class="card" id="venue-${escapeHtml(v.id)}">
+          <div class="card-top">
+            <h4>${escapeHtml(v.name)}</h4>
+            <span class="card-pills">${hot}${tag}</span>
           </div>
+          <p class="neighborhood">${escapeHtml(v.neighborhood)}</p>
+${mapLinks(v, when)}${meter}
+${weekHtml(v, when, basic || closingSoon)}
 ${reviews}
         </article>`;
 }
 
-function groupHtml(group, venues) {
-  const body = venues.length
-    ? `<div class="cards">\n${venues.map(cardHtml).join('\n')}\n        </div>`
-    : `<p class="empty">Nothing listed here yet.</p>`;
-  return `      <section class="group">
+function groupHtml(group, venues, when, cityId) {
+  const operating = venues.filter((venue) => !isShutdown(venue));
+  const scored = operating.map((venue) => ({ venue, forecast: scoreVenue(venue, when) }));
+  const ranked = scored
+    .filter(({ forecast }) => forecast.status.open)
+    .sort((a, b) => b.forecast.score - a.forecast.score || a.venue.name.localeCompare(b.venue.name));
+  const shut = scored
+    .filter(({ forecast }) => !forecast.status.open)
+    .sort((a, b) => a.venue.name.localeCompare(b.venue.name));
+  const gone = venues.filter((venue) => isShutdown(venue));
+  const cards = [
+    ...ranked.map(({ venue }) => cardHtml(venue, when, false)),
+    ...shut.map(({ venue }) => cardHtml(venue, when, true)),
+  ];
+  const empty = venues.length ? 'Nothing open right now.' : 'Nothing listed here yet.';
+  const body = cards.length
+    ? `<div class="cards">\n${cards.join('\n')}\n        </div>`
+    : `<p class="empty">${empty}</p>`;
+  const aside = gone.length
+    ? `\n        <p class="aside">Removed — out of business: ${escapeHtml(gone.map((venue) => venue.name).join(', '))}.</p>`
+    : '';
+  return `      <section class="group" id="group-${escapeHtml(cityId)}-${escapeHtml(group.id)}">
         <h3>${groupIcon(group)}${escapeHtml(group.title)}</h3>
-        ${body}
+        ${body}${aside}
       </section>`;
 }
 
-function cityHtml(city) {
+function sectionMenu(cityId) {
+  const items = GROUPS.map((group) => `        <button type="button" data-jump="group-${escapeHtml(cityId)}-${escapeHtml(group.id)}">${groupIcon(group)}<span>${escapeHtml(group.title)}</span></button>`).join('\n');
+  return `      <nav class="jump-menu" id="jump-menu-${escapeHtml(cityId)}" aria-label="Jump to a section">
+${items}
+      </nav>`;
+}
+
+function cityPageHtml(city) {
+  const when = zonedNow(new Date(), city.tz);
   const venues = seed.venues.filter((v) => v.city === city.name);
   const groups = GROUPS.map((group) => {
     const inGroup = venues.filter((v) => group.categories.includes(v.category));
-    return groupHtml(group, inGroup);
+    return groupHtml(group, inGroup, when, city.id);
   }).join('\n');
+  const report = weatherByCity[city.name];
+  const temp = report && Number.isFinite(report.tempC) ? `${Math.round(report.tempC)}°C` : '';
+  const rainLabel = report?.raining ? 'Raining' : 'Rain likely';
 
-  return `    <section class="city" id="${escapeHtml(city.id)}">
-      <p class="back"><a href="#home">All cities</a></p>
-      <h2 class="section-title">Tonight's Scene Forecast · ${escapeHtml(city.name)}<span class="when">${escapeHtml(dayName)}</span></h2>
+  return `  <main class="view" id="${escapeHtml(city.id)}" hidden>
+    <section class="city-hero block">
+      <p class="back"><a href="#home">Home</a></p>
+      <p class="eyebrow" data-period>${escapeHtml(periodLabel(when.hour))}</p>
+      <h1>${escapeHtml(placeLabel(city))}</h1>
+      <p class="lede" data-date>${escapeHtml(when.dateLabel)}</p>
+      <p class="now-line" data-weather data-lat="${city.lat}" data-lon="${city.lon}">
+        <span class="now-time" data-clock data-tz="${escapeHtml(city.tz)}">${escapeHtml(when.timeLabel)}</span>
+        <span class="now-temp" data-temp>${escapeHtml(temp)}</span>
+        <span class="rain" data-rain ${report?.rainLikely ? '' : 'hidden'} role="img" aria-label="${escapeHtml(rainLabel)}">${RAIN_ICON}</span>
+      </p>
+${sectionMenu(city.id)}
+    </section>
+    <section class="block city-body">
 ${groups}
-      <footer>
-        <p>Expected busyness from historical patterns — not live counts. Prototype.</p>
-      </footer>
-    </section>`;
+    </section>
+    <button type="button" class="menu-back" hidden>Menu</button>
+  </main>`;
 }
 
-const cityPicks = CITIES.map((city) => `        <li><a class="city-pick" href="#${escapeHtml(city.id)}">${escapeHtml(city.name)}</a></li>`).join('\n');
-const cityLookup = JSON.stringify(CITIES.map(({ id, lat, lon }) => ({ id, lat, lon })));
+const worldList = CITIES.map((city) => {
+  if (LIVE.has(city.id)) {
+    return `            <li class="acc-item"><a class="acc-link" href="#${escapeHtml(city.id)}">${escapeHtml(placeLabel(city))}<span>Open</span></a></li>`;
+  }
+  return `            <li class="acc-item">
+              <button type="button" class="acc-toggle" data-city="${escapeHtml(city.id)}" aria-expanded="false">${escapeHtml(placeLabel(city))}<span class="chev" aria-hidden="true"></span></button>
+              <div class="acc-panel"><div class="acc-panel-clip"><p>Next. This city will use the same page.</p></div></div>
+            </li>`;
+}).join('\n');
+
+const footerCities = CITIES.map((city) => {
+  if (LIVE.has(city.id)) {
+    return `            <li><a href="#${escapeHtml(city.id)}">${escapeHtml(placeLabel(city))}</a></li>`;
+  }
+  return `            <li><a href="#home" data-open-world data-city="${escapeHtml(city.id)}">${escapeHtml(placeLabel(city))}</a></li>`;
+}).join('\n');
+
+const cityLookup = JSON.stringify(CITIES.map(({ id, name, country, lat, lon }) => ({ id, name, country, lat, lon })));
+
+for (const city of CITIES) {
+  if (!LIVE.has(city.id)) continue;
+  try {
+    weatherByCity[city.name] = await fetchWeather(city.lat, city.lon, city.tz);
+  } catch (err) {
+    console.error(`${city.name} weather unavailable: ${err.message}`);
+  }
+}
 
 const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>FindingDorothy — Tonight's Scene Forecast</title>
+  <title>FindingDorothy — Know where the night is going</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      color-scheme: dark;
-      --bg: #101218;
-      --card: #1a1d27;
-      --line: rgba(255, 255, 255, 0.08);
-      --text: #f3f4f7;
-      --muted: #9aa1ae;
-      --accent: #ff7aa2;
-      --accent-2: #c084fc;
+      color-scheme: light;
+      --bg: #ffffff;
+      --text: #111111;
+      --muted: #6b6b76;
+      --line: #ececf1;
+      --yellow: #ffc531;
+      --orange: #ff7a18;
+      --grad: linear-gradient(90deg, #ffc531, #ff7a18);
+      --grad-shut: linear-gradient(90deg, #d8d8e0, #5c5c66);
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      min-height: 100vh;
-      background:
-        radial-gradient(1200px 500px at 10% -10%, rgba(192, 132, 252, 0.16), transparent 55%),
-        radial-gradient(900px 420px at 100% 0%, rgba(255, 122, 162, 0.12), transparent 50%),
-        var(--bg);
+      background: var(--bg);
       color: var(--text);
-      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: Inter, sans-serif;
+      font-size: 16px;
+      font-weight: 400;
       line-height: 1.45;
     }
-    .wrap {
-      width: min(960px, 100%);
-      margin: 0 auto;
-      padding: 2.25rem 1rem 3rem;
+    h1, h2, .card h4, .why-grid h3, .acc-link, .acc-toggle, .now-time, .now-temp, .score {
+      font-family: Poppins, sans-serif;
+      letter-spacing: -0.02em;
     }
-    .brand {
-      color: inherit;
+    img { max-width: 100%; }
+    a { color: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      min-height: 68px;
+      padding: 0.65rem 1.25rem;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+    .logo {
+      display: block;
+      flex: none;
+      width: 170px;
+      height: 38px;
+      overflow: hidden;
+    }
+    .logo img {
+      display: block;
+      width: 186.9px;
+      height: 186.9px;
+      max-width: none;
+      margin: -70.8px 0 0 -7px;
+    }
+    .nav-panel {
+      display: flex;
+      align-items: center;
+      gap: 1.35rem;
+      margin-left: auto;
+    }
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 1.15rem;
+    }
+    .site-nav a {
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 500;
       text-decoration: none;
     }
-    header h1 {
-      margin: 0;
-      font-size: clamp(1.8rem, 4vw, 2.4rem);
-      letter-spacing: -0.03em;
-      font-weight: 700;
-    }
-    .tagline {
-      margin: 0.4rem 0 0;
-      color: var(--muted);
-      font-size: 1rem;
-    }
-    .section-title {
-      margin: 2rem 0 1rem;
-      font-size: clamp(1.05rem, 2.4vw, 1.25rem);
-      font-weight: 650;
-      letter-spacing: -0.02em;
-      text-wrap: pretty;
-    }
-    .share {
-      appearance: none;
-      display: block;
-      width: min(100%, 22rem);
-      margin: 2.75rem 0 0;
-      border: 0;
+    .site-nav a:hover,
+    .site-nav a:focus-visible { color: var(--orange); }
+    .app-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       border-radius: 999px;
-      padding: 0.95rem 1.3rem;
-      background: linear-gradient(90deg, var(--accent-2), var(--accent));
-      color: #1a1020;
-      font: inherit;
-      font-size: 1.05rem;
-      font-weight: 700;
+      padding: 0.62rem 1.05rem;
+      background: #111;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 500;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .app-pill:hover,
+    .app-pill:focus-visible { background: #2a2a2a; }
+    span.app-pill { cursor: default; }
+    span.app-pill:hover,
+    span.app-pill:focus-visible { background: #111; }
+    main.view { padding-bottom: 8rem; }
+    .soon { padding-top: 4.5rem; }
+    .soon h1 {
+      margin: 0;
+      font-size: 64px;
+      font-weight: 800;
       letter-spacing: -0.02em;
+      line-height: 1.05;
+    }
+    .soon p {
+      margin: 0.85rem 0 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+    .nav-toggle {
+      display: none;
+      margin-left: auto;
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
       cursor: pointer;
     }
-    .share:hover { filter: brightness(1.06); }
-    .share:focus-visible {
-      outline: 2px solid var(--text);
-      outline-offset: 3px;
-    }
-    .share:disabled { cursor: progress; filter: none; opacity: 0.75; }
-    .loc-note {
-      margin: 0.75rem 0 0;
-      min-height: 1.4em;
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-    .or {
-      margin: 2.25rem 0 0;
-      color: var(--muted);
-      font-size: 0.85rem;
-    }
-    .home h2 {
-      margin: 0.35rem 0 0;
-      font-size: 1.05rem;
-      font-weight: 650;
-      letter-spacing: -0.02em;
-    }
-    .when {
+    .nav-toggle span {
       display: block;
-      margin-top: 0.25rem;
+      width: 16px;
+      height: 2px;
+      margin: 4px auto;
+      background: #111;
+      border-radius: 2px;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(220px, 0.85fr);
+      align-items: center;
+      gap: 2rem;
+      width: min(1120px, calc(100% - 2.5rem));
+      margin: 0 auto;
+      padding: 4.2rem 0 2.5rem;
+    }
+    .hero h1 {
+      margin: 0;
+      font-size: 64px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+    }
+    .fun { color: #ff7a18; }
+    .loc-note {
+      min-height: 1.3em;
+      margin: 0.85rem 0 0;
       color: var(--muted);
-      font-size: 0.92rem;
+      font-size: 13px;
       font-weight: 500;
     }
-    @media (min-width: 720px) {
-      .when {
-        display: inline;
-        margin-top: 0;
-        color: inherit;
-        font-size: inherit;
-        font-weight: inherit;
-      }
-      .when::before { content: " · "; }
+    .world {
+      display: grid;
+      grid-template-rows: 0fr;
+      margin-top: 0;
+      opacity: 0;
+      transition: grid-template-rows 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease, margin-top 0.45s ease;
     }
-    .city-list {
-      margin: 0.35rem 0 0;
+    .world.is-open {
+      grid-template-rows: 1fr;
+      margin-top: 0.4rem;
+      opacity: 1;
+    }
+    .world-clip { overflow: hidden; min-height: 0; }
+    .acc {
+      margin: 0.2rem 0 0;
       padding: 0;
       list-style: none;
+      border-top: 1px solid var(--line);
     }
-    .city-pick {
-      display: inline-block;
-      padding: 0.45rem 0;
-      color: inherit;
-      font-size: 1.35rem;
-      font-weight: 650;
-      letter-spacing: -0.03em;
+    .acc-item {
+      border-bottom: 1px solid var(--line);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .world.is-open .acc-item { opacity: 1; transform: none; }
+    .world.is-open .acc-item:nth-child(1) { transition-delay: 40ms; }
+    .world.is-open .acc-item:nth-child(2) { transition-delay: 80ms; }
+    .world.is-open .acc-item:nth-child(3) { transition-delay: 120ms; }
+    .world.is-open .acc-item:nth-child(4) { transition-delay: 160ms; }
+    .world.is-open .acc-item:nth-child(5) { transition-delay: 200ms; }
+    .world.is-open .acc-item:nth-child(6) { transition-delay: 240ms; }
+    .acc-link, .acc-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 0.9rem 0;
+      border: 0;
+      background: none;
+      color: #111;
+      font: inherit;
+      font-family: Poppins, sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-align: left;
       text-decoration: none;
+      cursor: pointer;
     }
-    .city-pick:hover,
-    .city-pick:focus-visible {
-      color: var(--accent);
-      outline: none;
+    .acc-link span { color: #ff7a18; font-family: Inter, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+    .chev {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-right: 2px solid #111;
+      border-bottom: 2px solid #111;
+      transform: rotate(45deg);
+      transition: transform 0.3s ease;
     }
-    .city { display: none; }
-    .city:target { display: block; }
-    body:has(.city:target) .home { display: none; }
-    .back {
-      margin: 1.75rem 0 0;
-    }
-    .back a {
+    .acc-toggle[aria-expanded="true"] .chev { transform: rotate(225deg); }
+    .acc-panel {
+      display: grid;
+      grid-template-rows: 0fr;
       color: var(--muted);
-      text-decoration: none;
-      font-size: 0.92rem;
+      transition: grid-template-rows 0.35s cubic-bezier(0.22, 1, 0.36, 1);
     }
-    .back a:hover,
-    .back a:focus-visible { color: var(--text); }
-    .group { margin-top: 1.75rem; }
+    .acc-panel.is-open { grid-template-rows: 1fr; }
+    .acc-panel-clip { overflow: hidden; min-height: 0; }
+    .acc-panel p { margin: 0; padding: 0 0 0.9rem; }
+    @media (prefers-reduced-motion: reduce) {
+      .world, .acc-item, .acc-panel, .chev { transition: none; }
+    }
+    .city-hero { padding-bottom: 0.4rem; }
+    .city-hero h1 {
+      margin: 0;
+      font-size: 64px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+    }
+    .back { margin: 0 0 1.1rem; }
+    .back a { color: var(--muted); font-weight: 500; text-decoration: none; }
+    .back a:hover, .back a:focus-visible { color: #111; }
+    .city-body { padding-top: 0.4rem; }
+    .aside {
+      margin: 0.85rem 0 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+    .subhead {
+      margin: 1rem 0 0;
+      max-width: 34rem;
+      color: var(--muted);
+      font-size: 16px;
+      font-weight: 400;
+    }
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      margin-top: 1.6rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0.75rem 1.2rem;
+      border-radius: 999px;
+      border: 1.5px solid #111;
+      font: inherit;
+      font-size: 16px;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .btn.solid { background: #111; color: #fff; }
+    .btn.solid:hover,
+    .btn.solid:focus-visible { background: #2a2a2a; }
+    .btn.ghost { background: #fff; color: #111; }
+    .btn.ghost:hover,
+    .btn.ghost:focus-visible { background: #fafafa; }
+    .btn.light { border-color: #fff; color: #fff; background: transparent; }
+    .btn.light:hover,
+    .btn.light:focus-visible { background: rgba(255, 255, 255, 0.08); }
+    .hero-art {
+      width: min(100%, 420px);
+      height: auto;
+      justify-self: center;
+    }
+    .block {
+      width: min(1120px, calc(100% - 2.5rem));
+      margin: 0 auto;
+      padding: 2.6rem 0;
+      scroll-margin-top: 84px;
+    }
+    .eyebrow {
+      margin: 0 0 0.4rem;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .block h2, .why h2, .pride h2, .venues-band h2 {
+      margin: 0;
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .lede {
+      margin: 0.45rem 0 0;
+      color: var(--muted);
+    }
+    .now-line {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      margin: 0.15rem 0 0;
+    }
+    .now-time, .now-temp {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .rain {
+      display: inline-flex;
+      width: 1.65rem;
+      height: 1.65rem;
+      color: #2f6fed;
+    }
+    .rain[hidden] { display: none; }
+    .rain svg { width: 100%; height: 100%; display: block; }
+    .jump-menu { display: none; }
+    .menu-back { display: none; }
+    .group { margin-top: 1.6rem; scroll-margin-top: 5.5rem; }
     .group h3 {
       display: flex;
       align-items: center;
       gap: 0.45rem;
       margin: 0 0 0.85rem;
-      font-size: 0.82rem;
-      font-weight: 700;
+      font-family: Inter, sans-serif;
+      font-size: 13px;
+      font-weight: 500;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--text);
     }
     .group-icon {
       display: inline-flex;
@@ -305,34 +601,21 @@ const html = `<!DOCTYPE html>
       justify-content: center;
       width: 1.15rem;
       height: 1.15rem;
-      color: #f3f5f8;
+      color: #111;
     }
-    .group-icon.dance { color: #ff7aa2; }
     .group-icon.fun { width: 0.85rem; height: 1.2rem; }
     .group-icon svg { width: 100%; height: 100%; display: block; }
-    .empty {
-      margin: 0;
-      padding: 1rem 1.1rem;
-      border-radius: 16px;
-      border: 1px dashed var(--line);
-      color: var(--muted);
-    }
     .cards {
       display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 0.85rem;
-      margin: 0;
-      padding: 0;
-    }
-    @media (min-width: 720px) {
-      .cards { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.9rem;
     }
     .card {
       min-width: 0;
-      background: var(--card);
+      padding: 1.05rem 1.05rem 1rem;
+      background: #fff;
       border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 1rem 1rem 0.95rem;
+      border-radius: 18px;
     }
     .card-top {
       display: flex;
@@ -342,161 +625,714 @@ const html = `<!DOCTYPE html>
     }
     .card h4 {
       margin: 0;
-      font-size: 1.15rem;
-      font-weight: 650;
+      font-size: 18px;
+      font-weight: 700;
       letter-spacing: -0.02em;
     }
-    .badge {
+    .card-pills {
+      display: inline-flex;
       flex: none;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .hot {
       border-radius: 999px;
-      padding: 0.2rem 0.6rem;
-      background: #262a33;
-      color: #c9ced8;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: capitalize;
+      padding: 0.18rem 0.55rem;
+      background: var(--grad);
+      color: #111;
+      font-size: 13px;
+      font-weight: 500;
       letter-spacing: 0.02em;
     }
-    .badge.medium { background: #332b1c; color: #f0d39a; }
-    .badge.high { background: #1a2e24; color: #9ee0b8; }
-    .neighborhood {
-      margin: 0.2rem 0 0;
+    .badge {
+      border-radius: 999px;
+      padding: 0.18rem 0.55rem;
+      border: 1px solid var(--line);
       color: var(--muted);
-      font-size: 0.92rem;
+      font-size: 13px;
+      font-weight: 500;
+      text-transform: capitalize;
     }
-    .address {
-      margin: 0.15rem 0 0;
-      font-size: 0.92rem;
-    }
+    .badge.closed { color: #111; }
+    .badge.closing { color: #111; border-color: #ff7a18; }
+    .neighborhood, .address { margin: 0.15rem 0 0; }
+    .neighborhood { color: var(--muted); }
+    .hours { margin: 0.4rem 0 0; font-size: 16px; font-weight: 500; }
+    .hours.closed { color: #111; }
     .maps {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.35rem 0.9rem;
-      margin: 0.3rem 0 0.95rem;
+      gap: 0.35rem 0.85rem;
+      margin: 0.35rem 0 0.9rem;
     }
     .maps a {
-      color: var(--accent);
-      font-size: 0.85rem;
-      text-decoration: none;
+      color: #111;
+      font-size: 16px;
+      font-weight: 500;
+      text-decoration: underline;
+      text-underline-offset: 2px;
     }
-    .maps a:hover,
-    .maps a:focus-visible { text-decoration: underline; }
-    .meter { min-width: 0; }
     .meter-head {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
       gap: 0.75rem;
-      min-width: 0;
     }
-    .meter-title {
+    .meter-title, .week-label, .reviews-label {
       margin: 0;
-      min-width: 0;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
       color: var(--muted);
+      font-family: Inter, sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
-    @media (max-width: 719px) {
-      .meter-head {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.15rem;
-      }
+    .score {
+      margin: 0;
+      font-size: 18px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
     }
     .bar {
-      height: 12px;
+      height: 10px;
       margin-top: 0.45rem;
       border-radius: 999px;
-      background: #2a2f3b;
+      background: #f3f3f6;
       overflow: hidden;
     }
     .bar span {
       display: block;
       height: 100%;
       border-radius: inherit;
-      background: linear-gradient(90deg, var(--accent-2), var(--accent));
+      background: var(--grad);
     }
     .meter-scale {
       display: flex;
       justify-content: space-between;
       margin-top: 0.28rem;
       color: var(--muted);
-      font-size: 0.75rem;
-    }
-    .score {
-      margin: 0;
-      font-variant-numeric: tabular-nums;
-      font-weight: 700;
-      font-size: 1rem;
+      font-size: 13px;
+      font-weight: 500;
     }
     .signal {
-      margin: 0.45rem 0 0.85rem;
-      color: var(--muted);
-      font-size: 0.92rem;
-      font-style: italic;
-    }
-    .reviews-label {
-      margin: 0 0 0.4rem;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
+      margin: 0.4rem 0 0.15rem;
       color: var(--muted);
     }
+    .why {
+      margin: 0.35rem 0 0;
+      font-size: 16px;
+    }
+    .sources {
+      margin: 0.3rem 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .week-label { margin-top: 0.95rem; }
+    .week {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 0.35rem;
+      margin-top: 0.45rem;
+    }
+    .week-col { min-width: 0; text-align: center; }
+    .week-track {
+      display: flex;
+      align-items: flex-end;
+      height: 52px;
+    }
+    .week-track span {
+      display: block;
+      width: 100%;
+      border-radius: 6px 6px 3px 3px;
+      background: var(--grad);
+    }
+    .week.is-shut .week-track span { background: var(--grad-shut); }
+    .week.is-shut .week-col.is-peak small { color: #6b6b76; }
+    .week-col small {
+      display: block;
+      margin-top: 0.28rem;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .week-col.is-peak small { color: #111; font-weight: 500; }
+    .week-col.is-today small { text-decoration: underline; text-underline-offset: 2px; }
+    .reviews-label { margin-top: 0.95rem; }
     .features {
       display: flex;
       flex-wrap: wrap;
       gap: 0.4rem;
-      min-width: 0;
-      margin: 0;
+      margin: 0.45rem 0 0;
       padding: 0;
       list-style: none;
     }
     .features li {
-      max-width: 100%;
+      border: 1px solid var(--line);
       border-radius: 999px;
-      padding: 0.22rem 0.6rem;
-      background: #242833;
-      color: #d5dae3;
-      font-size: 0.8rem;
+      padding: 0.2rem 0.6rem;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 500;
     }
-    footer {
-      margin-top: 1.75rem;
+    .empty {
+      margin: 0;
+      padding: 1rem 1.1rem;
+      border: 1px dashed var(--line);
+      border-radius: 16px;
       color: var(--muted);
-      font-size: 0.85rem;
     }
-    footer p { margin: 0; }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1.1rem;
+    }
+    .chip, .foot-list button {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.5rem 0.9rem;
+      background: #fff;
+      color: #111;
+      font: inherit;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .chip.is-on {
+      border-color: #111;
+      background: #111;
+      color: #fff;
+    }
+    .chip:hover, .chip:focus-visible,
+    .foot-list button:hover, .foot-list button:focus-visible { border-color: #111; }
+    .why-grid, .pride-copy {
+      display: grid;
+      gap: 0.9rem;
+      margin-top: 1.2rem;
+    }
+    .why-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .why-grid article, .pride-copy {
+      padding: 1.15rem 1.15rem 1.2rem;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background:
+        linear-gradient(var(--grad), var(--grad)) top / 100% 4px no-repeat,
+        #fff;
+    }
+    .why-grid h3, .pride h2 { margin: 0.35rem 0 0; }
+    .why-grid h3 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+    .why-grid p, .pride p, .venues-band p {
+      margin: 0.45rem 0 0;
+      color: var(--muted);
+    }
+    .venues-band {
+      background: #111;
+      color: #fff;
+      scroll-margin-top: 84px;
+    }
+    .venues-band .band-inner {
+      width: min(1120px, calc(100% - 2.5rem));
+      margin: 0 auto;
+      padding: 3.2rem 0;
+    }
+    .venues-band .eyebrow { color: #c8c8d0; }
+    .venues-band p { max-width: 36rem; color: #d5d5dc; }
+    .venues-band .btn { margin-top: 1.2rem; }
+    .venue-invite {
+      width: min(1120px, calc(100% - 2.5rem));
+      margin: 96px auto 0;
+    }
+    .venue-invite-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.75rem;
+      padding: 48px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background:
+        linear-gradient(var(--grad), var(--grad)) top / 100% 4px no-repeat,
+        #fff;
+    }
+    .venue-invite-copy {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      min-width: 0;
+    }
+    .venue-mark {
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, #FFC531, #FF7A18);
+      color: #fff;
+    }
+    .venue-mark svg { width: 30px; height: 30px; display: block; }
+    .venue-invite h2 {
+      margin: 0;
+      max-width: 16em;
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .venue-invite p {
+      margin: 0.5rem 0 0;
+      max-width: 36rem;
+      color: var(--muted);
+      font-size: 16px;
+    }
+    .venue-invite .btn { flex: none; }
+    .get-app { display: none; }
+    .site-footer {
+      background: #111;
+      color: #fff;
+      scroll-margin-top: 84px;
+    }
+    .foot-inner {
+      width: min(1120px, calc(100% - 2.5rem));
+      margin: 0 auto;
+      padding: 2.6rem 0 1.6rem;
+    }
+    .foot-cols {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+    .site-footer h3 {
+      margin: 0 0 0.7rem;
+      font-family: Inter, sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .foot-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .foot-list li { margin: 0.35rem 0; }
+    .foot-list span, .foot-list a, .foot-list button {
+      border: 0;
+      padding: 0;
+      background: none;
+      color: #d5d5dc;
+      font-size: 16px;
+      font-weight: 400;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .foot-list a:hover, .foot-list a:focus-visible,
+    .foot-list button:hover, .foot-list button:focus-visible { color: #fff; }
+    .legal {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      color: #b7b7c2;
+      font-size: 13px;
+      font-weight: 400;
+    }
+    .legal p { margin: 0.25rem 0; }
+    @media (max-width: 759px) {
+      .nav-toggle { display: inline-block; }
+      .nav-panel {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.35rem;
+        margin: 0;
+        padding: 0.4rem 1rem 1rem;
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+      }
+      .site-header.is-open .nav-panel { display: flex; }
+      .site-nav { flex-direction: column; align-items: stretch; gap: 0; }
+      .site-nav a { padding: 0.75rem 0; border-bottom: 1px solid var(--line); }
+      .app-pill { width: 100%; margin-top: 0.7rem; }
+      .hero, .cards, .why-grid, .foot-cols { grid-template-columns: minmax(0, 1fr); }
+      .hero { padding-top: 2.2rem; padding-bottom: 0; }
+      .hero h1, .soon h1, .city-hero h1 { font-size: 42px; }
+      .block h2, .why h2, .pride h2, .venues-band h2, .venue-invite h2 { font-size: 28px; }
+      .venue-invite-card { flex-direction: column; align-items: flex-start; }
+      .venue-invite-copy { flex-direction: column; align-items: center; width: 100%; }
+      .venue-invite-copy > div { width: 100%; }
+      .venue-invite .btn { width: 100%; }
+      .get-app {
+        display: block;
+        width: min(1120px, calc(100% - 2.5rem));
+        margin: 8px auto 0;
+        background: #fff;
+        text-align: center;
+      }
+      .get-app h2 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      .get-app-badges {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        margin-top: 0.85rem;
+      }
+      .get-app-badges img { display: block; height: 44px; width: auto; }
+      .get-app-badges .play { height: 66px; margin: -11px 0; }
+      .hero-art { width: 148px; margin-bottom: -28px; }
+      .hero-cta { flex-direction: column; }
+      .hero-cta .btn, .venues-band .btn { width: 100%; }
+      .meter-head { flex-direction: column; align-items: flex-start; gap: 0.15rem; }
+      .jump-menu {
+        display: grid;
+        gap: 0.45rem;
+        margin-top: 1.35rem;
+      }
+      .jump-menu button {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        width: 100%;
+        min-height: 48px;
+        padding: 0.7rem 0.9rem;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        color: #111;
+        font: inherit;
+        font-size: 16px;
+        font-weight: 500;
+        text-align: left;
+        cursor: pointer;
+      }
+      .menu-back {
+        position: fixed;
+        z-index: 20;
+        right: 1rem;
+        bottom: 1.15rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        min-height: 44px;
+        padding: 0.55rem 1.1rem;
+        border: 0;
+        border-radius: 999px;
+        background: #111;
+        color: #fff;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+        font: inherit;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      .menu-back::before {
+        content: "";
+        width: 0.45rem;
+        height: 0.45rem;
+        border-left: 2px solid #fff;
+        border-top: 2px solid #fff;
+        transform: translateY(1px) rotate(45deg);
+      }
+      .menu-back[hidden] { display: none; }
+    }
   </style>
 </head>
 <body>
   <!-- Sauna icon: Freepik via SVG Repo, CC BY 3.0. Flame icon: UXWing. -->
-  <div class="wrap">
-    <header>
-      <a class="brand" href="#home">
-        <h1>FindingDorothy</h1>
-      </a>
-      <p class="tagline">Gay travel intel, powered by real reviews</p>
-    </header>
-    <main>
-      <section class="home" id="home">
-        <button type="button" class="share" id="share-location">Share your location</button>
-        <p class="loc-note" id="loc-status" role="status">Opens the nearest city we cover.</p>
-        <p class="or">or</p>
-        <h2>Select a city you will be visiting</h2>
-        <ul class="city-list">
-${cityPicks}
-        </ul>
-      </section>
-${CITIES.map(cityHtml).join('\n')}
-    </main>
-  </div>
+  <header class="site-header">
+    <a class="logo" href="#home" aria-label="FindingDorothy">
+      <img src="assets/logo-v4-warm.jpg" alt="FindingDorothy">
+    </a>
+    <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-panel">
+      <nav class="site-nav" aria-label="Primary">
+        <a href="#home" data-open-world>Cities</a>
+        <a href="#forecast">Scene Forecast</a>
+        <a href="#pride">Pride Calendar</a>
+        <a href="#venues">For Venues</a>
+      </nav>
+      <span class="app-pill">Get the App</span>
+    </div>
+  </header>
+  <main class="view" id="home">
+    <section class="hero">
+      <div>
+        <h1>Know where the <span class="fun">fun</span> is going.</h1>
+        <p class="subhead">Gay Guys travel intel, powered by real data.</p>
+        <div class="hero-cta">
+          <button type="button" class="btn solid" id="share-location">See tonight's forecast where you are</button>
+          <button type="button" class="btn ghost" id="browse-world" aria-expanded="false" aria-controls="world">Browse the world</button>
+        </div>
+        <p class="loc-note" id="loc-status" role="status"></p>
+        <div class="world" id="world" aria-hidden="true" inert>
+          <div class="world-clip">
+            <ul class="acc">
+${worldList}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <img class="hero-art" src="assets/icon-mark.jpg" alt="">
+    </section>
+    <section class="get-app" aria-label="Get the app">
+      <h2>Get the app!</h2>
+      <div class="get-app-badges">
+        <img class="app-store" src="assets/app-store-badge.svg" alt="Download on the App Store">
+        <img class="play" src="assets/google-play-badge.png" alt="Get it on Google Play">
+      </div>
+    </section>
+    <section class="venue-invite" aria-label="For venues">
+      <div class="venue-invite-card">
+        <div class="venue-invite-copy">
+          <span class="venue-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none">
+              <path fill="currentColor" d="M6.4 12.6h19.2c-.55 2.2-2.3 4.2-5.4 5.4-1.5.6-2.7.9-4.2.9s-2.7-.3-4.2-.9c-3.1-1.2-4.85-3.2-5.4-5.4z"/>
+              <path stroke="currentColor" stroke-width="2.1" stroke-linecap="round" d="M5.2 11.5h21.6"/>
+              <path stroke="currentColor" stroke-width="2.1" stroke-linecap="round" d="M16 18.8V25"/>
+              <path stroke="currentColor" stroke-width="2.1" stroke-linecap="round" d="M11 26.2h10"/>
+              <circle cx="22.8" cy="10.2" r="1.65" fill="currentColor"/>
+            </svg>
+          </span>
+          <div>
+            <p class="eyebrow">For venues</p>
+            <h2>Bring <span class="fun">more guys</span> through the door.</h2>
+            <p>Share how busy you are, and tell us about your events. Travelers looking for the night see it here.</p>
+          </div>
+        </div>
+        <a class="btn solid" href="#venues">Contact us!</a>
+      </div>
+    </section>
+  </main>
+${CITIES.filter((city) => LIVE.has(city.id)).map((city) => cityPageHtml(city)).join('\n')}
+${[['forecast', 'Scene Forecast'], ['pride', 'Pride Calendar'], ['venues', 'For Venues']].map(([id, title]) => `  <main class="view" id="${id}" hidden>
+    <section class="block soon">
+      <h1>${escapeHtml(title)}</h1>
+      <p>coming soon</p>
+    </section>
+  </main>`).join('\n')}
+  <footer class="site-footer">
+    <div class="foot-inner">
+      <div class="foot-cols">
+        <div>
+          <h3>Product</h3>
+          <ul class="foot-list">
+            <li><a href="#forecast">Scene Forecast</a></li>
+            <li><a href="#home" data-open-world>Cities</a></li>
+            <li><a href="#pride">Pride Calendar</a></li>
+            <li><span>Get the App</span></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Cities</h3>
+          <ul class="foot-list">
+${footerCities}
+          </ul>
+        </div>
+        <div>
+          <h3>For Venues</h3>
+          <ul class="foot-list">
+            <li><a href="#venues">Live counter</a></li>
+            <li><a href="#venues">Why FindingDorothy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="legal">
+        <p>© 2026 FindingDorothy</p>
+        <p>Expected busyness from historical patterns — not live counts.</p>
+      </div>
+    </div>
+  </footer>
   <script>
     const cities = ${cityLookup};
     const nearKm = ${NEAR_CITY_KM};
-    const button = document.getElementById('share-location');
+    const pages = new Set(${JSON.stringify([...LIVE])});
+    const header = document.querySelector('.site-header');
+    const toggle = document.querySelector('.nav-toggle');
+    const world = document.getElementById('world');
+    const browse = document.getElementById('browse-world');
     const status = document.getElementById('loc-status');
+    const share = document.getElementById('share-location');
+
+    function closeMenu() {
+      header.classList.remove('is-open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', 'Open menu');
+    }
+
+    toggle.addEventListener('click', () => {
+      const open = header.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    });
+    header.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+
+    function setPanels(cityId) {
+      document.querySelectorAll('.acc-toggle').forEach((button) => {
+        const open = Boolean(cityId) && button.dataset.city === cityId;
+        button.setAttribute('aria-expanded', open ? 'true' : 'false');
+        button.nextElementSibling.classList.toggle('is-open', open);
+      });
+    }
+
+    function setWorld(open, cityId) {
+      world.classList.toggle('is-open', open);
+      world.inert = !open;
+      world.setAttribute('aria-hidden', open ? 'false' : 'true');
+      browse.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (!open) setPanels('');
+      else if (cityId) setPanels(cityId);
+    }
+
+    function closeWorld() {
+      setWorld(false);
+    }
+
+    document.querySelector('.logo').addEventListener('click', closeWorld);
+
+    function paintClock() {
+      const now = new Date();
+      document.querySelectorAll('[data-clock]').forEach((clock) => {
+        const fmt = new Intl.DateTimeFormat('en-US', {
+          timeZone: clock.dataset.tz,
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hourCycle: 'h23',
+        });
+        const bag = {};
+        for (const part of fmt.formatToParts(now)) bag[part.type] = part.value;
+        let hour = Number(bag.hour);
+        if (hour === 24) hour = 0;
+        const minute = String(bag.minute).padStart(2, '0');
+        const suffix = hour >= 12 ? 'PM' : 'AM';
+        const hour12 = hour % 12 || 12;
+        const hero = clock.closest('.city-hero');
+        hero.querySelector('[data-date]').textContent = bag.weekday + ', ' + bag.month + ' ' + Number(bag.day) + ', ' + bag.year;
+        clock.textContent = hour12 + ':' + minute + ' ' + suffix;
+        const period = hour < 12 ? 'This morning' : hour < 17 ? 'This afternoon' : hour < 21 ? 'This evening' : 'Tonight';
+        hero.querySelector('[data-period]').textContent = period;
+      });
+    }
+    paintClock();
+    setInterval(paintClock, 30000);
+
+    function applyWeather(node, report) {
+      const temp = node.querySelector('[data-temp]');
+      const rain = node.querySelector('[data-rain]');
+      if (temp && Number.isFinite(report.tempC)) temp.textContent = Math.round(report.tempC) + '°C';
+      if (!rain) return;
+      const raining = report.precipMm >= 0.3 || isRainCode(report.code);
+      const likely = raining || (Number.isFinite(report.probability) && report.probability >= 60);
+      rain.hidden = !likely;
+      rain.setAttribute('aria-label', raining ? 'Raining' : 'Rain likely');
+    }
+
+    function isRainCode(code) {
+      return (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || code >= 95;
+    }
+
+    async function paintWeather() {
+      for (const node of document.querySelectorAll('[data-weather]')) {
+        const url = new URL('https://api.open-meteo.com/v1/forecast');
+        url.searchParams.set('latitude', node.dataset.lat);
+        url.searchParams.set('longitude', node.dataset.lon);
+        url.searchParams.set('current', 'temperature_2m,precipitation,weather_code');
+        url.searchParams.set('hourly', 'precipitation_probability');
+        url.searchParams.set('forecast_hours', '6');
+        url.searchParams.set('timezone', 'auto');
+        try {
+          const data = await fetch(url).then((res) => res.json());
+          const current = data.current || {};
+          const key = String(current.time || '').slice(0, 13);
+          const times = (data.hourly && data.hourly.time) || [];
+          const chances = (data.hourly && data.hourly.precipitation_probability) || [];
+          const index = times.findIndex((stamp) => String(stamp).slice(0, 13) === key);
+          applyWeather(node, {
+            tempC: current.temperature_2m,
+            precipMm: current.precipitation || 0,
+            code: current.weather_code,
+            probability: index >= 0 ? chances[index] : null,
+          });
+        } catch (err) {
+          void err;
+        }
+      }
+    }
+    paintWeather();
+
+    document.querySelectorAll('[data-jump]').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.getElementById(button.dataset.jump)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    const mobileMenu = window.matchMedia('(max-width: 759px)');
+    document.querySelectorAll('.menu-back').forEach((menuBack) => {
+      const page = menuBack.closest('main');
+      const jumpMenu = page.querySelector('.jump-menu');
+      if (!jumpMenu) return;
+      let menuInView = true;
+      const syncMenuBack = () => {
+        menuBack.hidden = !mobileMenu.matches || page.hidden || menuInView;
+      };
+      const menuWatch = new IntersectionObserver((entries) => {
+        menuInView = entries.some((entry) => entry.isIntersecting);
+        syncMenuBack();
+      }, { rootMargin: '-72px 0px 0px 0px', threshold: 0.2 });
+      menuWatch.observe(jumpMenu);
+      mobileMenu.addEventListener('change', syncMenuBack);
+      menuBack.addEventListener('click', () => {
+        jumpMenu.closest('.city-hero').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    function showView() {
+      const id = location.hash.replace('#', '');
+      const current = !id || id === 'home' ? 'home' : id;
+      document.querySelectorAll('main.view').forEach((view) => {
+        view.hidden = view.id !== current;
+      });
+      window.scrollTo(0, 0);
+    }
+
+    function openWorld(cityId) {
+      if (location.hash && location.hash !== '#home') location.hash = 'home';
+      setWorld(true, cityId || '');
+      window.scrollTo(0, 0);
+    }
+
+    browse.addEventListener('click', () => {
+      setWorld(!world.classList.contains('is-open'));
+    });
+
+    document.querySelectorAll('.acc-toggle').forEach((button) => {
+      button.addEventListener('click', () => {
+        const open = button.getAttribute('aria-expanded') !== 'true';
+        setPanels(open ? button.dataset.city : '');
+      });
+    });
+
+    document.querySelectorAll('[data-open-world]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        openWorld(link.dataset.city || '');
+      });
+    });
 
     function distanceKm(a, b) {
       const toRad = (deg) => deg * Math.PI / 180;
@@ -508,35 +1344,44 @@ ${CITIES.map(cityHtml).join('\n')}
       return 6371 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
     }
 
-    function nearestCity(here) {
-      let best = null;
-      for (const city of cities) {
-        const distance = distanceKm(here, city);
-        if (!best || distance < best.distance) best = { city, distance };
-      }
-      return best;
-    }
-
-    button.addEventListener('click', () => {
+    share.addEventListener('click', () => {
       if (!navigator.geolocation) {
-        status.textContent = 'Location is unavailable here. Select a city below.';
+        status.textContent = 'Location is unavailable here. Pick a city below.';
+        openWorld();
         return;
       }
-      button.disabled = true;
+      share.disabled = true;
       status.textContent = 'Finding the nearest city…';
       navigator.geolocation.getCurrentPosition((pos) => {
-        button.disabled = false;
-        const nearest = nearestCity({ lat: pos.coords.latitude, lon: pos.coords.longitude });
-        if (!nearest || nearest.distance > nearKm) {
-          status.textContent = 'No covered city is close enough. Select one below.';
+        share.disabled = false;
+        let best = null;
+        const here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        for (const city of cities) {
+          const distance = distanceKm(here, city);
+          if (!best || distance < best.distance) best = { city, distance };
+        }
+        if (!best || best.distance > nearKm) {
+          status.textContent = 'No covered city is close enough. Pick one below.';
+          openWorld();
           return;
         }
-        location.hash = nearest.city.id;
+        if (!pages.has(best.city.id)) {
+          status.textContent = best.city.name + ', ' + best.city.country + ' is the nearest city. That page is next.';
+          openWorld(best.city.id);
+          return;
+        }
+        status.textContent = '';
+        location.hash = best.city.id;
       }, () => {
-        button.disabled = false;
-        status.textContent = 'Location was not shared. Select a city below.';
+        share.disabled = false;
+        status.textContent = 'Location was not shared. Pick a city below.';
+        openWorld();
       }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 });
     });
+
+    window.addEventListener('hashchange', showView);
+    if (location.hash === '#home') history.replaceState(null, '', location.pathname + location.search);
+    showView();
   </script>
 </body>
 </html>

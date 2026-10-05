@@ -10,6 +10,11 @@
  * @returns {{ score: number, confidence: 'high'|'medium'|'low', drivers: string[] }}
  */
 export function scoreForecast(prior, liveSignals = []) {
+  // A closed door is not a quiet guess. Nothing is happening inside.
+  if (liveSignals.some((s) => s.kind === 'closed')) {
+    return { score: 0, confidence: 'low', drivers: ['Closed now'] };
+  }
+
   // v0: prior-driven; live signals nudge. Full Bayesian update lands in Phase 2.
   let p = prior.p_busy;
   const drivers = [...(prior.drivers || [])];
@@ -33,7 +38,8 @@ export function scoreForecast(prior, liveSignals = []) {
  * Conservative display mapping. A false "go" costs far more than a false "stay",
  * so low confidence NEVER produces a now-claim — it shows the pattern instead.
  */
-export function labelFor(score, confidence) {
+export function labelFor(score, confidence, context = {}) {
+  if (context.closed) return { label: 'Quiet', action: 'skip' };
   if (confidence === 'low') return { label: 'Not enough live signal', action: 'pattern' };
   if (score >= 8) return { label: 'Worth going now', action: 'go' };
   if (score >= 6) return { label: 'Decent tonight', action: 'maybe' };

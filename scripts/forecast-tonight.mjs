@@ -1,39 +1,59 @@
-// scripts/forecast-tonight.mjs
-// The first "product": score tonight's busyness for every seed venue and print it.
+// Score every seed venue for right now and print the sources behind each number.
 // Run: node scripts/forecast-tonight.mjs
-// Phase 0: priors are hand-set category defaults (the "hierarchical prior" idea
-// from ARCHITECTURE.md in 6 lines). Phase 2 replaces them with mined data.
 
 import { readFileSync } from 'node:fs';
-import { scoreForecast, labelFor } from '../packages/forecast/score.js';
+import { periodLabel, zonedNow } from '../packages/forecast/open.js';
+import { SOURCE_NOTES, assembleForecast, isShutdown } from '../packages/forecast/assemble.js';
+import { fetchWeather } from '../packages/forecast/weather.js';
 
 const seed = JSON.parse(readFileSync(new URL('../data/seed-venues.json', import.meta.url)));
+const when = zonedNow(new Date(), 'America/Los_Angeles');
 
-// Category-level priors: P(busy) by night type. This is the fallback layer
-// the architecture calls "category priors" — real per-venue data sharpens it later.
-const PRIORS = {
-  sauna: { weekend: { p: 0.95, drivers: ['Weekend pattern', '24h schedule'] }, weeknight: { p: 0.45, drivers: ['Weeknight pattern', '24h schedule'] } },
-  bar:   { weekend: { p: 0.7,  drivers: ['Weekend pattern', 'Castro foot traffic'] }, weeknight: { p: 0.4, drivers: ['Weeknight pattern', 'Castro foot traffic'] } },
-};
-
-const now = new Date();
-const dow = now.getDay(); // 0=Sunday
-const isWeekend = dow === 0 || dow === 5 || dow === 6;
-const dayName = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-
-console.log(`\nFindingDorothy — Scene Forecast · San Francisco · ${dayName}`);
-console.log('─'.repeat(58));
-
-for (const v of seed.venues) {
-  const cat = PRIORS[v.category] ?? PRIORS.bar;
-  const t = isWeekend ? cat.weekend : cat.weeknight;
-  // n_obs is small on purpose: these are priors, not measurements → medium/low confidence.
-  const prior = { p_busy: t.p, n_obs: 12, drivers: t.drivers };
-  const { score, confidence, drivers } = scoreForecast(prior, []);
-  const { label } = labelFor(score, confidence);
-  const name = `${v.name} (${v.category}, ${v.neighborhood})`.padEnd(38);
-  console.log(`${name} ${score.toFixed(1)}/10  ${label} · ${confidence}`);
-  console.log(`${''.padEnd(38)} drivers: ${drivers.join(' · ')}`);
+let weather = null;
+try {
+  weather = await fetchWeather(37.7749, -122.4194, 'America/Los_Angeles');
+} catch (err) {
+  console.error(`Weather unavailable: ${err.message}`);
 }
-console.log('─'.repeat(58));
-console.log('Prototype priors — expected patterns, not live counts.\n');
+
+console.log(`\nFindingDorothy — ${periodLabel(when.hour)} · San Francisco · ${when.dateLabel} · ${when.timeLabel}`);
+console.log('─'.repeat(72));
+console.log('Sources');
+for (const [name, note] of SOURCE_NOTES) {
+  const extra = name === 'Weather' && weather ? ` Right now: ${weather.summary} (${weather.observedAt}).` : '';
+  console.log(`  ${name.padEnd(18)} ${note}${extra}`);
+}
+console.log('─'.repeat(72));
+
+const ranked = seed.venues
+  .map((venue) => ({ venue, forecast: assembleForecast(venue, when, { weather }) }))
+  .filter(({ venue, forecast }) => !isShutdown(venue) && forecast.status.open)
+  .sort((a, b) => b.forecast.score - a.forecast.score || a.venue.name.localeCompare(b.venue.name));
+
+ranked.forEach(({ venue, forecast }, index) => {
+  const name = `${index + 1}. ${venue.name} (${venue.category}, ${venue.neighborhood})`.padEnd(42);
+  console.log(`${name} ${forecast.score.toFixed(1)}/10  ${forecast.label} · ${forecast.confidence}`);
+  console.log(`${''.padEnd(42)} ${forecast.status.text}`);
+  console.log(`${''.padEnd(42)} ${forecast.summary}`);
+  for (const source of forecast.sources) {
+    if (source.kind === 'missing') continue;
+    console.log(`${''.padEnd(42)} ${source.name}: ${source.detail}`);
+  }
+});
+
+const shut = seed.venues.filter((venue) => !isShutdown(venue) && !assembleForecast(venue, when, { weather }).status.open);
+const gone = seed.venues.filter((venue) => isShutdown(venue));
+if (shut.length) {
+  console.log('Not ranked — shut right now');
+  for (const venue of shut) {
+    const forecast = assembleForecast(venue, when, { weather });
+    console.log(`  ${venue.name}: ${forecast.status.text}`);
+  }
+}
+if (gone.length) {
+  console.log(`Removed — out of business: ${gone.map((venue) => venue.name).join(', ')}`);
+} else {
+  console.log('Out of business: none of these places have that signal.');
+}
+console.log('─'.repeat(72));
+console.log('Low confidence on purpose: no check-ins and no venue counter, so this is a pattern, not a live count.\n');
