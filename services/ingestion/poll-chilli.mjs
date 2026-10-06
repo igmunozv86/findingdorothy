@@ -15,7 +15,7 @@ const ENDPOINT = 'https://hotelchilli.com.br/wp-admin/admin-ajax.php?action=atua
 const HTML_SELECTOR = '.chilli-card-counter';
 const INTERVAL_MS = 5 * 60 * 1000;
 const USER_AGENT = 'FindingDorothy/phase0';
-const VENUE_ID = 'sp-hotel-chilli';
+const VENUE_ID = 'sao-paulo-hotel-chilli';
 const latestPath = new URL('../../data/live-occupancy.json', import.meta.url);
 const logPath = new URL('../../data/live-occupancy.jsonl', import.meta.url);
 const pagePath = new URL('../../apps/web/index.html', import.meta.url);

@@ -9,12 +9,7 @@ import { periodLabel, placeStatus, zonedNow } from '../packages/forecast/open.js
 import { assembleForecast, dayScore, isShutdown, summaryWithCountNote } from '../packages/forecast/assemble.js';
 import { freshOccupancy, signalMarkup } from '../packages/forecast/live.js';
 import { fetchWeather } from '../packages/forecast/weather.js';
-import { loadCities, stagingBlockers } from '../packages/cities/load.js';
-
-const blocked = stagingBlockers(new URL('../data/staging/cities/', import.meta.url));
-if (blocked.length) {
-  throw new Error(`${blocked.length} staging files failed validation and have not merged. The page was not written.`);
-}
+import { loadCities } from '../packages/cities/load.js';
 
 const CITIES = loadCities(new URL('../data/cities/', import.meta.url));
 const LIVE = CITIES.filter((city) => city.live);
@@ -42,6 +37,7 @@ const RAIN_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="curre
 const FLAGS = {
   USA: '🇺🇸',
   Spain: '🇪🇸',
+  Portugal: '🇵🇹',
   France: '🇫🇷',
   Germany: '🇩🇪',
   UK: '🇬🇧',
@@ -50,6 +46,9 @@ const FLAGS = {
   Chile: '🇨🇱',
   Brazil: '🇧🇷',
   Argentina: '🇦🇷',
+  Colombia: '🇨🇴',
+  Peru: '🇵🇪',
+  Uruguay: '🇺🇾',
   Mexico: '🇲🇽',
   Canada: '🇨🇦',
   Australia: '🇦🇺',

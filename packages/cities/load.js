@@ -4,25 +4,6 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { validateCity } from './validate.js';
 
-export function stagingBlockers(directory) {
-  let names = [];
-  try {
-    names = readdirSync(directory).filter((name) => name.endsWith('.json'));
-  } catch {
-    return [];
-  }
-  const blocked = [];
-  for (const name of names) {
-    try {
-      const city = JSON.parse(readFileSync(new URL(name, directory)));
-      if (validateCity(city, name).length) blocked.push(name);
-    } catch {
-      blocked.push(name);
-    }
-  }
-  return blocked.sort();
-}
-
 export function loadCities(directory) {
   const names = readdirSync(directory).filter((name) => name.endsWith('.json')).sort();
   if (!names.length) throw new Error(`No city files in ${directory}`);

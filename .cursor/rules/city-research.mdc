@@ -1,0 +1,146 @@
+---
+description: How to research a city (new, refresh, or QA fix) — workers, schema, validation, merge
+alwaysApply: true
+---
+
+# City research — worker instructions
+
+## When this runs
+
+- A new city is added, an existing city needs a refresh, or Nacho reports a
+  QA correction (he's been there — that's Tier 4 QA).
+- Research NEVER happens in the main build conversation. It always runs as
+  parallel worker agents, one per city.
+
+## The orchestrator prompt
+
+When Nacho says "research these cities", spawn one worker agent per city (or
+per small batch). All workers run in parallel and follow the per-city brief
+below. Workers write to `data/staging/cities/<slug>.json` only — never to
+`data/cities/`, never to `apps/web/index.html`.
+
+## Per-city worker brief
+
+1. **Verify, don't invent.** Every venue: name + address confirmed in ≥ 2
+   independent tiers. DROP anything unverifiable — a thin file beats a
+   fabricated one.
+2. **Sources (every venue needs ≥ 2):** each source is
+   `{tier, url, retrieved_at}`. Tiers: 0 = Overpass/OSM (addresses, coords),
+   1 = Wikidata (stable facts), 2 = keyed APIs (only when keys exist),
+   3 = MANUAL ONLY — the venue's own website or own Instagram
+   (bio/highlights/posts via the checklist, never scraped). Tier 4 is Nacho's
+   QA — it is not a source.
+3. **Hours — always check the venue's own website first.** The venue's own
+   website is the #1 source for hours and the worker MUST fetch it (plain
+   page read) and extract open/close times. `hours_verified: true` ONLY when
+   the venue's own site or own Instagram states a full open AND close.
+   Use `"no recent data"` ONLY when the venue's own site has no hours AND no
+   other reliable source states them — never as a lazy default. The
+   MANUAL_ONLY restriction applies to Instagram (no public API, often
+   login-walled: never log in, never scrape, use only what's publicly
+   visible), NOT to venue websites, which workers always read.
+   Whenever hours are verified, add the source they came from to the
+   venue's `sources` array as an extra source (if not already listed) —
+   every hours claim must be traceable to a cited tier-3 source.
+   Verified format: `"24h"` or `{mon: ["10:00","02:00"], …}` in HH:MM.
+4. **Coordinates:** numbers only when confidently sourced (map/geocode for
+   the street address). Otherwise BOTH `lat` and `lon` are null. Never guessed.
+5. **Categories:** `bar` | `club` | `sauna` | `cruise` | `sex`. Categorize by
+   primary function per the evidence; a backroom gets noted in
+   `review_features`, not a category upgrade.
+6. **Fields:** `id` is `<slug>-<name-slug>`, unique. `review_features`: 2–4
+   short factual strings. `instagram`: handle or null. No unknown fields —
+   the validator rejects them. No phone numbers, ever.
+7. **Pride:** `{"2026": {date, event_name, source_url} | null, "2027": …}`.
+   ONLY dates the organizer has actually published. Never infer from prior
+   years. Null is a valid, honest answer.
+8. **Meta:** `slug` (must match the filename), `name`, `country`,
+   `region` (exact taxonomy string), `gayborhood` (string or null),
+   city `lat`/`lon` (numbers), `status` (`seeded` for new cities),
+   `last_updated` (YYYY-MM-DD), `tz` (IANA, from the reference table below).
+9. **Aim:** 6–8 venues per city covering bars/clubs, saunas, and
+   cruise/sex venues where they're genuinely part of the scene.
+
+## Validation and merge (in this order, no skipping)
+
+1. `node scripts/select-venues.mjs` — validates every staging file. Fix all
+   failures. Review flags (thin results, single-tier confirmation) are
+   warnings: investigate, don't invent.
+2. `node scripts/merge-cities.mjs` — copies only passing files to
+   `data/cities/`, prints a diff per file. Failing files stay in staging.
+3. `node scripts/build-web.mjs` — rebuilds the page from `data/cities/`
+   ONLY. Run it only when production holds exactly the cities you want
+   published.
+
+## Learning loop (the rule that prevents repeat mistakes)
+
+When Nacho spots a mistake, the fix goes INTO THIS BRIEF (or the spec),
+then that city's worker re-runs under the stricter rule. Never patch a
+venue by hand. Log every QA correction and what changed in the brief.
+
+## Hours backfill pass
+
+Run this when too many venues sit at `"no recent data"` for hours. It is a
+separate operation from city research and can run while other work continues.
+
+1. For every venue with `hours == "no recent data"`: fetch the venue's own
+   website (plain page read — always allowed; MANUAL_ONLY is Instagram-only)
+   and extract open/close times.
+2. Full open AND close found → set `hours` (`"24h"` or
+   `{mon: ["10:00","02:00"], …}` HH:MM), `hours_verified: true`, and add the
+   site as a `{tier: 3, url, retrieved_at}` source if not already listed.
+3. Genuinely no hours anywhere → leave `"no recent data"`, but only after
+   exhausting all three: (a) the venue's own website thoroughly (homepage,
+   contact/visit/hours pages — not a glance), (b) the venue's public
+   Instagram bio/highlights/posts, (c) the Google business listing. The
+   report must say which of the three were checked per venue. Never invent
+   hours, never touch other fields, keep ≥ 2 sources per venue.
+4. Re-run `node scripts/select-venues.mjs` after every file; fix failures.
+5. Write a short backfill report: per venue, hours found (with source URL)
+   or still missing (with reason).
+
+## Reference — region / tz / country per city
+
+| slug | country | region | tz |
+|---|---|---|---|
+| san-francisco | USA | North America | America/Los_Angeles |
+| new-york | USA | North America | America/New_York |
+| los-angeles | USA | North America | America/Los_Angeles |
+| miami | USA | North America | America/New_York |
+| seattle | USA | North America | America/Los_Angeles |
+| vancouver | Canada | North America | America/Vancouver |
+| toronto | Canada | North America | America/Toronto |
+| montreal | Canada | North America | America/Toronto |
+| mexico-city | Mexico | North America | America/Mexico_City |
+| puerto-vallarta | Mexico | North America | America/Bahia_Banderas |
+| washington-dc | USA | North America | America/New_York |
+| chicago | USA | North America | America/Chicago |
+| fort-lauderdale | USA | North America | America/New_York |
+| madrid | Spain | Europe | Europe/Madrid |
+| barcelona | Spain | Europe | Europe/Madrid |
+| paris | France | Europe | Europe/Paris |
+| berlin | Germany | Europe | Europe/Berlin |
+| cologne | Germany | Europe | Europe/Berlin |
+| amsterdam | Netherlands | Europe | Europe/Amsterdam |
+| london | UK | Europe | Europe/London |
+| manchester | UK | Europe | Europe/London |
+| rome | Italy | Europe | Europe/Rome |
+| milan | Italy | Europe | Europe/Rome |
+| santiago | Chile | Latin America | America/Santiago |
+| sao-paulo | Brazil | Latin America | America/Sao_Paulo |
+| rio-de-janeiro | Brazil | Latin America | America/Sao_Paulo |
+| salvador | Brazil | Latin America | America/Bahia |
+| buenos-aires | Argentina | Latin America | America/Argentina/Buenos_Aires |
+| lima | Peru | Latin America | America/Lima |
+| bogota | Colombia | Latin America | America/Bogota |
+| montevideo | Uruguay | Latin America | America/Montevideo |
+| sydney | Australia | Asia-Pacific | Australia/Sydney |
+| melbourne | Australia | Asia-Pacific | Australia/Melbourne |
+| bangkok | Thailand | Asia-Pacific | Asia/Bangkok |
+| taipei | Taiwan | Asia-Pacific | Asia/Taipei |
+| tel-aviv | Israel | Middle East | Asia/Jerusalem |
+| cape-town | South Africa | Africa | Africa/Johannesburg |
+
+Region is one of exactly: North America, Europe, Latin America, Asia-Pacific,
+Middle East, Africa. Tel Aviv is Middle East, never Asia. For cities not in
+this table: region by geography, tz as the city's IANA zone.

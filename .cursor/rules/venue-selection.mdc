@@ -5,10 +5,10 @@ alwaysApply: true
 
 # City data
 
-Cursor renders. Cursor does not research venues and does not hand-edit city content. Do not edit `apps/web/index.html`.
+Cursor renders. Research runs as parallel workers under `.cursor/rules/city-research.mdc`, not in the build conversation. Do not hand-edit city content. Do not edit `apps/web/index.html`.
 
 - Workers write one city to `data/staging/cities/<slug>.json`. Mimi merges only files that pass `node scripts/merge-cities.mjs`. That script prints a diff and leaves a failing file in staging.
-- The page reads `data/cities/<slug>.json` only. The build stops while any staging file is still invalid, and it stops if a merged file fails validation.
+- The page reads `data/cities/<slug>.json` only. Staging drafts do not block the build. The build stops if a merged file fails validation.
 - Automated checks: schema, enums, exact region strings, at least two sources with a url and retrieved_at. Source tiers are 0, 1, 2, or 3. Tier 4 is Nacho's QA, not a source. `hours_verified` is true only when a tier 3 source is present. Unknown hours are `"no recent data"`.
 - Two-tier confirmation of a name and address, and a thin city, are review flags. They are not a reason to invent a source.
 - Region is one of: North America, Europe, Latin America, Asia-Pacific, Middle East, Africa. Tel Aviv is Middle East.
