@@ -7,7 +7,6 @@
 import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { periodLabel, placeStatus, zonedNow } from '../packages/forecast/open.js';
 import { assembleForecast, dayScore, isShutdown, loadForecastInputs } from '../packages/forecast/assemble.js';
-import { bandLabel } from '../packages/forecast/score.js';
 import { freshOccupancy, signalMarkup } from '../packages/forecast/live.js';
 import { fetchWeather } from '../packages/forecast/weather.js';
 import { loadCities } from '../packages/cities/load.js';
@@ -624,7 +623,7 @@ function prideListItem(event) {
   const city = CITIES.find((item) => item.id === event.city_id);
   const place = event.place ? ` · ${escapeHtml(event.place)}` : '';
   const where = city.live
-    ? `<a href="#${escapeHtml(city.id)}">${escapeHtml(city.name)}, ${escapeHtml(city.country)}</a>`
+    ? `<a href="#city/${escapeHtml(city.id)}">${escapeHtml(city.name)}, ${escapeHtml(city.country)}</a>`
     : `${escapeHtml(city.name)}, ${escapeHtml(city.country)}`;
   return `            <li data-city="${escapeHtml(event.city_id)}" data-start="${event.start}" data-end="${event.end}">
               <p class="pride-when">${escapeHtml(formatPrideRange(event.start, event.end))}</p>
@@ -668,34 +667,23 @@ ${prideResultsHtml()}
   </main>`;
 }
 
-const CATEGORY_LABEL = {
-  bar: 'Bar',
-  club: 'Club',
-  sauna: 'Sauna',
-  cruise: 'Cruise',
-  sex: 'Sex',
-};
-
-const VIBE_DEFS = [
-  { id: 'leather', name: 'Leather bars' },
-  { id: 'late', name: 'Late-night clubs' },
-  { id: 'sauna', name: 'Saunas' },
-  { id: 'drag', name: 'Drag & cabaret' },
-  { id: 'cruisy', name: 'Cruisy' },
+const SCENE_GROUPS = [
+  { id: 'dance', name: 'Dance and Bars', categories: ['bar', 'club'] },
+  { id: 'sauna', name: 'Saunas and Bathhouses', categories: ['sauna'] },
+  { id: 'sexy', name: 'Cruisy', categories: ['cruise', 'sex'] },
 ];
 
-const NIGHT_HOURS = [18, 19, 20, 21, 22, 23, 0, 1, 2];
-
-function vibeIds(venue) {
-  const text = (venue.review_features || []).join(' ').toLowerCase();
-  const ids = [];
-  if (venue.category === 'bar' && text.includes('leather')) ids.push('leather');
-  if (venue.category === 'club') ids.push('late');
-  if (venue.category === 'sauna') ids.push('sauna');
-  if (text.includes('drag') || text.includes('cabaret')) ids.push('drag');
-  if (venue.category === 'cruise' || venue.category === 'sex' || text.includes('cruis')) ids.push('cruisy');
-  return ids;
+function sceneGroup(category) {
+  const match = SCENE_GROUPS.find((group) => group.categories.includes(category));
+  return match ? match.id : 'dance';
 }
+
+function sceneGroupName(category) {
+  const match = SCENE_GROUPS.find((group) => group.categories.includes(category));
+  return match ? match.name : 'Dance and Bars';
+}
+
+const NIGHT_HOURS = [18, 19, 20, 21, 22, 23, 0, 1, 2];
 
 function peakClock(hour) {
   const suffix = hour >= 12 ? 'pm' : 'am';
@@ -784,9 +772,9 @@ function snapshotVenue(venue, city) {
   return {
     id: venue.id,
     name: venue.name,
-    cat: CATEGORY_LABEL[venue.category] || venue.category,
+    cat: sceneGroupName(venue.category),
     area: venue.neighborhood || '',
-    vibes: vibeIds(venue),
+    vibes: [sceneGroup(venue.category)],
     conf: confidence,
     unsure: venue.hours == null || venue.hours === 'no recent data',
     verified: Boolean(venue.hours_verified),
@@ -826,6 +814,15 @@ function buildTonight() {
       weekend: weekendLabel(now.weekday, city.tz),
       best,
       score,
+      weather: {
+        temp: weatherByCity[city.name] ? tempLabel(weatherByCity[city.name].tempC) : '',
+        rain: Boolean(weatherByCity[city.name]?.rainLikely),
+        raining: Boolean(weatherByCity[city.name]?.raining),
+      },
+      pride: Object.values(city.pride || {})
+        .filter((row) => row && row.date && row.event_name)
+        .map((row) => ({ name: row.event_name, date: row.date }))
+        .sort((a, b) => a.date.localeCompare(b.date)),
       venues,
     };
   });
@@ -842,22 +839,120 @@ function tonightLine(venue, mode) {
   return `Open now · peaks ~${peakClock(venue.peak)}`;
 }
 
+function busyNote(venue) {
+  if (venue.live && venue.conf !== 'low') return 'live count in';
+  return 'usual for this hour';
+}
+
+function conceptHtml(features) {
+  const items = (features || []).slice(0, 5);
+  if (!items.length) return '';
+  return `<span class="tonight-concepts">${items.map((item) => `<span>${escapeHtml(item)}</span>`).join('')}</span>`;
+}
+
 function tonightRow(venue, hour, mode) {
   const percent = mode === 'weekend' ? venue.weekend.percent : venue.curve[hour];
-  const band = bandLabel(percent, venue.conf);
   const live = venue.live ? '<span class="live-dot" aria-label="Live"></span>' : '';
   const place = venue.area ? ` · ${escapeHtml(venue.area)}` : '';
-  return `          <li><button type="button" class="tonight-row" data-venue="${escapeHtml(venue.id)}"><span class="tonight-name">${escapeHtml(venue.name)}</span><span class="forecast-badge">${percent}% · ${escapeHtml(band)}</span>${live}<span class="tonight-meta">${escapeHtml(venue.cat)}${place}</span><span class="tonight-when">${escapeHtml(tonightLine(venue, mode))}</span></button></li>`;
+  const note = mode === 'weekend' ? 'weekend peak' : busyNote(venue);
+  return `          <li><button type="button" class="tonight-row" data-venue="${escapeHtml(venue.id)}"><span class="tonight-name">${escapeHtml(venue.name)}</span><span class="tonight-score"><span class="forecast-badge">${percent}%</span><span class="forecast-note">${escapeHtml(note)}</span></span>${live}<span class="tonight-meta">${escapeHtml(venue.cat)}${place}</span><span class="tonight-hours">${escapeHtml(venue.hoursText)}</span><span class="tonight-when">${escapeHtml(tonightLine(venue, mode))}</span>${conceptHtml(venue.features)}</button></li>`;
 }
 
 function tonightRail(venues, hour, mode) {
-  if (!venues.length) return '        <p class="tonight-empty">Nothing open right now.</p>';
+  if (!venues.length) {
+    const text = mode === 'tonight' ? 'Nothing open right now.' : 'Nothing open right now.';
+    return `        <p class="tonight-empty">${text}</p>`;
+  }
+  if (mode === 'tonight') {
+    return `        <ol class="tonight-list">\n${venues.map((venue) => tonightRow(venue, hour, mode)).join('\n')}\n        </ol>`;
+  }
   const head = venues.slice(0, 8).map((venue) => tonightRow(venue, hour, mode)).join('\n');
   const tail = venues.slice(8).map((venue) => tonightRow(venue, hour, mode)).join('\n');
   const more = tail
-    ? `        <details class="show-more"><summary>Show more</summary><ol class="tonight-list">\n${tail}\n        </ol></details>`
+    ? `        <details class="show-more"><summary>Show more</summary><div class="more-clip"><div class="more-clip-inner"><ol class="tonight-list">\n${tail}\n        </ol></div></div></details>`
     : '';
   return `        <ol class="tonight-list">\n${head}\n        </ol>\n${more}`;
+}
+
+function closedListHtml(venues, id = 'closed-list', title = 'Closed') {
+  if (!venues.length) return `      <div class="closed-block" id="${id}" hidden></div>`;
+  const items = venues
+    .map((venue) => `          <li><button type="button" class="closed-row" data-venue="${escapeHtml(venue.id)}"><span class="closed-name">${escapeHtml(venue.name)}</span><span class="closed-cat">${escapeHtml(venue.cat)}</span><span class="closed-hours">${escapeHtml(venue.hoursText)}</span></button></li>`)
+    .join('\n');
+  return `      <div class="closed-block" id="${id}">
+        <p class="closed-label">${escapeHtml(title)}</p>
+        <ul class="closed-list">
+${items}
+        </ul>
+      </div>`;
+}
+
+function prideCountdown(iso, today) {
+  const days = Math.round((Date.parse(`${iso}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86400000);
+  if (days < 0) return null;
+  if (days === 0) return 'today';
+  if (days === 1) return 'tomorrow';
+  if (days < 7) return `in ${days} days`;
+  const weeks = Math.round(days / 7);
+  if (weeks < 4) return `in ${weeks} ${weeks === 1 ? 'week' : 'weeks'}`;
+  const [ty, tm] = today.split('-').map(Number);
+  const [ey, em] = iso.split('-').map(Number);
+  const monthDiff = (ey - ty) * 12 + (em - tm);
+  if (monthDiff === 1) return 'next month';
+  if (monthDiff > 1) return `in ${monthDiff} months`;
+  return `in ${weeks} weeks`;
+}
+
+function upcomingPride(city) {
+  const today = localDateKey(city.tz);
+  return (city.pride || [])
+    .filter((row) => row.date >= today)
+    .map((row) => ({
+      name: row.name,
+      when: formatPrideDay(row.date),
+      countdown: prideCountdown(row.date, today),
+    }));
+}
+
+const PRIDE_FLAG = '<svg class="pride-flag" viewBox="0 0 22 16" aria-hidden="true"><rect width="22" height="2.67" fill="#E40303"/><rect width="22" height="2.67" y="2.67" fill="#FF8C00"/><rect width="22" height="2.67" y="5.33" fill="#FFED00"/><rect width="22" height="2.67" y="8" fill="#008026"/><rect width="22" height="2.67" y="10.67" fill="#24408E"/><rect width="22" height="2.67" y="13.33" fill="#732982"/></svg>';
+
+function upcomingPrideHtml(city) {
+  const rows = upcomingPride(city);
+  if (!rows.length) return '    <section class="tonight-block pride-upcoming" id="upcoming-pride" hidden></section>';
+  const items = rows.map((row) => `      <article>
+        <p class="pride-what">${escapeHtml(row.name)}</p>
+        <p class="pride-when">${escapeHtml(row.when)}</p>
+        <p class="pride-count">${escapeHtml(row.countdown)}</p>
+      </article>`).join('\n');
+  return `    <section class="tonight-block pride-upcoming" id="upcoming-pride">
+      <h2>${PRIDE_FLAG} Upcoming Pride</h2>
+${items}
+    </section>`;
+}
+
+function nowLineHtml(city) {
+  const when = zonedNow(new Date(), city.tz);
+  const rainLabel = city.weather.raining ? 'Raining' : 'Rain likely';
+  const rainHidden = city.weather.rain ? '' : ' hidden';
+  return `    <div class="now-bar">
+      <button type="button" class="now-line" id="now-line" data-weather data-lat="${city.lat}" data-lon="${city.lon}" aria-expanded="false" aria-controls="city-picker">
+        <span class="now-flag" data-flag>${city.flag}</span>
+        <span class="now-place" data-place>${escapeHtml(city.name)}, ${escapeHtml(city.country)}</span>
+        <span class="now-time" data-clock data-tz="${escapeHtml(city.tz)}">${escapeHtml(when.timeLabel)}</span>
+        <span class="now-temp" data-temp>${escapeHtml(city.weather.temp)}</span>
+        <span class="rain" data-rain${rainHidden} role="img" aria-label="${escapeHtml(rainLabel)}">${RAIN_ICON}</span>
+        <svg class="now-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16.5 20.5 21" stroke-linecap="round"/></svg>
+      </button>
+      <div class="city-picker" id="city-picker" hidden>
+        <form class="area-search" role="search">
+          <input id="city-picker-search" type="search" placeholder="Search your location to find fun near you" autocomplete="off" enterkeyhint="search">
+          <button type="submit" aria-label="Search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16.5 20.5 21" stroke-linecap="round"/></svg>
+          </button>
+        </form>
+        <ul id="city-picker-list"></ul>
+      </div>
+    </div>`;
 }
 
 function homeTonightHtml() {
@@ -868,21 +963,22 @@ function homeTonightHtml() {
   const weekendVenues = city.venues
     .filter((venue) => venue.weekend.percent > 0)
     .sort((a, b) => b.weekend.percent - a.weekend.percent);
-  const chips = VIBE_DEFS
-    .filter((vibe) => city.venues.some((venue) => venue.vibes.includes(vibe.id)))
-    .map((vibe) => `          <button type="button" class="vibe-chip" data-vibe="${vibe.id}" aria-pressed="false">${escapeHtml(vibe.name)}</button>`)
+  const closedVenues = city.venues
+    .filter((venue) => !venue.open[city.hour])
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const chips = SCENE_GROUPS
+    .map((group) => `          <button type="button" class="vibe-chip" data-group="${group.id}" aria-pressed="false">${escapeHtml(group.name)}</button>`)
     .join('\n');
-  const cityCards = tonightData.cities.map((item) => `          <a class="city-card" href="#${escapeHtml(item.id)}" data-pick-city="${escapeHtml(item.id)}"><span class="city-flag">${item.flag}</span><span class="city-name">${escapeHtml(item.name)}</span><span class="city-place">${escapeHtml(item.country)}</span></a>`).join('\n');
   return `    <section class="hero tonight-hero">
       <img class="hero-mark" src="assets/icon-mark.jpg" alt="">
       <h1>Know where the <span class="fun">fun</span><br>is going.</h1>
       <p class="subhead">Gay travel intel, powered by real data.</p>
     </section>
+${nowLineHtml(city)}
+    <div id="city-rails">
     <section class="tonight-block" id="tonight">
       <div class="tonight-head">
-        <h2 id="tonight-title">Tonight</h2>
-        <p class="rank-note">ranked by tonight's forecast</p>
-        <button type="button" class="map-toggle" id="map-toggle" aria-pressed="false">Map</button>
+        <h2 id="tonight-title">Right now</h2>
       </div>
       <div class="vibe-row" id="vibe-row">
 ${chips}
@@ -890,7 +986,7 @@ ${chips}
       <div id="tonight-list">
 ${tonightRail(tonightVenues, city.hour, 'tonight')}
       </div>
-      <div class="tonight-map" id="tonight-map" hidden></div>
+${closedListHtml(closedVenues)}
     </section>
     <section class="tonight-block" id="weekend">
       <div class="tonight-head">
@@ -898,25 +994,16 @@ ${tonightRail(tonightVenues, city.hour, 'tonight')}
         <p class="rank-note" id="weekend-dates">${escapeHtml(city.weekend)}</p>
         <p class="rank-note">ranked by the weekend peak</p>
       </div>
+      <div class="vibe-row" id="weekend-groups">
+${chips}
+      </div>
       <div id="weekend-list">
 ${tonightRail(weekendVenues, city.hour, 'weekend')}
       </div>
+${closedListHtml(city.venues.filter((venue) => venue.weekend.percent === 0).sort((a, b) => a.name.localeCompare(b.name)), 'weekend-closed', 'Closed this weekend')}
     </section>
-    <section class="tonight-block" id="more-cities">
-      <div class="tonight-head">
-        <h2>More cities</h2>
-        <p class="rank-note">ranked by tonight's forecast</p>
-      </div>
-      <form class="area-search city-search" role="search">
-        <input id="more-city-search" type="search" placeholder="Search your location to find fun near you" autocomplete="off" enterkeyhint="search">
-        <button type="submit" aria-label="Search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16.5 20.5 21" stroke-linecap="round"/></svg>
-        </button>
-      </form>
-      <div class="city-rail" id="city-rail">
-${cityCards}
-      </div>
-    </section>
+${upcomingPrideHtml(city)}
+    </div>
     <div class="sheet-back" id="sheet-back" hidden>
       <aside class="sheet" id="venue-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
         <button type="button" class="sheet-handle" id="sheet-handle" aria-label="Drag to close"></button>
@@ -945,9 +1032,11 @@ const html = `<!DOCTYPE html>
       --orange: #ff7a18;
       --grad: linear-gradient(90deg, #ffc531, #ff7a18);
       --grad-shut: linear-gradient(90deg, #d8d8e0, #5c5c66);
+      --section: 2.25rem;
+      --card-gap: 0.75rem;
     }
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: auto; }
     body {
       margin: 0;
       background: var(--bg);
@@ -1369,7 +1458,7 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     .hero .loc-note { min-height: 0; margin: 0.4rem 0 0; font-size: 13px; }
     .hero .loc-note:empty { display: none; }
     .home-sheet .city-pick { width: 100%; margin: 0.2rem 0 0; text-align: left; }
-    #home.view { padding-bottom: 0; }
+    #home.view { padding-bottom: 10rem; }
     .hero-cta {
       display: flex;
       flex-wrap: wrap;
@@ -1689,11 +1778,18 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       margin: 0.35rem 0 0.9rem;
     }
     .maps a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0.4rem 0.9rem;
+      border: 1px solid #111;
+      border-radius: 999px;
+      background: #fff;
       color: #111;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 500;
-      text-decoration: underline;
-      text-underline-offset: 2px;
+      text-decoration: none;
     }
     .meter-head {
       display: flex;
@@ -2123,7 +2219,7 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     }
     .legal p { margin: 0.25rem 0; }
     @media (max-width: 759px) {
-      .nav-toggle { display: inline-block; }
+      .nav-toggle { display: inline-block; margin-left: auto; }
       .nav-panel {
         display: none;
         position: absolute;
@@ -2467,13 +2563,21 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     }
     .tonight-hero, .tonight-block { width: min(1120px, calc(100% - 2.3rem)); margin: 0 auto; }
     .tonight-hero { padding-top: 1.25rem; }
-    .tonight-hero .hero-mark { width: 48px; height: 48px; }
-    .tonight-block { padding: 1.35rem 0 0.4rem; }
-    #tonight, #weekend, #more-cities { scroll-margin-top: 84px; }
+    .tonight-hero .hero-mark { width: 120px; height: 120px; }
+    @media (min-width: 760px) {
+      .tonight-hero .hero-mark { width: 156px; height: 156px; }
+    }
+    .tonight-block { padding: var(--section) 0 0; }
+    .pride-upcoming[hidden] { display: none; }
+    .pride-upcoming h2 { display: flex; align-items: center; gap: 0.55rem; margin: 0 0 0.65rem; font-size: 28px; font-weight: 800; }
+    .pride-flag { width: 26px; height: 18px; flex: none; border-radius: 2px; }
+    .pride-upcoming article + article { margin-top: 0.85rem; }
+    .pride-count { margin: 0.15rem 0 0; color: var(--muted); font-size: 14px; }
+    #tonight, #weekend { scroll-margin-top: 84px; }
     .tonight-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 0.8rem; }
     .tonight-head h2 { margin: 0; font-size: 28px; font-weight: 800; }
     .rank-note { margin: 0; color: var(--muted); font-size: 14px; }
-    .map-toggle, .vibe-chip, .city-pill {
+    .vibe-chip {
       border: 1px solid var(--line);
       background: #fff;
       color: var(--text);
@@ -2481,12 +2585,6 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       font-weight: 500;
       cursor: pointer;
     }
-    .map-toggle {
-      margin-left: auto;
-      border-radius: 999px;
-      padding: 0.35rem 0.85rem;
-    }
-    .map-toggle[aria-pressed="true"] { background: #111; color: #fff; border-color: #111; }
     .vibe-row { display: flex; gap: 0.45rem; overflow-x: auto; padding: 0.85rem 0 0.2rem; }
     .vibe-chip { flex: none; border-radius: 999px; padding: 0.4rem 0.8rem; }
     .vibe-chip[aria-pressed="true"] { background: #111; color: #fff; border-color: #111; }
@@ -2506,6 +2604,7 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       cursor: pointer;
     }
     .tonight-name { font-weight: 500; }
+    .tonight-score { display: flex; flex-direction: column; align-items: flex-end; gap: 0.1rem; }
     .forecast-badge {
       font-family: Poppins, sans-serif;
       font-weight: 700;
@@ -2514,6 +2613,17 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       background-clip: text;
       color: transparent;
     }
+    .forecast-note { color: var(--muted); font-size: 12px; font-weight: 500; line-height: 1.2; text-align: right; }
+    .tonight-hours { grid-column: 1 / -1; font-size: 14px; }
+    .tonight-concepts { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.15rem; }
+    .tonight-concepts span {
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      background: #f4f4f7;
+      color: #111;
+      font-size: 12px;
+    }
+    .forecast-explain { margin: 0.35rem 0 0; color: var(--muted); font-size: 14px; }
     .live-dot {
       width: 8px;
       height: 8px;
@@ -2524,59 +2634,99 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     }
     .tonight-meta, .tonight-when { grid-column: 1 / -1; color: var(--muted); font-size: 14px; }
     .tonight-empty { color: var(--muted); }
-    .show-more { margin-top: 0.35rem; }
-    .show-more summary { cursor: pointer; font-weight: 500; }
-    .city-search { margin-top: 0.85rem; }
-    .city-rail {
-      display: flex;
-      gap: 0.75rem;
-      overflow-x: auto;
-      margin-top: 0.85rem;
-      padding-bottom: 0.35rem;
-    }
-    .city-card {
-      flex: 0 0 168px;
+    .closed-block { margin-top: 1.35rem; }
+    .closed-block[hidden] { display: none; }
+    .closed-label { margin: 0; color: var(--muted); font-size: 14px; font-weight: 500; }
+    .closed-list { list-style: none; margin: 0.35rem 0 0; padding: 0; }
+    .closed-row {
       display: flex;
       flex-direction: column;
-      gap: 0.2rem;
-      padding: 0.9rem;
+      align-items: flex-start;
+      gap: 0.1rem;
+      width: 100%;
+      padding: 0.55rem 0;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+    .closed-cat, .closed-hours { color: var(--muted); font-size: 14px; }
+    .show-more { margin-top: 0.35rem; }
+    .show-more summary { cursor: pointer; font-weight: 500; }
+    .now-bar {
+      position: relative;
+      width: fit-content;
+      max-width: min(1120px, calc(100% - 2.3rem));
+      margin: 0.4rem auto 0;
+    }
+    #now-line {
+      width: fit-content;
+      max-width: 100%;
+      margin: 0;
+      flex-wrap: nowrap;
+      justify-content: center;
+      padding: 0.7rem 1.15rem;
       border: 1px solid var(--line);
-      border-radius: 16px;
-      background: #fff;
-      text-decoration: none;
-    }
-    .city-card::before {
-      content: "";
-      display: block;
-      height: 4px;
-      margin: -0.9rem -0.9rem 0.7rem;
-      border-radius: 16px 16px 0 0;
-      background: var(--grad);
-    }
-    .city-flag { font-size: 22px; line-height: 1; }
-    .city-name { font-weight: 500; }
-    .city-place { color: var(--muted); font-size: 14px; }
-    .city-pill {
-      margin-left: auto;
       border-radius: 999px;
-      padding: 0.4rem 0.85rem;
+      background: #fff;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+    .now-flag, .now-time, .now-temp, .now-search { flex: none; white-space: nowrap; }
+    .now-flag { font-size: 18px; line-height: 1; }
+    .now-place {
+      flex: 0 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #now-line .now-place,
+    #now-line .now-time,
+    #now-line .now-temp {
+      font-family: Inter, sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 0;
+      line-height: 1.2;
+    }
+    .now-search { width: 18px; height: 18px; }
+    @media (max-width: 759px) {
+      .now-bar { max-width: calc(100% - 1rem); }
+      #now-line { gap: 0.35rem; padding: 0.5rem 0.6rem; }
+      #now-line .now-place,
+      #now-line .now-time,
+      #now-line .now-temp { font-size: 15px; }
+      .now-search { width: 16px; height: 16px; }
     }
     .city-picker {
       position: absolute;
       z-index: 40;
       top: calc(100% + 0.35rem);
-      right: 1rem;
-      width: min(320px, calc(100% - 2rem));
+      left: 50%;
+      width: min(320px, calc(100vw - 2rem));
       padding: 0.75rem;
       border: 1px solid var(--line);
       border-radius: 16px;
       background: #fff;
+      transform-origin: top center;
+      opacity: 0;
+      transform: translateX(-50%) scale(0.96);
+    }
+    .city-picker.is-on {
+      opacity: 1;
+      transform: translateX(-50%);
+      transition: opacity 180ms ease, transform 180ms ease;
     }
     .city-picker .area-search { margin: 0; }
-    .city-picker .area-search input,
-    .city-picker .area-search button { height: 44px; }
+    .city-picker .area-search input { height: 44px; font-size: 16px; }
+    .city-picker .area-search button { width: 44px; height: 44px; }
     .city-picker ul { list-style: none; margin: 0.5rem 0 0; padding: 0; max-height: 280px; overflow: auto; }
-    .city-picker button {
+    .city-picker li button {
       display: flex;
       justify-content: space-between;
       width: 100%;
@@ -2587,12 +2737,16 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       text-align: left;
       cursor: pointer;
     }
+    .city-picker .picker-empty { margin: 0.7rem 0.2rem 0.2rem; color: var(--muted); font-size: 14px; }
     .sheet-back {
       position: fixed;
       inset: 0;
       z-index: 50;
       background: rgba(17, 17, 17, 0.28);
+      opacity: 0;
+      transition: opacity 200ms linear;
     }
+    .sheet-back.is-on { opacity: 1; }
     .sheet-back[hidden] { display: none; }
     .sheet {
       position: absolute;
@@ -2605,7 +2759,10 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       border-radius: 18px 18px 0 0;
       background: #fff;
       overflow: auto;
+      transform: translateY(110%);
+      transition: transform 280ms cubic-bezier(0.32, 0.72, 0, 1);
     }
+    .sheet-back.is-on .sheet { transform: none; }
     .sheet.is-full { max-height: 100vh; border-radius: 0; }
     .sheet-handle {
       width: 42px;
@@ -2627,11 +2784,8 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     }
     .sheet-save svg { width: 22px; height: 22px; fill: none; stroke: currentColor; }
     .sheet-save.is-on svg { fill: currentColor; stroke: none; }
-    .curve, .week-curve { width: 100%; height: 84px; margin-top: 0.75rem; }
+    .curve, .week-curve { width: 100%; height: 112px; margin-top: 0.35rem; }
     .verified { color: #1f7a43; font-size: 13px; font-weight: 500; }
-    .tonight-map { height: 280px; margin-top: 0.75rem; border: 1px solid var(--line); border-radius: 16px; }
-    .tonight-map svg { width: 100%; height: 100%; }
-    .pin { fill: #ff7a18; stroke: #111; cursor: pointer; }
     @media (min-width: 760px) {
       .tonight-list { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
       .tonight-row {
@@ -2649,6 +2803,30 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
         border-radius: 0;
       }
       .sheet.is-full { width: min(560px, 100%); }
+      .sheet { transform: translateX(16px); }
+      .sheet-back.is-on .sheet { transform: none; }
+      .tonight-list { gap: var(--card-gap); }
+    }
+    #city-rails, #city-rails * { overflow-anchor: none; }
+    #now-line, #city-rails { transition: opacity 320ms ease, transform 320ms ease; }
+    #now-line.is-out, #city-rails.is-out { opacity: 0; pointer-events: none; }
+    #city-rails.is-out { transform: translateY(8px); }
+    #now-line.is-in, #city-rails.is-in { opacity: 0; transition: none; }
+    #city-rails.is-in { transform: translateY(10px); }
+    .more-clip { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 240ms ease; }
+    .show-more[open] .more-clip { grid-template-rows: 1fr; }
+    .more-clip-inner { overflow: hidden; }
+    .show-more[open] .more-clip .tonight-list { animation: rise 240ms ease-out; }
+    .rise { animation: rise 240ms ease-out both; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
     }
   </style>
 </head>
@@ -2658,57 +2836,20 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     <a class="logo" href="#home" aria-label="FindingDorothy">
       <img src="assets/logo-v4-warm.jpg" alt="FindingDorothy">
     </a>
-    <button type="button" class="city-pill" id="city-pill" aria-expanded="false" aria-controls="city-picker">
-      <span id="city-pill-label">${escapeHtml((tonightData.cities.find((city) => city.id === tonightData.defaultCity) || tonightData.cities[0]).name)}</span>
-    </button>
-    <div class="city-picker" id="city-picker" hidden>
-      <form class="area-search" role="search">
-        <input id="city-picker-search" type="search" placeholder="Search your location to find fun near you" autocomplete="off" enterkeyhint="search">
-        <button type="submit" aria-label="Search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16.5 20.5 21" stroke-linecap="round"/></svg>
-        </button>
-      </form>
-      <ul id="city-picker-list"></ul>
-    </div>
     <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
     <div class="nav-panel">
       <nav class="site-nav" aria-label="Primary">
         <a href="#home">Home</a>
-        <a href="#more-cities">Cities</a>
         <a href="#pride">Fun Calendar</a>
-        <a href="#venues">For Venues</a>
         <a href="#why">Why FindingDorothy</a>
       </nav>
     </div>
   </header>
   <main class="view" id="home">
 ${homeTonightHtml()}
-    <div class="home-sheet">
-      <section class="get-app" aria-label="Get the app">
-        <p>Get the app for a better experience!</p>
-        <div class="get-app-badges">
-          <img class="app-store" src="assets/app-store-badge.svg" alt="Download on the App Store">
-          <img class="play" src="assets/google-play-badge.png" alt="Get it on Google Play">
-        </div>
-      </section>
-      <section class="home-venue" aria-label="For venues">
-        <div class="home-venue-card">
-          <span class="venue-mark" aria-hidden="true">
-            <svg viewBox="0 0 64.216 64.216" fill="currentColor">
-              <path d="M49.147,17.246c0-5.088-4.139-9.229-9.229-9.229c-5.092,0-9.229,4.141-9.229,9.229c0,0.092,0.01,0.178,0.015,0.27h-4.443l-1.676-9.92L16.184,0l-1.115,1.23l7.979,7.207l1.531,9.078h-6.403l-0.222,0.395c-1.261,2.213-1.927,4.485-2.149,7.385c0,3.247,0.201,5.819,1.585,8.774c1.974,4.174,5.522,7.193,9.708,7.914v19.319c-3.848,0.154-6.717,0.738-6.717,1.439c0,0.815,3.914,1.475,8.732,1.475c4.829,0,8.737-0.657,8.737-1.475c0-0.701-2.865-1.285-6.713-1.439V41.961c1.298-0.244,2.536-0.717,3.685-1.364c6.567-3.676,8.086-11.247,7.745-14.546C46.362,24.906,49.147,21.412,49.147,17.246z M20.012,32.742c-0.741,0-1.347-0.604-1.347-1.346c0-0.744,0.605-1.346,1.347-1.346c0.743,0,1.348,0.602,1.348,1.346C21.36,32.139,20.756,32.742,20.012,32.742z M17.385,24.926c0.202-2.074,0.771-4.068,1.708-5.846h5.749l1.209,7.172C20.55,27.848,17.385,24.926,17.385,24.926z M26.539,34.19c-0.802,0-1.451-0.647-1.451-1.448c0-0.801,0.649-1.449,1.451-1.449c0.135,0,0.256,0.043,0.38,0.076l0.253,1.51l0.817-0.137C27.989,33.543,27.34,34.19,26.539,34.19z M31.406,31.914c-0.517,0-0.933-0.414-0.933-0.93s0.416-0.934,0.933-0.934c0.512,0,0.931,0.418,0.931,0.934S31.918,31.914,31.406,31.914z M33.165,35.851c-0.455,0-0.828-0.369-0.828-0.828c0-0.457,0.373-0.83,0.828-0.83c0.461,0,0.829,0.373,0.829,0.83S33.626,35.851,33.165,35.851z M36.997,28.186c-0.173,0-0.311-0.139-0.311-0.309c0-0.172,0.138-0.311,0.311-0.311c0.176,0,0.313,0.139,0.313,0.311C37.307,28.047,37.173,28.186,36.997,28.186z M38.19,32.742c-0.484,0-0.883-0.393-0.883-0.881c0-0.484,0.396-0.877,0.883-0.877s0.879,0.393,0.879,0.877C39.069,32.35,38.676,32.742,38.19,32.742z M29.23,24.926c-0.551,0.301-1.076,0.549-1.593,0.764l-1.112-6.609c0,0,12.411-0.131,12.417-0.139c0.921,1.762,1.568,3.93,1.771,5.985C40.714,24.926,36.686,20.838,29.23,24.926z M42.465,25.432c-0.049-0.207-0.237-0.791-0.256-0.936l1.571-0.68c0,0-1.874-3.305-3.012-5.231c0.078-0.051,0.15-0.109,0.218-0.172c1.811,1.875,4.473,4.076,4.473,4.076l1.09-1.467c0,0-2.871-1.917-5.199-3.119c0.024-0.056,0.04-0.116,0.058-0.175c2.519,0.726,5.935,1.304,5.935,1.304l0.218-1.785c0,0-0.001-0.021-0.001-0.033c-2.034-0.271-4.077-0.31-6.1-0.133c-0.007-0.048-0.011-0.097-0.022-0.144c2.547-0.629,5.809-1.838,5.809-1.838l-0.731-1.685c0,0-3.123,1.547-5.328,2.97c-0.035-0.049-0.074-0.095-0.114-0.139c1.883-1.811,4.116-4.509,4.116-4.509l-1.467-1.09c0,0-1.938,2.904-3.139,5.238c-0.053-0.025-0.108-0.044-0.165-0.063c0.729-2.521,1.312-5.966,1.312-5.966s-1.172-0.221-1.783-0.221c-0.011,0-0.031,0.002-0.031,0.002s-0.228,3.487-0.104,6.111c-0.06,0.004-0.118,0.007-0.176,0.018c-0.627-2.547-1.84-5.816-1.84-5.816l-1.686,0.734c0,0,1.542,3.108,2.961,5.312c-0.051,0.034-0.095,0.075-0.142,0.115c-1.813-1.881-4.497-4.101-4.497-4.101l-1.09,1.463c0,0,2.876,1.921,5.205,3.123c-0.027,0.055-0.052,0.111-0.073,0.17c-2.517-0.724-5.922-1.301-5.922-1.301s-0.22,1.17-0.22,1.785c0,0.012,0.002,0.033,0.002,0.033s3.436,0.224,6.053,0.104c0.003,0.045,0.007,0.089,0.014,0.133h-7.075c-0.004-0.092-0.015-0.178-0.015-0.27c0-4.744,3.859-8.607,8.607-8.607c4.746,0,8.605,3.863,8.605,8.607C48.525,21.102,45.964,24.34,42.465,25.432z"/>
-            </svg>
-          </span>
-          <p class="eyebrow">For venues</p>
-          <h2>Bring <span class="fun">the crowd</span><br>through the door.</h2>
-          <p>Share how busy you are, and tell us about your events. Travelers looking for the night see it here.</p>
-          <a class="btn solid" href="#venues">Contact us!</a>
-        </div>
-      </section>
-    </div>
   </main>
-${citiesPageHtml()}
   <main class="view" id="why" hidden>
     <section class="why-hero block">
       <p class="back"><a href="#home">Home</a></p>
@@ -2738,16 +2879,8 @@ ${citiesPageHtml()}
         </article>
       </div>
     </section>
-    ${venueInvite}
   </main>
-${LIVE.map((city) => cityPageHtml(city)).join('\n')}
 ${pridePageHtml()}
-${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) => `  <main class="view" id="${id}" hidden>
-    <section class="block soon">
-      <h1>${escapeHtml(title)}</h1>
-      <p>coming soon</p>
-    </section>
-  </main>`).join('\n')}
   <footer class="site-footer">
     <div class="foot-simple">
       <a class="foot-brand" href="#home">
@@ -2755,9 +2888,7 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
       </a>
       <nav aria-label="Footer">
         <a href="#home">Home</a>
-        <a href="#more-cities">Cities</a>
         <a href="#pride">Fun Calendar</a>
-        <a href="#venues">For Venues</a>
         <a href="#why">Why FindingDorothy</a>
       </nav>
       <p class="legal">© 2026 FindingDorothy</p>
@@ -2790,46 +2921,24 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
     header.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
 
     function paintClock() {
-      const now = new Date();
-      document.querySelectorAll('[data-clock]').forEach((clock) => {
-        const fmt = new Intl.DateTimeFormat('en-US', {
-          timeZone: clock.dataset.tz,
-          weekday: 'long',
-          month: 'long',
-          day: 'numeric',
-          year: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-          hourCycle: 'h23',
-        });
-        const bag = {};
-        for (const part of fmt.formatToParts(now)) bag[part.type] = part.value;
-        let hour = Number(bag.hour);
-        if (hour === 24) hour = 0;
-        const minute = String(bag.minute).padStart(2, '0');
-        const suffix = hour >= 12 ? 'PM' : 'AM';
-        const hour12 = hour % 12 || 12;
-        const hero = clock.closest('.city-hero');
-        hero.querySelector('[data-date]').textContent = bag.weekday + ', ' + bag.month + ' ' + Number(bag.day) + ', ' + bag.year;
-        clock.textContent = hour12 + ':' + minute + ' ' + suffix;
-        const period = hour < 12 ? 'This morning' : hour < 17 ? 'This afternoon' : hour < 21 ? 'This evening' : 'Tonight';
-        hero.querySelector('[data-period]').textContent = period;
-        const dayFmt = new Intl.DateTimeFormat('en-US', {
-          timeZone: clock.dataset.tz,
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-        });
-        const dayBag = {};
-        for (const part of dayFmt.formatToParts(now)) dayBag[part.type] = part.value;
-        const iso = dayBag.year + '-' + dayBag.month + '-' + dayBag.day;
-        hero.querySelectorAll('.pride-banner').forEach((banner) => {
-          banner.hidden = iso < banner.dataset.start || iso > banner.dataset.end;
-        });
+      const clock = document.querySelector('[data-clock]');
+      if (!clock || !clock.dataset.tz) return;
+      const fmt = new Intl.DateTimeFormat('en-US', {
+        timeZone: clock.dataset.tz,
+        hour: 'numeric',
+        minute: '2-digit',
+        hourCycle: 'h23',
       });
+      const bag = {};
+      for (const part of fmt.formatToParts(new Date())) bag[part.type] = part.value;
+      let hour = Number(bag.hour);
+      if (hour === 24) hour = 0;
+      const minute = String(bag.minute).padStart(2, '0');
+      const suffix = hour >= 12 ? 'PM' : 'AM';
+      clock.textContent = (hour % 12 || 12) + ':' + minute + ' ' + suffix;
     }
     paintClock();
-    setInterval(paintClock, 30000);
+    setInterval(paintClock, 1000);
 
     function applyWeather(node, report) {
       const temp = node.querySelector('[data-temp]');
@@ -2915,16 +3024,22 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
 
     function showView() {
       const raw = location.hash.replace('#', '');
-      const sceneJump = raw.match(/^group-(.+)-(dance|sauna|fun)$/);
+      const cityLink = /^city\\/([a-z0-9-]+)$/.exec(raw);
       let current = 'home';
       let anchor = null;
-      if (sceneJump && document.getElementById(sceneJump[1])) {
-        current = sceneJump[1];
-        anchor = raw;
-      } else if (raw === 'cities') {
-        history.replaceState(null, '', location.pathname + location.search + '#more-cities');
+      if (cityLink) {
+        const match = tonight.cities.find((city) => city.id === cityLink[1]);
+        if (match && match.id !== homeCityId) {
+          homeCityId = match.id;
+          nowGroup = null;
+          weekendGroup = null;
+          try { localStorage.setItem('fd-city', match.id); } catch (err) {}
+          renderHome(true);
+        }
         current = 'home';
-        anchor = 'more-cities';
+      } else if (raw === 'cities' || raw === 'more-cities') {
+        history.replaceState(null, '', location.pathname + location.search);
+        current = 'home';
       } else if (raw && raw !== 'home') {
         const node = document.getElementById(raw);
         const view = node && node.closest ? node.closest('main.view') : null;
@@ -2933,39 +3048,24 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
           if (node !== view) anchor = raw;
         }
       }
-      const token = ++viewToken;
-      const shown = document.querySelector('main.view:not([hidden])');
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (viewReady && shown && shown.id !== current && !reduce) {
-        shown.classList.add('is-leaving');
-        window.setTimeout(() => {
-          if (token !== viewToken) return;
-          shown.classList.remove('is-leaving');
-          revealView(current, anchor);
-        }, 180);
-        return;
-      }
       revealView(current, anchor);
       viewReady = true;
     }
 
     function revealView(id, anchor) {
+      const shown = document.querySelector('main.view:not([hidden])');
+      const same = shown && shown.id === id;
       document.querySelectorAll('main.view').forEach((view) => {
         view.hidden = view.id !== id;
-        view.classList.remove('is-leaving', 'is-entering');
       });
-      const next = document.getElementById(id);
+      if (same && !anchor) return;
       if (anchor) {
         requestAnimationFrame(() => {
-          document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.getElementById(anchor)?.scrollIntoView({ behavior: 'auto', block: 'start' });
         });
         return;
       }
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-      if (viewReady && next && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        next.classList.add('is-entering');
-        next.addEventListener('animationend', () => next.classList.remove('is-entering'), { once: true });
-      }
     }
 
     function distanceKm(a, b) {
@@ -3450,28 +3550,22 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
       applyPrideQuery();
     }
 
-    const VIBES = [
-      { id: 'leather', name: 'Leather bars' },
-      { id: 'late', name: 'Late-night clubs' },
-      { id: 'sauna', name: 'Saunas' },
-      { id: 'drag', name: 'Drag & cabaret' },
-      { id: 'cruisy', name: 'Cruisy' },
+    const GROUPS = [
+      { id: 'dance', name: 'Dance and Bars' },
+      { id: 'sauna', name: 'Saunas and Bathhouses' },
+      { id: 'sexy', name: 'Cruisy' },
     ];
     const WEEK_DOW = [1, 2, 3, 4, 5, 6, 0];
+    const WEEK_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     let homeCityId = tonight.defaultCity;
-    let vibeId = null;
-    let mapOn = false;
+    let nowGroup = null;
+    let weekendGroup = null;
     try {
       const storedCity = localStorage.getItem('fd-city');
       if (storedCity && tonight.cities.some((city) => city.id === storedCity)) homeCityId = storedCity;
     } catch (err) {}
-
-    function bandFrom(percent, confidence) {
-      if (confidence === 'low') return 'Pattern';
-      if (percent >= 70) return 'Busy';
-      if (percent >= 45) return 'Heating up';
-      return 'Quiet';
-    }
+    const hashCity = /^#city\\/([a-z0-9-]+)$/.exec(location.hash);
+    if (hashCity && tonight.cities.some((city) => city.id === hashCity[1])) homeCityId = hashCity[1];
 
     function peakText(hour) {
       return (hour % 12 || 12) + (hour >= 12 ? 'pm' : 'am');
@@ -3505,7 +3599,12 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
       catch (err) { return []; }
     }
 
-    function rowButton(venue, percent, line) {
+    function busyNote(venue) {
+      if (venue.live && venue.conf !== 'low') return 'live count in';
+      return 'usual for this hour';
+    }
+
+    function rowButton(venue, percent, line, note) {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'tonight-row';
@@ -3513,27 +3612,47 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
       const name = document.createElement('span');
       name.className = 'tonight-name';
       name.textContent = venue.name;
+      const score = document.createElement('span');
+      score.className = 'tonight-score';
       const badge = document.createElement('span');
       badge.className = 'forecast-badge';
-      badge.textContent = percent + '% · ' + bandFrom(percent, venue.conf);
+      badge.textContent = percent + '%';
+      const meaning = document.createElement('span');
+      meaning.className = 'forecast-note';
+      meaning.textContent = note;
+      score.append(badge, meaning);
       const meta = document.createElement('span');
       meta.className = 'tonight-meta';
       meta.textContent = venue.area ? venue.cat + ' · ' + venue.area : venue.cat;
+      const hours = document.createElement('span');
+      hours.className = 'tonight-hours';
+      hours.textContent = venue.hoursText;
       const when = document.createElement('span');
       when.className = 'tonight-when';
       when.textContent = line;
-      button.append(name, badge);
+      button.append(name, score);
       if (venue.live) {
         const dot = document.createElement('span');
         dot.className = 'live-dot';
         dot.setAttribute('aria-label', 'Live');
         button.append(dot);
       }
-      button.append(meta, when);
+      button.append(meta, hours, when);
+      const concepts = (venue.features || []).slice(0, 5);
+      if (concepts.length) {
+        const row = document.createElement('span');
+        row.className = 'tonight-concepts';
+        concepts.forEach((feature) => {
+          const chip = document.createElement('span');
+          chip.textContent = feature;
+          row.append(chip);
+        });
+        button.append(row);
+      }
       return button;
     }
 
-    function fillRail(node, venues, lineFor) {
+    function fillRail(node, venues, lineFor, showAll) {
       node.replaceChildren();
       if (!venues.length) {
         const empty = document.createElement('p');
@@ -3544,69 +3663,46 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
       }
       const list = document.createElement('ol');
       list.className = 'tonight-list';
-      venues.slice(0, 8).forEach((venue) => {
+      const visible = showAll ? venues : venues.slice(0, 8);
+      visible.forEach((venue) => {
         const item = document.createElement('li');
         const lined = lineFor(venue);
-        item.append(rowButton(venue, lined.percent, lined.line));
+        item.append(rowButton(venue, lined.percent, lined.line, lined.note));
         list.append(item);
       });
       node.append(list);
-      if (venues.length <= 8) return;
+      if (showAll || venues.length <= 8) return;
       const details = document.createElement('details');
       details.className = 'show-more';
       const summary = document.createElement('summary');
       summary.textContent = 'Show more';
+      const clip = document.createElement('div');
+      clip.className = 'more-clip';
+      const inner = document.createElement('div');
+      inner.className = 'more-clip-inner';
       const rest = document.createElement('ol');
       rest.className = 'tonight-list';
       venues.slice(8).forEach((venue) => {
         const item = document.createElement('li');
         const lined = lineFor(venue);
-        item.append(rowButton(venue, lined.percent, lined.line));
+        item.append(rowButton(venue, lined.percent, lined.line, lined.note));
         rest.append(item);
       });
-      details.append(summary, rest);
+      inner.append(rest);
+      clip.append(inner);
+      details.append(summary, clip);
       node.append(details);
-    }
-
-    function tonightList(city) {
-      const hour = activeHour(city);
-      return city.venues
-        .filter((venue) => venue.open[hour] && (!vibeId || venue.vibes.indexOf(vibeId) !== -1))
-        .sort((a, b) => b.curve[hour] - a.curve[hour]);
-    }
-
-    function renderCityRail() {
-      const rail = document.getElementById('city-rail');
-      const query = foldName(document.getElementById('more-city-search').value.trim());
-      rail.replaceChildren();
-      tonight.cities.forEach((city) => {
-        if (query && foldName(city.name + ' ' + city.country).indexOf(query) === -1) return;
-        const link = document.createElement('a');
-        link.className = 'city-card';
-        link.href = '#' + city.id;
-        link.setAttribute('data-pick-city', city.id);
-        const flag = document.createElement('span');
-        flag.className = 'city-flag';
-        flag.textContent = city.flag;
-        const name = document.createElement('span');
-        name.className = 'city-name';
-        name.textContent = city.name;
-        const place = document.createElement('span');
-        place.className = 'city-place';
-        place.textContent = city.country;
-        link.append(flag, name, place);
-        rail.append(link);
-      });
     }
 
     function renderPicker() {
       const list = document.getElementById('city-picker-list');
       const query = foldName(document.getElementById('city-picker-search').value.trim());
-      const ranked = tonight.cities.slice();
-      if (here) ranked.sort((a, b) => distanceKm(here, a) - distanceKm(here, b));
+      const ranked = tonight.cities.slice().sort((a, b) => a.name.localeCompare(b.name, 'en'));
       list.replaceChildren();
+      let shown = 0;
       ranked.forEach((city) => {
         if (query && foldName(city.name + ' ' + city.country).indexOf(query) === -1) return;
+        shown += 1;
         const item = document.createElement('li');
         const button = document.createElement('button');
         button.type = 'button';
@@ -3618,98 +3714,285 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
         item.append(button);
         list.append(item);
       });
+      if (!shown) {
+        const empty = document.createElement('li');
+        empty.className = 'picker-empty';
+        empty.textContent = 'No city matches that.';
+        list.append(empty);
+      }
     }
 
-    function renderHome() {
-      const city = homeCity();
-      const hour = activeHour(city);
-      document.getElementById('city-pill-label').textContent = city.name;
-      const vibeRow = document.getElementById('vibe-row');
-      vibeRow.replaceChildren();
-      VIBES.forEach((vibe) => {
-        if (!city.venues.some((venue) => venue.vibes.indexOf(vibe.id) !== -1)) return;
+    function paintNow(city) {
+      const line = document.getElementById('now-line');
+      const clock = line.querySelector('[data-clock]');
+      line.dataset.lat = String(city.lat);
+      line.dataset.lon = String(city.lon);
+      clock.dataset.tz = city.tz;
+      line.querySelector('[data-place]').textContent = city.name + ', ' + city.country;
+      line.querySelector('[data-flag]').textContent = city.flag;
+      line.querySelector('[data-temp]').textContent = city.weather.temp;
+      const rain = line.querySelector('[data-rain]');
+      rain.hidden = !city.weather.rain;
+      rain.setAttribute('aria-label', city.weather.raining ? 'Raining' : 'Rain likely');
+      paintClock();
+      paintWeather();
+    }
+
+    let homeFade = 0;
+    function motionNodes() {
+      return [document.getElementById('now-line'), document.getElementById('city-rails')].filter(Boolean);
+    }
+    function renderHome(fade) {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!fade || reduce) {
+        paintHome();
+        if (fade) window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        return;
+      }
+      const token = ++homeFade;
+      const nodes = motionNodes();
+      nodes.forEach((node) => node.classList.add('is-out'));
+      window.setTimeout(() => {
+        if (token !== homeFade) return;
+        paintHome();
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        nodes.forEach((node) => {
+          node.classList.remove('is-out');
+          node.classList.add('is-in');
+        });
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            if (token !== homeFade) return;
+            motionNodes().forEach((node) => node.classList.remove('is-in'));
+          });
+        });
+      }, 260);
+    }
+
+    function cityToday(timeZone) {
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone: timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date());
+    }
+
+    function prideWhen(iso) {
+      const parts = iso.split('-');
+      const y = Number(parts[0]);
+      const m = Number(parts[1]);
+      const d = Number(parts[2]);
+      const utc = new Date(Date.UTC(y, m - 1, d));
+      const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return weekdays[utc.getUTCDay()] + ' ' + d + ' ' + months[m - 1] + ' ' + y;
+    }
+
+    function prideCountdown(iso, today) {
+      const days = Math.round((Date.parse(iso + 'T00:00:00Z') - Date.parse(today + 'T00:00:00Z')) / 86400000);
+      if (days < 0) return '';
+      if (days === 0) return 'today';
+      if (days === 1) return 'tomorrow';
+      if (days < 7) return 'in ' + days + ' days';
+      const weeks = Math.round(days / 7);
+      if (weeks < 4) return 'in ' + weeks + (weeks === 1 ? ' week' : ' weeks');
+      const todayParts = today.split('-');
+      const isoParts = iso.split('-');
+      const monthDiff = (Number(isoParts[0]) - Number(todayParts[0])) * 12 + (Number(isoParts[1]) - Number(todayParts[1]));
+      if (monthDiff === 1) return 'next month';
+      if (monthDiff > 1) return 'in ' + monthDiff + ' months';
+      return 'in ' + weeks + ' weeks';
+    }
+
+    function paintPride(city) {
+      const block = document.getElementById('upcoming-pride');
+      const today = cityToday(city.tz);
+      const rows = (city.pride || []).filter((row) => row.date >= today);
+      block.replaceChildren();
+      if (!rows.length) {
+        block.hidden = true;
+        return;
+      }
+      const title = document.createElement('h2');
+      title.innerHTML = '<svg class="pride-flag" viewBox="0 0 22 16" aria-hidden="true"><rect width="22" height="2.67" fill="#E40303"/><rect width="22" height="2.67" y="2.67" fill="#FF8C00"/><rect width="22" height="2.67" y="5.33" fill="#FFED00"/><rect width="22" height="2.67" y="8" fill="#008026"/><rect width="22" height="2.67" y="10.67" fill="#24408E"/><rect width="22" height="2.67" y="13.33" fill="#732982"/></svg> Upcoming Pride';
+      block.append(title);
+      rows.forEach((row) => {
+        const article = document.createElement('article');
+        const name = document.createElement('p');
+        name.className = 'pride-what';
+        name.textContent = row.name;
+        const when = document.createElement('p');
+        when.className = 'pride-when';
+        when.textContent = prideWhen(row.date);
+        const count = document.createElement('p');
+        count.className = 'pride-count';
+        count.textContent = prideCountdown(row.date, today);
+        article.append(name, when, count);
+        block.append(article);
+      });
+      block.hidden = false;
+    }
+
+    function paintGroups(node, active) {
+      node.querySelectorAll('[data-group]').forEach((button) => {
+        button.setAttribute('aria-pressed', button.getAttribute('data-group') === active ? 'true' : 'false');
+      });
+    }
+
+    function paintClosedList(node, venues, title) {
+      node.replaceChildren();
+      if (!venues.length) {
+        node.hidden = true;
+        return;
+      }
+      const label = document.createElement('p');
+      label.className = 'closed-label';
+      label.textContent = title;
+      const list = document.createElement('ul');
+      list.className = 'closed-list';
+      venues.forEach((venue) => {
+        const item = document.createElement('li');
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'vibe-chip';
-        button.setAttribute('data-vibe', vibe.id);
-        button.setAttribute('aria-pressed', vibeId === vibe.id ? 'true' : 'false');
-        button.textContent = vibe.name;
-        vibeRow.append(button);
+        button.className = 'closed-row';
+        button.setAttribute('data-venue', venue.id);
+        const name = document.createElement('span');
+        name.className = 'closed-name';
+        name.textContent = venue.name;
+        const cat = document.createElement('span');
+        cat.className = 'closed-cat';
+        cat.textContent = venue.cat;
+        const hours = document.createElement('span');
+        hours.className = 'closed-hours';
+        hours.textContent = venue.hoursText;
+        button.append(name, cat, hours);
+        item.append(button);
+        list.append(item);
       });
-      fillRail(document.getElementById('tonight-list'), tonightList(city), (venue) => ({
+      node.append(label, list);
+      node.hidden = false;
+    }
+
+    function inGroup(venue, group) {
+      return !group || venue.vibes.indexOf(group) !== -1;
+    }
+
+    function paintLists() {
+      const city = homeCity();
+      const hour = activeHour(city);
+      paintGroups(document.getElementById('vibe-row'), nowGroup);
+      paintGroups(document.getElementById('weekend-groups'), weekendGroup);
+      const nowShown = city.venues.filter((venue) => inGroup(venue, nowGroup));
+      const weekendShown = city.venues.filter((venue) => inGroup(venue, weekendGroup));
+      fillRail(document.getElementById('tonight-list'), nowShown.filter((venue) => venue.open[hour]).sort((a, b) => b.curve[hour] - a.curve[hour]), (venue) => ({
         percent: venue.curve[hour],
+        note: busyNote(venue),
         line: venue.unsure
           ? 'Hours not confirmed · peaks ~' + peakText(venue.peak)
           : 'Open now · peaks ~' + peakText(venue.peak),
-      }));
-      fillRail(document.getElementById('weekend-list'), city.venues.filter((venue) => venue.weekend.percent > 0).sort((a, b) => b.weekend.percent - a.weekend.percent), (venue) => ({
+      }), true);
+      paintClosedList(document.getElementById('closed-list'), nowShown.filter((venue) => !venue.open[hour]).sort((a, b) => a.name.localeCompare(b.name)), 'Closed');
+      fillRail(document.getElementById('weekend-list'), weekendShown.filter((venue) => venue.weekend.percent > 0).sort((a, b) => b.weekend.percent - a.weekend.percent), (venue) => ({
         percent: venue.weekend.percent,
+        note: 'weekend peak',
         line: 'Peaks ~' + peakText(venue.weekend.hour),
       }));
+      paintClosedList(document.getElementById('weekend-closed'), weekendShown.filter((venue) => venue.weekend.percent === 0).sort((a, b) => a.name.localeCompare(b.name)), 'Closed this weekend');
       document.getElementById('weekend-dates').textContent = city.weekend;
-      renderCityRail();
-      if (!document.getElementById('city-picker').hidden) renderPicker();
-      if (mapOn) drawMap();
     }
 
-    function chooseCity(id, scroll) {
+    function paintHome() {
+      paintNow(homeCity());
+      paintPride(homeCity());
+      paintLists();
+      if (!document.getElementById('city-picker').hidden) renderPicker();
+    }
+
+    function chooseCity(id) {
+      const same = id === homeCityId;
       homeCityId = id;
-      vibeId = null;
+      nowGroup = null;
+      weekendGroup = null;
       try { localStorage.setItem('fd-city', id); } catch (err) {}
-      document.getElementById('city-picker').hidden = true;
-      document.getElementById('city-pill').setAttribute('aria-expanded', 'false');
-      if (location.hash && location.hash !== '#home' && document.getElementById('home').hidden) {
-        location.hash = 'home';
+      closePicker();
+      closeSheet();
+      const next = '#city/' + id;
+      if (location.hash !== next) location.hash = next;
+      if (same) {
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        return;
       }
-      renderHome();
-      if (scroll) document.getElementById('tonight').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      renderHome(true);
     }
 
     function curveSvg(curve, hour) {
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('viewBox', '0 0 240 80');
+      svg.setAttribute('viewBox', '0 0 240 104');
       svg.setAttribute('class', 'curve');
       svg.setAttribute('role', 'img');
-      svg.setAttribute('aria-label', 'Forecast across 24 hours');
+      svg.setAttribute('aria-label', 'Forecast across today, hour by hour');
       const poly = document.createElementNS(svg.namespaceURI, 'polyline');
       poly.setAttribute('fill', 'none');
       poly.setAttribute('stroke', '#ff7a18');
       poly.setAttribute('stroke-width', '2');
       poly.setAttribute('points', curve.map((value, index) => {
         const x = (index / 23) * 232 + 4;
-        const y = 70 - (value / 100) * 58;
+        const y = 62 - (value / 100) * 52;
         return x + ',' + y;
       }).join(' '));
       const dot = document.createElementNS(svg.namespaceURI, 'circle');
       dot.setAttribute('cx', String((hour / 23) * 232 + 4));
-      dot.setAttribute('cy', String(70 - (curve[hour] / 100) * 58));
+      dot.setAttribute('cy', String(62 - (curve[hour] / 100) * 52));
       dot.setAttribute('r', '4');
       dot.setAttribute('fill', '#111111');
       svg.append(poly, dot);
+      [0, 6, 12, 18].forEach((mark) => {
+        const label = document.createElementNS(svg.namespaceURI, 'text');
+        label.setAttribute('x', String((mark / 23) * 232 + 4));
+        label.setAttribute('y', '96');
+        label.setAttribute('text-anchor', mark === 0 ? 'start' : 'middle');
+        label.setAttribute('fill', '#6b6b76');
+        label.setAttribute('font-size', '11');
+        label.setAttribute('font-family', 'Inter, sans-serif');
+        const clock = mark % 12 || 12;
+        label.textContent = clock + (mark >= 12 ? 'p' : 'a');
+        svg.append(label);
+      });
       return svg;
     }
 
     function weekSvg(scores, weekday) {
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('viewBox', '0 0 240 80');
+      svg.setAttribute('viewBox', '0 0 240 104');
       svg.setAttribute('class', 'week-curve');
       svg.setAttribute('role', 'img');
-      svg.setAttribute('aria-label', 'Expected busyness Monday through Sunday');
+      svg.setAttribute('aria-label', 'Expected busyness Monday through Sunday. Today is marked in the labels.');
       scores.forEach((score, index) => {
+        const today = WEEK_DOW[index] === weekday;
         const rect = document.createElementNS(svg.namespaceURI, 'rect');
-        const height = Math.max(4, (score / 100) * 58);
+        const height = Math.max(4, (score / 100) * 52);
         rect.setAttribute('x', String(8 + index * 34));
-        rect.setAttribute('y', String(68 - height));
+        rect.setAttribute('y', String(62 - height));
         rect.setAttribute('width', '18');
         rect.setAttribute('height', String(height));
         rect.setAttribute('rx', '3');
-        rect.setAttribute('fill', WEEK_DOW[index] === weekday ? '#111111' : '#ff7a18');
-        svg.append(rect);
+        rect.setAttribute('fill', '#ff7a18');
+        const label = document.createElementNS(svg.namespaceURI, 'text');
+        label.setAttribute('x', String(8 + index * 34 + 9));
+        label.setAttribute('y', '96');
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('fill', today ? '#111111' : '#6b6b76');
+        label.setAttribute('font-size', '11');
+        label.setAttribute('font-weight', today ? '700' : '500');
+        label.setAttribute('font-family', 'Inter, sans-serif');
+        label.textContent = WEEK_LABELS[index];
+        svg.append(rect, label);
       });
       return svg;
     }
 
-    function openSheet(id) {
+    function openSheet(id, badgeText) {
       const city = homeCity();
       const venue = city.venues.find((item) => item.id === id);
       if (!venue) return;
@@ -3736,7 +4019,15 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
       title.textContent = venue.name;
       const badge = document.createElement('p');
       badge.className = 'forecast-badge';
-      badge.textContent = percent + '% · ' + bandFrom(percent, venue.conf);
+      badge.textContent = badgeText || (percent + '%');
+      const explain = document.createElement('p');
+      explain.className = 'forecast-explain';
+      const closedNow = !venue.open[hour];
+      explain.textContent = closedNow
+        ? 'Closed right now, so this is not a live crowd.'
+        : (venue.conf === 'low'
+          ? 'How busy it usually is at this hour. Not a live count.'
+          : 'Expected busyness right now.');
       body.append(save, title, badge);
       if (venue.live) {
         const dot = document.createElement('span');
@@ -3744,7 +4035,11 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
         dot.setAttribute('aria-label', 'Live');
         body.append(dot);
       }
-      body.append(curveSvg(venue.curve, hour));
+      body.append(explain);
+      const todayLabel = document.createElement('p');
+      todayLabel.className = 'rank-note';
+      todayLabel.textContent = 'Today';
+      body.append(todayLabel, curveSvg(venue.curve, hour));
       const weekLabel = document.createElement('p');
       weekLabel.className = 'rank-note';
       weekLabel.textContent = 'This week';
@@ -3776,7 +4071,7 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
         label.textContent = 'From reviews';
         const list = document.createElement('ul');
         list.className = 'features';
-        venue.features.forEach((feature) => {
+        venue.features.slice(0, 5).forEach((feature) => {
           const item = document.createElement('li');
           item.textContent = feature;
           list.append(item);
@@ -3800,100 +4095,96 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
         maps.append(google, document.createTextNode(' '), apple);
         body.append(maps);
       }
+      const back = document.getElementById('sheet-back');
       document.getElementById('venue-sheet').classList.remove('is-full');
-      document.getElementById('sheet-back').hidden = false;
+      back.hidden = false;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) back.classList.add('is-on');
+      else requestAnimationFrame(() => back.classList.add('is-on'));
     }
 
     function closeSheet() {
-      document.getElementById('sheet-back').hidden = true;
+      const back = document.getElementById('sheet-back');
+      if (back.hidden) return;
+      back.classList.remove('is-on');
+      const finish = () => { back.hidden = true; };
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) finish();
+      else window.setTimeout(finish, 280);
     }
 
-    function drawMap() {
-      const city = homeCity();
-      const hour = activeHour(city);
-      const venues = tonightList(city).filter((venue) => venue.lat != null && venue.lon != null);
-      const map = document.getElementById('tonight-map');
-      map.replaceChildren();
-      if (!venues.length) return;
-      let minLat = Infinity;
-      let maxLat = -Infinity;
-      let minLon = Infinity;
-      let maxLon = -Infinity;
-      venues.forEach((venue) => {
-        minLat = Math.min(minLat, venue.lat);
-        maxLat = Math.max(maxLat, venue.lat);
-        minLon = Math.min(minLon, venue.lon);
-        maxLon = Math.max(maxLon, venue.lon);
-      });
-      if (minLat === maxLat) { minLat -= 0.01; maxLat += 0.01; }
-      if (minLon === maxLon) { minLon -= 0.01; maxLon += 0.01; }
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('viewBox', '0 0 100 100');
-      venues.forEach((venue) => {
-        const circle = document.createElementNS(svg.namespaceURI, 'circle');
-        circle.setAttribute('class', 'pin');
-        circle.setAttribute('cx', String(((venue.lon - minLon) / (maxLon - minLon)) * 84 + 8));
-        circle.setAttribute('cy', String((1 - (venue.lat - minLat) / (maxLat - minLat)) * 84 + 8));
-        circle.setAttribute('r', '2.4');
-        circle.setAttribute('tabindex', '0');
-        circle.setAttribute('role', 'button');
-        circle.setAttribute('aria-label', venue.name + ', ' + venue.curve[hour] + '%');
-        circle.addEventListener('click', () => openSheet(venue.id));
-        svg.append(circle);
-      });
-      map.append(svg);
+    function openPicker() {
+      const picker = document.getElementById('city-picker');
+      document.getElementById('now-line').setAttribute('aria-expanded', 'true');
+      picker.hidden = false;
+      renderPicker();
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) picker.classList.add('is-on');
+      else requestAnimationFrame(() => picker.classList.add('is-on'));
+      const input = document.getElementById('city-picker-search');
+      window.setTimeout(() => {
+        if (picker.hidden) return;
+        input.focus();
+        input.select();
+      }, 0);
+    }
+
+    function closePicker() {
+      const picker = document.getElementById('city-picker');
+      if (picker.hidden) return;
+      document.getElementById('now-line').setAttribute('aria-expanded', 'false');
+      picker.classList.remove('is-on');
+      const finish = () => { picker.hidden = true; };
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) finish();
+      else window.setTimeout(finish, 180);
     }
 
     function onVenueClick(event) {
       const row = event.target.closest('[data-venue]');
       if (!row) return;
-      openSheet(row.getAttribute('data-venue'));
+      const badge = row.querySelector('.forecast-badge');
+      openSheet(row.getAttribute('data-venue'), badge ? badge.textContent : '');
     }
 
     document.getElementById('tonight-list').addEventListener('click', onVenueClick);
+    document.getElementById('closed-list').addEventListener('click', onVenueClick);
     document.getElementById('weekend-list').addEventListener('click', onVenueClick);
-    document.getElementById('vibe-row').addEventListener('click', (event) => {
-      const chip = event.target.closest('[data-vibe]');
+    document.getElementById('weekend-closed').addEventListener('click', onVenueClick);
+    document.getElementById('city-rails').addEventListener('mousedown', (event) => {
+      if (event.target.closest('[data-group]')) event.preventDefault();
+    });
+    document.getElementById('city-rails').addEventListener('click', (event) => {
+      const chip = event.target.closest('[data-group]');
       if (!chip) return;
-      const id = chip.getAttribute('data-vibe');
-      vibeId = vibeId === id ? null : id;
-      renderHome();
+      const id = chip.getAttribute('data-group');
+      const weekend = Boolean(chip.closest('#weekend-groups'));
+      if (weekend) weekendGroup = weekendGroup === id ? null : id;
+      else nowGroup = nowGroup === id ? null : id;
+      paintLists();
     });
-    document.getElementById('map-toggle').addEventListener('click', () => {
-      mapOn = !mapOn;
-      document.getElementById('tonight-map').hidden = !mapOn;
-      document.getElementById('map-toggle').setAttribute('aria-pressed', mapOn ? 'true' : 'false');
-      if (mapOn) drawMap();
-    });
-    document.getElementById('city-rail').addEventListener('click', (event) => {
-      const card = event.target.closest('[data-pick-city]');
-      if (!card) return;
+    document.getElementById('now-line').addEventListener('mousedown', (event) => {
       event.preventDefault();
-      chooseCity(card.getAttribute('data-pick-city'), true);
     });
-    document.getElementById('city-pill').addEventListener('click', () => {
-      const picker = document.getElementById('city-picker');
-      const open = picker.hidden;
-      picker.hidden = !open;
-      document.getElementById('city-pill').setAttribute('aria-expanded', open ? 'true' : 'false');
-      if (open) renderPicker();
+    document.getElementById('now-line').addEventListener('click', () => {
+      if (document.getElementById('city-picker').hidden) openPicker();
+      else closePicker();
     });
     document.getElementById('city-picker-search').addEventListener('input', renderPicker);
-    document.getElementById('more-city-search').addEventListener('input', renderCityRail);
-    document.getElementById('city-picker-search').form.addEventListener('submit', (event) => event.preventDefault());
-    document.getElementById('more-city-search').form.addEventListener('submit', (event) => event.preventDefault());
+    document.getElementById('city-picker-search').form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const button = document.querySelector('#city-picker-list button');
+      if (button) button.click();
+    });
     document.addEventListener('click', (event) => {
       const picker = document.getElementById('city-picker');
       if (picker.hidden) return;
-      if (event.target.closest('#city-picker') || event.target.closest('#city-pill')) return;
-      picker.hidden = true;
-      document.getElementById('city-pill').setAttribute('aria-expanded', 'false');
+      if (event.target.closest('.now-bar')) return;
+      closePicker();
     });
     document.getElementById('sheet-back').addEventListener('click', (event) => {
       if (event.target.id === 'sheet-back') closeSheet();
     });
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') closeSheet();
+      if (event.key !== 'Escape') return;
+      closeSheet();
+      closePicker();
     });
     const sheetHandle = document.getElementById('sheet-handle');
     let dragY = 0;
@@ -3907,7 +4198,17 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
       else if (dy < -36) document.getElementById('venue-sheet').classList.add('is-full');
     });
 
-    renderHome();
+    renderHome(false);
+    let railsEntered = false;
+    const riseObserver = new IntersectionObserver((entries) => {
+      if (railsEntered || !entries.some((entry) => entry.isIntersecting)) return;
+      railsEntered = true;
+      document.querySelectorAll('#tonight-list .tonight-row, #weekend-list .tonight-row').forEach((node, index) => {
+        node.style.animationDelay = (index * 40) + 'ms';
+        node.classList.add('rise');
+      });
+    }, { threshold: 0.15 });
+    riseObserver.observe(document.getElementById('tonight'));
     let seenHour = activeHour(homeCity());
     setInterval(() => {
       const hour = activeHour(homeCity());
@@ -3917,15 +4218,16 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
     }, 60000);
     let hadCity = false;
     try { hadCity = Boolean(localStorage.getItem('fd-city')); } catch (err) {}
-    if (!hadCity && navigator.geolocation) {
-      document.getElementById('city-pill-label').textContent = 'Detecting…';
+    if (!hadCity && !hashCity && navigator.geolocation) {
+      const place = document.querySelector('[data-place]');
+      place.textContent = 'Detecting…';
       navigator.geolocation.getCurrentPosition((pos) => {
         here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
         const nearest = tonight.cities.slice().sort((a, b) => distanceKm(here, a) - distanceKm(here, b))[0];
         if (nearest) chooseCity(nearest.id, false);
-        else document.getElementById('city-pill-label').textContent = homeCity().name;
+        else place.textContent = homeCity().name + ', ' + homeCity().country;
       }, () => {
-        document.getElementById('city-pill-label').textContent = homeCity().name;
+        place.textContent = homeCity().name + ', ' + homeCity().country;
       }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
     }
 
