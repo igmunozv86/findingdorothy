@@ -1,0 +1,133 @@
+{
+  "meta": {
+    "slug": "hong-kong",
+    "name": "Hong Kong",
+    "country": "Hong Kong",
+    "region": "Asia-Pacific",
+    "gayborhood": null,
+    "lat": 22.278333333333,
+    "lon": 114.15861111111,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Asia/Hong_Kong"
+  },
+  "venues": [
+    {
+      "id": "hong-kong-flm",
+      "name": "FLM",
+      "category": "bar",
+      "neighborhood": "Sheung Wan",
+      "address": "62 Jervois Street, Sheung Wan, Hong Kong",
+      "lat": 22.2849129,
+      "lon": 114.1516256,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "LGBTIQ+ dining and entertainment nightspot",
+        "Listed address is 62 Jervois Street, Sheung Wan",
+        "Own page says to enter via Cafe Queen by FLM at 237 Queen's",
+        "Own Facebook advertises drag shows"
+      ],
+      "instagram": "flmhk",
+      "sources": [
+        {
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/4403654990",
+          "retrieved_at": "2026-10-06"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.flmhk.net/",
+          "retrieved_at": "2026-10-06"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.facebook.com/flmhk",
+          "retrieved_at": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "id": "hong-kong-ce-sauna",
+      "name": "CE Sauna",
+      "category": "sauna",
+      "neighborhood": "Central",
+      "address": "2/F, Cheung Hing Commercial Building, 37-43 Cochrane Street, Central, Hong Kong",
+      "lat": 22.2827296,
+      "lon": 114.1538974,
+      "hours": {
+        "sun": [
+          "13:00",
+          "23:00"
+        ],
+        "mon": [
+          "13:00",
+          "23:00"
+        ],
+        "tue": [
+          "13:00",
+          "23:00"
+        ],
+        "wed": [
+          "13:00",
+          "23:00"
+        ],
+        "thu": [
+          "13:00",
+          "23:00"
+        ],
+        "fri": [
+          "13:00",
+          "23:00"
+        ],
+        "sat": [
+          "13:00",
+          "23:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Men's sauna on Cochrane Street, operating since 1991",
+        "Steam bath, sauna, full-body massage, and jacuzzi",
+        "Daily free drinks, fruit, and snacks",
+        "Posted entry fee HK$150, with lower rates by age"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/12464106640",
+          "retrieved_at": "2026-10-06"
+        },
+        {
+          "tier": 3,
+          "url": "https://cesauna.com/",
+          "retrieved_at": "2026-10-06"
+        },
+        {
+          "tier": 3,
+          "url": "https://cesauna.com/contact-%E8%81%AF%E7%B5%A1",
+          "retrieved_at": "2026-10-06"
+        },
+        {
+          "tier": 3,
+          "url": "https://cesauna.com/facilites-%E8%A8%AD%E5%82%99",
+          "retrieved_at": "2026-10-06"
+        },
+        {
+          "tier": 3,
+          "url": "https://cesauna.com/location-%E4%BD%8D%E7%BD%AE",
+          "retrieved_at": "2026-10-06"
+        }
+      ]
+    }
+  ],
+  "pride": {
+    "2026": {
+      "date": "2026-11-14",
+      "event_name": "Hong Kong Pride Event 2026",
+      "source_url": "https://hkpride.net/en/"
+    },
+    "2027": null
+  }
+}

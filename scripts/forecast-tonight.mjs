@@ -55,7 +55,6 @@ const ranked = venues
 ranked.slice(0, 15).forEach(({ venue, forecast }, index) => {
   const name = `${index + 1}. ${venue.name} (${venue.category}, ${venue.neighborhood})`.padEnd(46);
   console.log(`${name} ${forecast.percent}%  ${forecast.confidence}`);
-  console.log(`${''.padEnd(46)} ${forecast.label}`);
   console.log(`${''.padEnd(46)} ${forecast.status.text}`);
   for (const source of forecast.sources) {
     if (source.kind === 'missing' || source.kind === 'rejected') continue;

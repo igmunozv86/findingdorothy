@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "slug": "tokyo",
+    "name": "Tokyo",
+    "country": "Japan",
+    "region": "Asia-Pacific",
+    "gayborhood": "Shinjuku Ni-chome",
+    "lat": 35.68944444444445,
+    "lon": 139.69166666666666,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Asia/Tokyo"
+  },
+  "venues": [
+    {
+      "id": "tokyo-aisotope-lounge",
+      "name": "AiSOTOPE LOUNGE",
+      "category": "club",
+      "neighborhood": "Shinjuku Ni-chome",
+      "address": "Saint Four Building 1F, 2-12-16 Shinjuku, Shinjuku-ku, Tokyo",
+      "lat": 35.690465,
+      "lon": 139.7078856,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Gay club on the 1st floor of Saint Four Building in Shinjuku Ni-chome",
+        "Nights are booked as separate events, each with its own door time",
+        "Photo ID checked at entry; under 20 and high-school students are refused",
+        "Photography inside the club is prohibited"
+      ],
+      "instagram": "aisotope_lounge",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://aisotope-lounge.net/access/",
+          "retrieved_at": "2026-10-06"
+        },
+        {
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/5322316322",
+          "retrieved_at": "2026-10-06"
+        },
+        {
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/way/169840420",
+          "retrieved_at": "2026-10-06"
+        }
+      ]
+    }
+  ],
+  "pride": {
+    "2026": {
+      "date": "2026-06-07",
+      "event_name": "Tokyo Pride 2026",
+      "source_url": "https://pride.tokyo/parade/"
+    },
+    "2027": null
+  }
+}

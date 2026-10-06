@@ -2,11 +2,11 @@
 // Phase 0: score every venue for right now and write one standalone page.
 // Run: node scripts/build-web.mjs
 // A city is one file in data/cities/<slug>.json. The template reads that file only.
-// A fresh live reading on any venue drops "No live count." from that card.
+// A fresh live reading replaces the signal line with the count.
 
 import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { periodLabel, placeStatus, zonedNow } from '../packages/forecast/open.js';
-import { assembleForecast, dayScore, isShutdown, loadForecastInputs, summaryWithCountNote } from '../packages/forecast/assemble.js';
+import { assembleForecast, dayScore, isShutdown, loadForecastInputs } from '../packages/forecast/assemble.js';
 import { freshOccupancy, signalMarkup } from '../packages/forecast/live.js';
 import { fetchWeather } from '../packages/forecast/weather.js';
 import { loadCities } from '../packages/cities/load.js';
@@ -208,7 +208,7 @@ function recordPrediction(row) {
 }
 
 function cardHtml(v, when, basic) {
-  const { percent, confidence, label, summary, status } = scoreVenue(v, when);
+  const { percent, confidence, status } = scoreVenue(v, when);
   const width = Math.max(0, Math.min(100, percent));
   const scoreText = `${percent}%`;
   const closingSoon = !basic && status.minutesLeft != null && status.minutesLeft <= 60;
@@ -228,7 +228,6 @@ function cardHtml(v, when, basic) {
           <ul class="features">${features}</ul>`
     : '';
   const live = quiet ? null : (liveByVenue.get(v.id) || null);
-  const whyAttr = live ? ` data-fallback-why="${escapeHtml(summaryWithCountNote(summary, false))}"` : '';
   const meter = quiet
     ? ''
     : `
@@ -241,8 +240,7 @@ function cardHtml(v, when, basic) {
               <span style="width:${width}%"></span>
             </div>
             <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
-            ${signalMarkup(confidence === 'low' ? 'Pattern, not a live count' : label, live)}
-            <p class="why"${whyAttr}>${escapeHtml(summary)}</p>
+            ${signalMarkup(confidence === 'low' ? 'Pattern, not a live count' : 'Live signals in', live)}
           </div>`;
 
   return `        <article class="card" id="venue-${escapeHtml(v.id)}">
@@ -288,7 +286,6 @@ function previewHtml() {
           <div class="bar" role="img" aria-label="Expected busyness ${escapeHtml(scoreText)}"><span style="width:${width}%"></span></div>
           <p class="hero-preview-score">${escapeHtml(scoreText)}</p>
         </div>
-        <p class="hero-preview-label">${escapeHtml(forecast.label)}</p>
       </div>`;
 }
 
@@ -1487,10 +1484,6 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       color: var(--muted);
     }
     .signal[data-live-at] { color: #111; font-weight: 500; }
-    .why {
-      margin: 0.35rem 0 0;
-      font-size: 16px;
-    }
     .week-label { margin-top: 0.95rem; }
     .week {
       display: grid;
