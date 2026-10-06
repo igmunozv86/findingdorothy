@@ -7,6 +7,7 @@
 import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { periodLabel, placeStatus, zonedNow } from '../packages/forecast/open.js';
 import { assembleForecast, dayScore, isShutdown, loadForecastInputs } from '../packages/forecast/assemble.js';
+import { bandLabel } from '../packages/forecast/score.js';
 import { freshOccupancy, signalMarkup } from '../packages/forecast/live.js';
 import { fetchWeather } from '../packages/forecast/weather.js';
 import { loadCities } from '../packages/cities/load.js';
@@ -667,6 +668,263 @@ ${prideResultsHtml()}
   </main>`;
 }
 
+const CATEGORY_LABEL = {
+  bar: 'Bar',
+  club: 'Club',
+  sauna: 'Sauna',
+  cruise: 'Cruise',
+  sex: 'Sex',
+};
+
+const VIBE_DEFS = [
+  { id: 'leather', name: 'Leather bars' },
+  { id: 'late', name: 'Late-night clubs' },
+  { id: 'sauna', name: 'Saunas' },
+  { id: 'drag', name: 'Drag & cabaret' },
+  { id: 'cruisy', name: 'Cruisy' },
+];
+
+const NIGHT_HOURS = [18, 19, 20, 21, 22, 23, 0, 1, 2];
+
+function vibeIds(venue) {
+  const text = (venue.review_features || []).join(' ').toLowerCase();
+  const ids = [];
+  if (venue.category === 'bar' && text.includes('leather')) ids.push('leather');
+  if (venue.category === 'club') ids.push('late');
+  if (venue.category === 'sauna') ids.push('sauna');
+  if (text.includes('drag') || text.includes('cabaret')) ids.push('drag');
+  if (venue.category === 'cruise' || venue.category === 'sex' || text.includes('cruis')) ids.push('cruisy');
+  return ids;
+}
+
+function peakClock(hour) {
+  const suffix = hour >= 12 ? 'pm' : 'am';
+  return `${hour % 12 || 12}${suffix}`;
+}
+
+function forecastAt(venue, city, dow, hour, eventTonight) {
+  const base = zonedNow(new Date(), city.tz);
+  return assembleForecast(venue, {
+    weekday: dow,
+    hour,
+    minute: 0,
+    minutes: hour * 60,
+    dateLabel: base.dateLabel,
+    timeLabel: base.timeLabel,
+  }, {
+    weather: weatherByCity[city.name] || null,
+    liveCount: liveByVenue.get(venue.id) || null,
+    eventsFile: eventsFor(city.tz),
+    eventTonight,
+    cells: forecastInputs.cells,
+    weights: forecastInputs.weights,
+  });
+}
+
+function nightPeak(venue, city, dow) {
+  let best = null;
+  for (const hour of NIGHT_HOURS) {
+    const forecast = forecastAt(venue, city, dow, hour, false);
+    if (!forecast.status.open) continue;
+    if (!best || forecast.percent >= best.percent) best = { percent: forecast.percent, hour };
+  }
+  return best || { percent: 0, hour: 21 };
+}
+
+function calendarOffset(timeZone, days) {
+  const key = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+  const [year, month, day] = key.split('-').map(Number);
+  const utc = new Date(Date.UTC(year, month - 1, day + days, 12));
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: 'UTC',
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  }).format(utc);
+}
+
+function weekendLabel(weekday, timeZone) {
+  let friday = 5 - weekday;
+  if (weekday === 6) friday = -1;
+  if (weekday === 0) friday = 5;
+  return `${calendarOffset(timeZone, friday)} – ${calendarOffset(timeZone, friday + 1)}`;
+}
+
+function snapshotVenue(venue, city) {
+  const now = zonedNow(new Date(), city.tz);
+  const eventsFile = eventsFor(city.tz);
+  const event = eventsFile && eventsFile[venue.id];
+  const eventTonight = Boolean(event?.event_tonight);
+  const curve = [];
+  const open = [];
+  let confidence = 'low';
+  let hoursText = '';
+  for (let hour = 0; hour < 24; hour += 1) {
+    const forecast = forecastAt(venue, city, now.weekday, hour, eventTonight);
+    curve.push(forecast.percent);
+    open.push(Boolean(forecast.status.open));
+    if (hour === now.hour) {
+      confidence = forecast.confidence;
+      hoursText = forecast.status.text;
+    }
+  }
+  let peak = open.findIndex(Boolean);
+  if (peak < 0) peak = curve.indexOf(Math.max(...curve));
+  for (let hour = 0; hour < 24; hour += 1) {
+    if (open[hour] && curve[hour] >= curve[peak]) peak = hour;
+  }
+  const fri = nightPeak(venue, city, 5);
+  const sat = nightPeak(venue, city, 6);
+  const weekend = fri.percent >= sat.percent ? { ...fri, day: 'Fri' } : { ...sat, day: 'Sat' };
+  return {
+    id: venue.id,
+    name: venue.name,
+    cat: CATEGORY_LABEL[venue.category] || venue.category,
+    area: venue.neighborhood || '',
+    vibes: vibeIds(venue),
+    conf: confidence,
+    unsure: venue.hours == null || venue.hours === 'no recent data',
+    verified: Boolean(venue.hours_verified),
+    peak,
+    curve,
+    open,
+    weekend,
+    week: WEEK.map((day) => scoreForDow(venue, day.dow)),
+    live: Boolean(liveByVenue.get(venue.id)),
+    addr: venue.address || '',
+    features: venue.review_features || [],
+    event: event?.event_name || null,
+    eventUrl: venue.events_url || null,
+    hoursText,
+    lat: typeof venue.lat === 'number' ? venue.lat : null,
+    lon: typeof venue.lon === 'number' ? venue.lon : null,
+  };
+}
+
+function buildTonight() {
+  const cities = LIVE.map((city) => {
+    const now = zonedNow(new Date(), city.tz);
+    const venues = city.venues.map((venue) => snapshotVenue(venue, city));
+    const openNow = venues.filter((venue) => venue.open[now.hour]);
+    const best = openNow.reduce((max, venue) => Math.max(max, venue.curve[now.hour]), 0);
+    const score = openNow.reduce((sum, venue) => sum + venue.curve[now.hour], 0);
+    return {
+      id: city.id,
+      name: city.name,
+      country: city.country,
+      lat: city.lat,
+      lon: city.lon,
+      tz: city.tz,
+      flag: FLAGS[city.country] || '',
+      weekday: now.weekday,
+      hour: now.hour,
+      weekend: weekendLabel(now.weekday, city.tz),
+      best,
+      score,
+      venues,
+    };
+  });
+  cities.sort((a, b) => b.score - a.score || b.best - a.best);
+  const fallback = cities.some((city) => city.id === 'san-francisco') ? 'san-francisco' : cities[0]?.id;
+  return { defaultCity: fallback, cities };
+}
+
+const tonightData = buildTonight();
+
+function tonightLine(venue, mode) {
+  if (mode === 'weekend') return `Peaks ~${peakClock(venue.weekend.hour)}`;
+  if (venue.unsure) return `Hours not confirmed · peaks ~${peakClock(venue.peak)}`;
+  return `Open now · peaks ~${peakClock(venue.peak)}`;
+}
+
+function tonightRow(venue, hour, mode) {
+  const percent = mode === 'weekend' ? venue.weekend.percent : venue.curve[hour];
+  const band = bandLabel(percent, venue.conf);
+  const live = venue.live ? '<span class="live-dot" aria-label="Live"></span>' : '';
+  const place = venue.area ? ` · ${escapeHtml(venue.area)}` : '';
+  return `          <li><button type="button" class="tonight-row" data-venue="${escapeHtml(venue.id)}"><span class="tonight-name">${escapeHtml(venue.name)}</span><span class="forecast-badge">${percent}% · ${escapeHtml(band)}</span>${live}<span class="tonight-meta">${escapeHtml(venue.cat)}${place}</span><span class="tonight-when">${escapeHtml(tonightLine(venue, mode))}</span></button></li>`;
+}
+
+function tonightRail(venues, hour, mode) {
+  if (!venues.length) return '        <p class="tonight-empty">Nothing open right now.</p>';
+  const head = venues.slice(0, 8).map((venue) => tonightRow(venue, hour, mode)).join('\n');
+  const tail = venues.slice(8).map((venue) => tonightRow(venue, hour, mode)).join('\n');
+  const more = tail
+    ? `        <details class="show-more"><summary>Show more</summary><ol class="tonight-list">\n${tail}\n        </ol></details>`
+    : '';
+  return `        <ol class="tonight-list">\n${head}\n        </ol>\n${more}`;
+}
+
+function homeTonightHtml() {
+  const city = tonightData.cities.find((item) => item.id === tonightData.defaultCity) || tonightData.cities[0];
+  const tonightVenues = city.venues
+    .filter((venue) => venue.open[city.hour])
+    .sort((a, b) => b.curve[city.hour] - a.curve[city.hour]);
+  const weekendVenues = city.venues
+    .filter((venue) => venue.weekend.percent > 0)
+    .sort((a, b) => b.weekend.percent - a.weekend.percent);
+  const chips = VIBE_DEFS
+    .filter((vibe) => city.venues.some((venue) => venue.vibes.includes(vibe.id)))
+    .map((vibe) => `          <button type="button" class="vibe-chip" data-vibe="${vibe.id}" aria-pressed="false">${escapeHtml(vibe.name)}</button>`)
+    .join('\n');
+  const cityCards = tonightData.cities.map((item) => `          <a class="city-card" href="#${escapeHtml(item.id)}" data-pick-city="${escapeHtml(item.id)}"><span class="city-flag">${item.flag}</span><span class="city-name">${escapeHtml(item.name)}</span><span class="city-place">${escapeHtml(item.country)}</span></a>`).join('\n');
+  return `    <section class="hero tonight-hero">
+      <img class="hero-mark" src="assets/icon-mark.jpg" alt="">
+      <h1>Know where the <span class="fun">fun</span><br>is going.</h1>
+      <p class="subhead">Gay travel intel, powered by real data.</p>
+    </section>
+    <section class="tonight-block" id="tonight">
+      <div class="tonight-head">
+        <h2 id="tonight-title">Tonight</h2>
+        <p class="rank-note">ranked by tonight's forecast</p>
+        <button type="button" class="map-toggle" id="map-toggle" aria-pressed="false">Map</button>
+      </div>
+      <div class="vibe-row" id="vibe-row">
+${chips}
+      </div>
+      <div id="tonight-list">
+${tonightRail(tonightVenues, city.hour, 'tonight')}
+      </div>
+      <div class="tonight-map" id="tonight-map" hidden></div>
+    </section>
+    <section class="tonight-block" id="weekend">
+      <div class="tonight-head">
+        <h2>This weekend</h2>
+        <p class="rank-note" id="weekend-dates">${escapeHtml(city.weekend)}</p>
+        <p class="rank-note">ranked by the weekend peak</p>
+      </div>
+      <div id="weekend-list">
+${tonightRail(weekendVenues, city.hour, 'weekend')}
+      </div>
+    </section>
+    <section class="tonight-block" id="more-cities">
+      <div class="tonight-head">
+        <h2>More cities</h2>
+        <p class="rank-note">ranked by tonight's forecast</p>
+      </div>
+      <form class="area-search city-search" role="search">
+        <input id="more-city-search" type="search" placeholder="Search your location to find fun near you" autocomplete="off" enterkeyhint="search">
+        <button type="submit" aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16.5 20.5 21" stroke-linecap="round"/></svg>
+        </button>
+      </form>
+      <div class="city-rail" id="city-rail">
+${cityCards}
+      </div>
+    </section>
+    <div class="sheet-back" id="sheet-back" hidden>
+      <aside class="sheet" id="venue-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <button type="button" class="sheet-handle" id="sheet-handle" aria-label="Drag to close"></button>
+        <div class="sheet-body" id="sheet-body"></div>
+      </aside>
+    </div>`;
+}
+
 const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -803,7 +1061,7 @@ const html = `<!DOCTYPE html>
     }
     .nav-toggle {
       display: none;
-      margin-left: auto;
+      margin-left: 0.65rem;
       width: 42px;
       height: 42px;
       padding: 0;
@@ -2190,6 +2448,207 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       .cities-page h1 { font-size: 48px; }
       .cities-brand img { width: 84px; height: 84px; margin-bottom: 1.15rem; }
       .pride-cal { margin-top: 2.25rem; }
+      .tonight-list { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+      .tonight-row {
+        padding: 0.9rem 1rem;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+      }
+      .sheet {
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: auto;
+        width: min(420px, 100%);
+        max-height: none;
+        border-radius: 0;
+      }
+      .sheet.is-full { width: min(560px, 100%); }
+    }
+    .tonight-hero, .tonight-block { width: min(1120px, calc(100% - 2.3rem)); margin: 0 auto; }
+    .tonight-hero { padding-top: 1.25rem; }
+    .tonight-hero .hero-mark { width: 48px; height: 48px; }
+    .tonight-block { padding: 1.35rem 0 0.4rem; }
+    #tonight, #weekend, #more-cities { scroll-margin-top: 84px; }
+    .tonight-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 0.8rem; }
+    .tonight-head h2 { margin: 0; font-size: 28px; font-weight: 800; }
+    .rank-note { margin: 0; color: var(--muted); font-size: 14px; }
+    .map-toggle, .vibe-chip, .city-pill {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .map-toggle {
+      margin-left: auto;
+      border-radius: 999px;
+      padding: 0.35rem 0.85rem;
+    }
+    .map-toggle[aria-pressed="true"] { background: #111; color: #fff; border-color: #111; }
+    .vibe-row { display: flex; gap: 0.45rem; overflow-x: auto; padding: 0.85rem 0 0.2rem; }
+    .vibe-chip { flex: none; border-radius: 999px; padding: 0.4rem 0.8rem; }
+    .vibe-chip[aria-pressed="true"] { background: #111; color: #fff; border-color: #111; }
+    .tonight-list { list-style: none; margin: 0.75rem 0 0; padding: 0; display: grid; gap: 0; }
+    .tonight-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.1rem 0.75rem;
+      width: 100%;
+      padding: 0.85rem 0;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+    .tonight-name { font-weight: 500; }
+    .forecast-badge {
+      font-family: Poppins, sans-serif;
+      font-weight: 700;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      margin-left: 0.35rem;
+      border-radius: 50%;
+      background: #1f9d55;
+      justify-self: end;
+    }
+    .tonight-meta, .tonight-when { grid-column: 1 / -1; color: var(--muted); font-size: 14px; }
+    .tonight-empty { color: var(--muted); }
+    .show-more { margin-top: 0.35rem; }
+    .show-more summary { cursor: pointer; font-weight: 500; }
+    .city-search { margin-top: 0.85rem; }
+    .city-rail {
+      display: flex;
+      gap: 0.75rem;
+      overflow-x: auto;
+      margin-top: 0.85rem;
+      padding-bottom: 0.35rem;
+    }
+    .city-card {
+      flex: 0 0 168px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      padding: 0.9rem;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      text-decoration: none;
+    }
+    .city-card::before {
+      content: "";
+      display: block;
+      height: 4px;
+      margin: -0.9rem -0.9rem 0.7rem;
+      border-radius: 16px 16px 0 0;
+      background: var(--grad);
+    }
+    .city-flag { font-size: 22px; line-height: 1; }
+    .city-name { font-weight: 500; }
+    .city-place { color: var(--muted); font-size: 14px; }
+    .city-pill {
+      margin-left: auto;
+      border-radius: 999px;
+      padding: 0.4rem 0.85rem;
+    }
+    .city-picker {
+      position: absolute;
+      z-index: 40;
+      top: calc(100% + 0.35rem);
+      right: 1rem;
+      width: min(320px, calc(100% - 2rem));
+      padding: 0.75rem;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+    }
+    .city-picker .area-search { margin: 0; }
+    .city-picker .area-search input,
+    .city-picker .area-search button { height: 44px; }
+    .city-picker ul { list-style: none; margin: 0.5rem 0 0; padding: 0; max-height: 280px; overflow: auto; }
+    .city-picker button {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      padding: 0.55rem 0.2rem;
+      border: 0;
+      background: transparent;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+    .sheet-back {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(17, 17, 17, 0.28);
+    }
+    .sheet-back[hidden] { display: none; }
+    .sheet {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      border-radius: 18px 18px 0 0;
+      background: #fff;
+      overflow: auto;
+    }
+    .sheet.is-full { max-height: 100vh; border-radius: 0; }
+    .sheet-handle {
+      width: 42px;
+      height: 4px;
+      margin: 0.7rem auto;
+      border: 0;
+      border-radius: 999px;
+      background: #d8d8e0;
+      cursor: grab;
+    }
+    .sheet-body { padding: 0 1.15rem 1.5rem; }
+    .sheet-body h3 { margin: 0; font-size: 28px; }
+    .sheet-save {
+      border: 0;
+      background: transparent;
+      color: #111;
+      font: inherit;
+      cursor: pointer;
+    }
+    .sheet-save svg { width: 22px; height: 22px; fill: none; stroke: currentColor; }
+    .sheet-save.is-on svg { fill: currentColor; stroke: none; }
+    .curve, .week-curve { width: 100%; height: 84px; margin-top: 0.75rem; }
+    .verified { color: #1f7a43; font-size: 13px; font-weight: 500; }
+    .tonight-map { height: 280px; margin-top: 0.75rem; border: 1px solid var(--line); border-radius: 16px; }
+    .tonight-map svg { width: 100%; height: 100%; }
+    .pin { fill: #ff7a18; stroke: #111; cursor: pointer; }
+    @media (min-width: 760px) {
+      .tonight-list { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+      .tonight-row {
+        padding: 0.9rem 1rem;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+      }
+      .sheet {
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: auto;
+        width: min(420px, 100%);
+        max-height: none;
+        border-radius: 0;
+      }
+      .sheet.is-full { width: min(560px, 100%); }
     }
   </style>
 </head>
@@ -2199,13 +2658,25 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     <a class="logo" href="#home" aria-label="FindingDorothy">
       <img src="assets/logo-v4-warm.jpg" alt="FindingDorothy">
     </a>
+    <button type="button" class="city-pill" id="city-pill" aria-expanded="false" aria-controls="city-picker">
+      <span id="city-pill-label">${escapeHtml((tonightData.cities.find((city) => city.id === tonightData.defaultCity) || tonightData.cities[0]).name)}</span>
+    </button>
+    <div class="city-picker" id="city-picker" hidden>
+      <form class="area-search" role="search">
+        <input id="city-picker-search" type="search" placeholder="Search your location to find fun near you" autocomplete="off" enterkeyhint="search">
+        <button type="submit" aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16.5 20.5 21" stroke-linecap="round"/></svg>
+        </button>
+      </form>
+      <ul id="city-picker-list"></ul>
+    </div>
     <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
     <div class="nav-panel">
       <nav class="site-nav" aria-label="Primary">
         <a href="#home">Home</a>
-        <a href="#cities">Cities</a>
+        <a href="#more-cities">Cities</a>
         <a href="#pride">Fun Calendar</a>
         <a href="#venues">For Venues</a>
         <a href="#why">Why FindingDorothy</a>
@@ -2213,6 +2684,7 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     </div>
   </header>
   <main class="view" id="home">
+${homeTonightHtml()}
     <div class="home-sheet">
       <section class="get-app" aria-label="Get the app">
         <p>Get the app for a better experience!</p>
@@ -2221,27 +2693,6 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
           <img class="play" src="assets/google-play-badge.png" alt="Get it on Google Play">
         </div>
       </section>
-      <section class="hero">
-        <img class="hero-mark" src="assets/icon-mark.jpg" alt="">
-        <h1>Know where the <span class="fun">fun</span><br>is going.</h1>
-        <p class="subhead">Gay travel intel, powered by real data.</p>
-        <form class="area-search" role="search">
-          <input id="area-search" type="search" placeholder="Search your location to find fun near you" autocomplete="off" enterkeyhint="search" aria-autocomplete="list" aria-controls="area-suggest">
-          <button type="submit" aria-label="Search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16.5 20.5 21" stroke-linecap="round"/></svg>
-          </button>
-        </form>
-        <ul class="area-suggest" id="area-suggest" hidden></ul>
-        <div class="area-block" id="area-block" hidden>
-          <p class="area-label" id="area-label"></p>
-          <div class="area-grid is-ready" id="area-picks">
-            <a class="area-chip" id="browse-world" href="#cities">Full List</a>
-          </div>
-        </div>
-      </section>
-    </div>
-${scenesHtml()}
-    <div class="home-sheet">
       <section class="home-venue" aria-label="For venues">
         <div class="home-venue-card">
           <span class="venue-mark" aria-hidden="true">
@@ -2304,7 +2755,7 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
       </a>
       <nav aria-label="Footer">
         <a href="#home">Home</a>
-        <a href="#cities">Cities</a>
+        <a href="#more-cities">Cities</a>
         <a href="#pride">Fun Calendar</a>
         <a href="#venues">For Venues</a>
         <a href="#why">Why FindingDorothy</a>
@@ -2314,6 +2765,7 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
   </footer>
   <script>
     const cities = ${cityLookup};
+    const tonight = ${JSON.stringify(tonightData)};
     const prideCities = ${prideCityLookup};
     const continentNames = ${continentNames};
     const header = document.querySelector('.site-header');
@@ -2469,6 +2921,10 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
       if (sceneJump && document.getElementById(sceneJump[1])) {
         current = sceneJump[1];
         anchor = raw;
+      } else if (raw === 'cities') {
+        history.replaceState(null, '', location.pathname + location.search + '#more-cities');
+        current = 'home';
+        anchor = 'more-cities';
       } else if (raw && raw !== 'home') {
         const node = document.getElementById(raw);
         const view = node && node.closest ? node.closest('main.view') : null;
@@ -2530,7 +2986,7 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
     function nearestRanked(limit) {
       return cities
         .map((city) => ({ city, distance: distanceKm(here, city) }))
-        .sort((a, b) => a.distance - b.distance || a.city.name.localeCompare(b.city.name))
+        .sort((a, b) => a.distance - b.distance || a.city.id.localeCompare(b.city.id))
         .slice(0, limit);
     }
 
@@ -2608,7 +3064,10 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
       }
       const matches = cities
         .filter((city) => foldName(city.name).includes(query))
-        .sort((a, b) => a.name.localeCompare(b.name, 'en'));
+        .sort((a, b) => {
+          const rank = (id) => tonight.cities.findIndex((city) => city.id === id);
+          return rank(a.id) - rank(b.id);
+        });
       suggest.hidden = false;
       if (!matches.length) {
         const item = document.createElement('li');
@@ -2630,24 +3089,26 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
       }
     }
 
-    areaSearch.addEventListener('input', renderSuggest);
-    suggest.addEventListener('click', (event) => {
-      const link = event.target.closest('a');
-      if (!link || !suggest.contains(link)) return;
-      event.preventDefault();
-      suggest.querySelectorAll('a').forEach((node) => node.classList.remove('is-go'));
-      link.classList.add('is-go');
-      const href = link.getAttribute('href');
-      window.setTimeout(() => {
-        if (location.hash === href) showView();
-        else location.hash = href;
-      }, 160);
-    });
-    areaSearch.form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      const links = [...suggest.querySelectorAll('a')];
-      if (links.length === 1) location.hash = links[0].getAttribute('href');
-    });
+    if (areaSearch && suggest) {
+      areaSearch.addEventListener('input', renderSuggest);
+      suggest.addEventListener('click', (event) => {
+        const link = event.target.closest('a');
+        if (!link || !suggest.contains(link)) return;
+        event.preventDefault();
+        suggest.querySelectorAll('a').forEach((node) => node.classList.remove('is-go'));
+        link.classList.add('is-go');
+        const href = link.getAttribute('href');
+        window.setTimeout(() => {
+          if (location.hash === href) showView();
+          else location.hash = href;
+        }, 160);
+      });
+      areaSearch.form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const links = [...suggest.querySelectorAll('a')];
+        if (links.length === 1) location.hash = links[0].getAttribute('href');
+      });
+    }
 
     const continentHint = document.getElementById('continent-hint');
     const continentTitle = document.getElementById('continent-title');
@@ -2661,7 +3122,10 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
       });
       const matches = cities
         .filter((city) => city.continent === id)
-        .sort((a, b) => a.name.localeCompare(b.name));
+        .sort((a, b) => {
+          const rank = (id) => tonight.cities.findIndex((city) => city.id === id);
+          return rank(a.id) - rank(b.id);
+        });
       continentHint.hidden = true;
       continentTitle.hidden = false;
       continentTitle.textContent = continentNames[id] || 'Cities';
@@ -2701,16 +3165,6 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
       });
     });
 
-    if (navigator.permissions && navigator.permissions.query) {
-      navigator.permissions.query({ name: 'geolocation' }).then((status) => {
-        if (status.state === 'granted') {
-          areaSearch.form.hidden = true;
-          askLocation().catch(() => {
-            areaSearch.form.hidden = false;
-          });
-        }
-      }).catch(() => {});
-    }
 
     function expireLiveCounts() {
       const maxAge = 15 * 60 * 1000;
@@ -2994,6 +3448,485 @@ ${[['forecast', 'Scene Forecast'], ['venues', 'For Venues']].map(([id, title]) =
         applyPrideQuery();
       });
       applyPrideQuery();
+    }
+
+    const VIBES = [
+      { id: 'leather', name: 'Leather bars' },
+      { id: 'late', name: 'Late-night clubs' },
+      { id: 'sauna', name: 'Saunas' },
+      { id: 'drag', name: 'Drag & cabaret' },
+      { id: 'cruisy', name: 'Cruisy' },
+    ];
+    const WEEK_DOW = [1, 2, 3, 4, 5, 6, 0];
+    let homeCityId = tonight.defaultCity;
+    let vibeId = null;
+    let mapOn = false;
+    try {
+      const storedCity = localStorage.getItem('fd-city');
+      if (storedCity && tonight.cities.some((city) => city.id === storedCity)) homeCityId = storedCity;
+    } catch (err) {}
+
+    function bandFrom(percent, confidence) {
+      if (confidence === 'low') return 'Pattern';
+      if (percent >= 70) return 'Busy';
+      if (percent >= 45) return 'Heating up';
+      return 'Quiet';
+    }
+
+    function peakText(hour) {
+      return (hour % 12 || 12) + (hour >= 12 ? 'pm' : 'am');
+    }
+
+    function cityClock(timeZone) {
+      const fmt = new Intl.DateTimeFormat('en-US', {
+        timeZone,
+        weekday: 'short',
+        hour: '2-digit',
+        hourCycle: 'h23',
+      });
+      const bag = {};
+      for (const part of fmt.formatToParts(new Date())) bag[part.type] = part.value;
+      let hour = Number(bag.hour);
+      if (hour === 24) hour = 0;
+      return { hour, weekday: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(bag.weekday) };
+    }
+
+    function homeCity() {
+      return tonight.cities.find((city) => city.id === homeCityId) || tonight.cities[0];
+    }
+
+    function activeHour(city) {
+      const clock = cityClock(city.tz);
+      return clock.weekday === city.weekday ? clock.hour : city.hour;
+    }
+
+    function savedIds() {
+      try { return JSON.parse(localStorage.getItem('fd-saved') || '[]'); }
+      catch (err) { return []; }
+    }
+
+    function rowButton(venue, percent, line) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'tonight-row';
+      button.setAttribute('data-venue', venue.id);
+      const name = document.createElement('span');
+      name.className = 'tonight-name';
+      name.textContent = venue.name;
+      const badge = document.createElement('span');
+      badge.className = 'forecast-badge';
+      badge.textContent = percent + '% · ' + bandFrom(percent, venue.conf);
+      const meta = document.createElement('span');
+      meta.className = 'tonight-meta';
+      meta.textContent = venue.area ? venue.cat + ' · ' + venue.area : venue.cat;
+      const when = document.createElement('span');
+      when.className = 'tonight-when';
+      when.textContent = line;
+      button.append(name, badge);
+      if (venue.live) {
+        const dot = document.createElement('span');
+        dot.className = 'live-dot';
+        dot.setAttribute('aria-label', 'Live');
+        button.append(dot);
+      }
+      button.append(meta, when);
+      return button;
+    }
+
+    function fillRail(node, venues, lineFor) {
+      node.replaceChildren();
+      if (!venues.length) {
+        const empty = document.createElement('p');
+        empty.className = 'tonight-empty';
+        empty.textContent = 'Nothing open right now.';
+        node.append(empty);
+        return;
+      }
+      const list = document.createElement('ol');
+      list.className = 'tonight-list';
+      venues.slice(0, 8).forEach((venue) => {
+        const item = document.createElement('li');
+        const lined = lineFor(venue);
+        item.append(rowButton(venue, lined.percent, lined.line));
+        list.append(item);
+      });
+      node.append(list);
+      if (venues.length <= 8) return;
+      const details = document.createElement('details');
+      details.className = 'show-more';
+      const summary = document.createElement('summary');
+      summary.textContent = 'Show more';
+      const rest = document.createElement('ol');
+      rest.className = 'tonight-list';
+      venues.slice(8).forEach((venue) => {
+        const item = document.createElement('li');
+        const lined = lineFor(venue);
+        item.append(rowButton(venue, lined.percent, lined.line));
+        rest.append(item);
+      });
+      details.append(summary, rest);
+      node.append(details);
+    }
+
+    function tonightList(city) {
+      const hour = activeHour(city);
+      return city.venues
+        .filter((venue) => venue.open[hour] && (!vibeId || venue.vibes.indexOf(vibeId) !== -1))
+        .sort((a, b) => b.curve[hour] - a.curve[hour]);
+    }
+
+    function renderCityRail() {
+      const rail = document.getElementById('city-rail');
+      const query = foldName(document.getElementById('more-city-search').value.trim());
+      rail.replaceChildren();
+      tonight.cities.forEach((city) => {
+        if (query && foldName(city.name + ' ' + city.country).indexOf(query) === -1) return;
+        const link = document.createElement('a');
+        link.className = 'city-card';
+        link.href = '#' + city.id;
+        link.setAttribute('data-pick-city', city.id);
+        const flag = document.createElement('span');
+        flag.className = 'city-flag';
+        flag.textContent = city.flag;
+        const name = document.createElement('span');
+        name.className = 'city-name';
+        name.textContent = city.name;
+        const place = document.createElement('span');
+        place.className = 'city-place';
+        place.textContent = city.country;
+        link.append(flag, name, place);
+        rail.append(link);
+      });
+    }
+
+    function renderPicker() {
+      const list = document.getElementById('city-picker-list');
+      const query = foldName(document.getElementById('city-picker-search').value.trim());
+      const ranked = tonight.cities.slice();
+      if (here) ranked.sort((a, b) => distanceKm(here, a) - distanceKm(here, b));
+      list.replaceChildren();
+      ranked.forEach((city) => {
+        if (query && foldName(city.name + ' ' + city.country).indexOf(query) === -1) return;
+        const item = document.createElement('li');
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = city.name;
+        const place = document.createElement('span');
+        place.textContent = city.country;
+        button.append(place);
+        button.addEventListener('click', () => chooseCity(city.id, true));
+        item.append(button);
+        list.append(item);
+      });
+    }
+
+    function renderHome() {
+      const city = homeCity();
+      const hour = activeHour(city);
+      document.getElementById('city-pill-label').textContent = city.name;
+      const vibeRow = document.getElementById('vibe-row');
+      vibeRow.replaceChildren();
+      VIBES.forEach((vibe) => {
+        if (!city.venues.some((venue) => venue.vibes.indexOf(vibe.id) !== -1)) return;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'vibe-chip';
+        button.setAttribute('data-vibe', vibe.id);
+        button.setAttribute('aria-pressed', vibeId === vibe.id ? 'true' : 'false');
+        button.textContent = vibe.name;
+        vibeRow.append(button);
+      });
+      fillRail(document.getElementById('tonight-list'), tonightList(city), (venue) => ({
+        percent: venue.curve[hour],
+        line: venue.unsure
+          ? 'Hours not confirmed · peaks ~' + peakText(venue.peak)
+          : 'Open now · peaks ~' + peakText(venue.peak),
+      }));
+      fillRail(document.getElementById('weekend-list'), city.venues.filter((venue) => venue.weekend.percent > 0).sort((a, b) => b.weekend.percent - a.weekend.percent), (venue) => ({
+        percent: venue.weekend.percent,
+        line: 'Peaks ~' + peakText(venue.weekend.hour),
+      }));
+      document.getElementById('weekend-dates').textContent = city.weekend;
+      renderCityRail();
+      if (!document.getElementById('city-picker').hidden) renderPicker();
+      if (mapOn) drawMap();
+    }
+
+    function chooseCity(id, scroll) {
+      homeCityId = id;
+      vibeId = null;
+      try { localStorage.setItem('fd-city', id); } catch (err) {}
+      document.getElementById('city-picker').hidden = true;
+      document.getElementById('city-pill').setAttribute('aria-expanded', 'false');
+      if (location.hash && location.hash !== '#home' && document.getElementById('home').hidden) {
+        location.hash = 'home';
+      }
+      renderHome();
+      if (scroll) document.getElementById('tonight').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function curveSvg(curve, hour) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 240 80');
+      svg.setAttribute('class', 'curve');
+      svg.setAttribute('role', 'img');
+      svg.setAttribute('aria-label', 'Forecast across 24 hours');
+      const poly = document.createElementNS(svg.namespaceURI, 'polyline');
+      poly.setAttribute('fill', 'none');
+      poly.setAttribute('stroke', '#ff7a18');
+      poly.setAttribute('stroke-width', '2');
+      poly.setAttribute('points', curve.map((value, index) => {
+        const x = (index / 23) * 232 + 4;
+        const y = 70 - (value / 100) * 58;
+        return x + ',' + y;
+      }).join(' '));
+      const dot = document.createElementNS(svg.namespaceURI, 'circle');
+      dot.setAttribute('cx', String((hour / 23) * 232 + 4));
+      dot.setAttribute('cy', String(70 - (curve[hour] / 100) * 58));
+      dot.setAttribute('r', '4');
+      dot.setAttribute('fill', '#111111');
+      svg.append(poly, dot);
+      return svg;
+    }
+
+    function weekSvg(scores, weekday) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 240 80');
+      svg.setAttribute('class', 'week-curve');
+      svg.setAttribute('role', 'img');
+      svg.setAttribute('aria-label', 'Expected busyness Monday through Sunday');
+      scores.forEach((score, index) => {
+        const rect = document.createElementNS(svg.namespaceURI, 'rect');
+        const height = Math.max(4, (score / 100) * 58);
+        rect.setAttribute('x', String(8 + index * 34));
+        rect.setAttribute('y', String(68 - height));
+        rect.setAttribute('width', '18');
+        rect.setAttribute('height', String(height));
+        rect.setAttribute('rx', '3');
+        rect.setAttribute('fill', WEEK_DOW[index] === weekday ? '#111111' : '#ff7a18');
+        svg.append(rect);
+      });
+      return svg;
+    }
+
+    function openSheet(id) {
+      const city = homeCity();
+      const venue = city.venues.find((item) => item.id === id);
+      if (!venue) return;
+      const hour = activeHour(city);
+      const percent = venue.curve[hour];
+      const body = document.getElementById('sheet-body');
+      body.replaceChildren();
+      const save = document.createElement('button');
+      save.type = 'button';
+      save.className = 'sheet-save';
+      const saved = savedIds().indexOf(venue.id) !== -1;
+      save.classList.toggle('is-on', saved);
+      save.setAttribute('aria-label', saved ? 'Saved' : 'Save');
+      save.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7-4.4-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 3.3c0 4.8-7 9.2-7 9.2z"/></svg>';
+      save.addEventListener('click', () => {
+        const ids = savedIds().filter((item) => item !== venue.id);
+        const on = save.classList.toggle('is-on');
+        if (on) ids.push(venue.id);
+        try { localStorage.setItem('fd-saved', JSON.stringify(ids)); } catch (err) {}
+        save.setAttribute('aria-label', on ? 'Saved' : 'Save');
+      });
+      const title = document.createElement('h3');
+      title.id = 'sheet-title';
+      title.textContent = venue.name;
+      const badge = document.createElement('p');
+      badge.className = 'forecast-badge';
+      badge.textContent = percent + '% · ' + bandFrom(percent, venue.conf);
+      body.append(save, title, badge);
+      if (venue.live) {
+        const dot = document.createElement('span');
+        dot.className = 'live-dot';
+        dot.setAttribute('aria-label', 'Live');
+        body.append(dot);
+      }
+      body.append(curveSvg(venue.curve, hour));
+      const weekLabel = document.createElement('p');
+      weekLabel.className = 'rank-note';
+      weekLabel.textContent = 'This week';
+      body.append(weekLabel, weekSvg(venue.week, city.weekday));
+      const hours = document.createElement('p');
+      hours.textContent = venue.hoursText;
+      body.append(hours);
+      if (venue.verified) {
+        const verified = document.createElement('p');
+        verified.className = 'verified';
+        verified.textContent = 'verified';
+        body.append(verified);
+      }
+      if (venue.event) {
+        const event = document.createElement('p');
+        if (venue.eventUrl) {
+          const link = document.createElement('a');
+          link.href = venue.eventUrl;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = venue.event;
+          event.append(link);
+        } else event.textContent = venue.event;
+        body.append(event);
+      }
+      if (venue.features.length) {
+        const label = document.createElement('p');
+        label.className = 'reviews-label';
+        label.textContent = 'From reviews';
+        const list = document.createElement('ul');
+        list.className = 'features';
+        venue.features.forEach((feature) => {
+          const item = document.createElement('li');
+          item.textContent = feature;
+          list.append(item);
+        });
+        body.append(label, list);
+      }
+      if (venue.addr) {
+        const query = encodeURIComponent(venue.name + ' ' + venue.addr);
+        const maps = document.createElement('p');
+        maps.className = 'maps';
+        const google = document.createElement('a');
+        google.href = 'https://www.google.com/maps/search/?api=1&query=' + query;
+        google.target = '_blank';
+        google.rel = 'noopener noreferrer';
+        google.textContent = 'Google Maps';
+        const apple = document.createElement('a');
+        apple.href = 'https://maps.apple.com/?q=' + query;
+        apple.target = '_blank';
+        apple.rel = 'noopener noreferrer';
+        apple.textContent = 'Apple Maps';
+        maps.append(google, document.createTextNode(' '), apple);
+        body.append(maps);
+      }
+      document.getElementById('venue-sheet').classList.remove('is-full');
+      document.getElementById('sheet-back').hidden = false;
+    }
+
+    function closeSheet() {
+      document.getElementById('sheet-back').hidden = true;
+    }
+
+    function drawMap() {
+      const city = homeCity();
+      const hour = activeHour(city);
+      const venues = tonightList(city).filter((venue) => venue.lat != null && venue.lon != null);
+      const map = document.getElementById('tonight-map');
+      map.replaceChildren();
+      if (!venues.length) return;
+      let minLat = Infinity;
+      let maxLat = -Infinity;
+      let minLon = Infinity;
+      let maxLon = -Infinity;
+      venues.forEach((venue) => {
+        minLat = Math.min(minLat, venue.lat);
+        maxLat = Math.max(maxLat, venue.lat);
+        minLon = Math.min(minLon, venue.lon);
+        maxLon = Math.max(maxLon, venue.lon);
+      });
+      if (minLat === maxLat) { minLat -= 0.01; maxLat += 0.01; }
+      if (minLon === maxLon) { minLon -= 0.01; maxLon += 0.01; }
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 100 100');
+      venues.forEach((venue) => {
+        const circle = document.createElementNS(svg.namespaceURI, 'circle');
+        circle.setAttribute('class', 'pin');
+        circle.setAttribute('cx', String(((venue.lon - minLon) / (maxLon - minLon)) * 84 + 8));
+        circle.setAttribute('cy', String((1 - (venue.lat - minLat) / (maxLat - minLat)) * 84 + 8));
+        circle.setAttribute('r', '2.4');
+        circle.setAttribute('tabindex', '0');
+        circle.setAttribute('role', 'button');
+        circle.setAttribute('aria-label', venue.name + ', ' + venue.curve[hour] + '%');
+        circle.addEventListener('click', () => openSheet(venue.id));
+        svg.append(circle);
+      });
+      map.append(svg);
+    }
+
+    function onVenueClick(event) {
+      const row = event.target.closest('[data-venue]');
+      if (!row) return;
+      openSheet(row.getAttribute('data-venue'));
+    }
+
+    document.getElementById('tonight-list').addEventListener('click', onVenueClick);
+    document.getElementById('weekend-list').addEventListener('click', onVenueClick);
+    document.getElementById('vibe-row').addEventListener('click', (event) => {
+      const chip = event.target.closest('[data-vibe]');
+      if (!chip) return;
+      const id = chip.getAttribute('data-vibe');
+      vibeId = vibeId === id ? null : id;
+      renderHome();
+    });
+    document.getElementById('map-toggle').addEventListener('click', () => {
+      mapOn = !mapOn;
+      document.getElementById('tonight-map').hidden = !mapOn;
+      document.getElementById('map-toggle').setAttribute('aria-pressed', mapOn ? 'true' : 'false');
+      if (mapOn) drawMap();
+    });
+    document.getElementById('city-rail').addEventListener('click', (event) => {
+      const card = event.target.closest('[data-pick-city]');
+      if (!card) return;
+      event.preventDefault();
+      chooseCity(card.getAttribute('data-pick-city'), true);
+    });
+    document.getElementById('city-pill').addEventListener('click', () => {
+      const picker = document.getElementById('city-picker');
+      const open = picker.hidden;
+      picker.hidden = !open;
+      document.getElementById('city-pill').setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) renderPicker();
+    });
+    document.getElementById('city-picker-search').addEventListener('input', renderPicker);
+    document.getElementById('more-city-search').addEventListener('input', renderCityRail);
+    document.getElementById('city-picker-search').form.addEventListener('submit', (event) => event.preventDefault());
+    document.getElementById('more-city-search').form.addEventListener('submit', (event) => event.preventDefault());
+    document.addEventListener('click', (event) => {
+      const picker = document.getElementById('city-picker');
+      if (picker.hidden) return;
+      if (event.target.closest('#city-picker') || event.target.closest('#city-pill')) return;
+      picker.hidden = true;
+      document.getElementById('city-pill').setAttribute('aria-expanded', 'false');
+    });
+    document.getElementById('sheet-back').addEventListener('click', (event) => {
+      if (event.target.id === 'sheet-back') closeSheet();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeSheet();
+    });
+    const sheetHandle = document.getElementById('sheet-handle');
+    let dragY = 0;
+    sheetHandle.addEventListener('pointerdown', (event) => {
+      dragY = event.clientY;
+      sheetHandle.setPointerCapture(event.pointerId);
+    });
+    sheetHandle.addEventListener('pointerup', (event) => {
+      const dy = event.clientY - dragY;
+      if (dy > 72) closeSheet();
+      else if (dy < -36) document.getElementById('venue-sheet').classList.add('is-full');
+    });
+
+    renderHome();
+    let seenHour = activeHour(homeCity());
+    setInterval(() => {
+      const hour = activeHour(homeCity());
+      if (hour === seenHour) return;
+      seenHour = hour;
+      renderHome();
+    }, 60000);
+    let hadCity = false;
+    try { hadCity = Boolean(localStorage.getItem('fd-city')); } catch (err) {}
+    if (!hadCity && navigator.geolocation) {
+      document.getElementById('city-pill-label').textContent = 'Detecting…';
+      navigator.geolocation.getCurrentPosition((pos) => {
+        here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        const nearest = tonight.cities.slice().sort((a, b) => distanceKm(here, a) - distanceKm(here, b))[0];
+        if (nearest) chooseCity(nearest.id, false);
+        else document.getElementById('city-pill-label').textContent = homeCity().name;
+      }, () => {
+        document.getElementById('city-pill-label').textContent = homeCity().name;
+      }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
     }
 
     window.addEventListener('hashchange', showView);
