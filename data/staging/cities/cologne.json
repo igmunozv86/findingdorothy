@@ -1,0 +1,263 @@
+{
+  "meta": {
+    "slug": "cologne",
+    "name": "Cologne",
+    "country": "Germany",
+    "region": "Europe",
+    "gayborhood": "Schaafenstraße",
+    "lat": 50.9375,
+    "lon": 6.9603,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Europe/Berlin"
+  },
+  "venues": [
+    {
+      "id": "cologne-iron",
+      "name": "Iron Cocktail Lounge",
+      "category": "bar",
+      "neighborhood": "Schaafenstraße",
+      "address": "Schaafenstraße 45, 50676 Köln",
+      "lat": 50.9347297,
+      "lon": 6.9412198,
+      "hours": {
+        "mon": [
+          "17:00",
+          "02:00"
+        ],
+        "tue": [
+          "18:00",
+          "02:00"
+        ],
+        "wed": [
+          "19:00",
+          "03:00"
+        ],
+        "thu": [
+          "18:00",
+          "02:00"
+        ],
+        "fri": [
+          "20:00",
+          "06:00"
+        ],
+        "sat": [
+          "20:00",
+          "06:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Cocktails",
+        "Karaoke on Wednesday",
+        "Dancing later on Schaafenstraße"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.iron-rona.de/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "cologne-mumu",
+      "name": "Die Mumu",
+      "category": "bar",
+      "neighborhood": "Schaafenstraße",
+      "address": "Schaafenstraße 51, 50676 Köln",
+      "lat": 50.9347274,
+      "lon": 6.9409557,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Party bar on Schaafenstraße",
+        "Central coat check on weekends",
+        "Karaoke on Tuesday"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "cologne-schampanja",
+      "name": "Schampanja",
+      "category": "bar",
+      "neighborhood": "Bermuda-Dreieck",
+      "address": "Mauritiuswall 43, 50676 Köln",
+      "lat": 50.9343289,
+      "lon": 6.9405206,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Gay pub since 1985",
+        "Kölsch and a changing soundtrack",
+        "Open every day"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "cologne-excorner",
+      "name": "ExCorner",
+      "category": "bar",
+      "neighborhood": "Schaafenstraße",
+      "address": "Schaafenstraße 57-59, 50676 Köln",
+      "lat": 50.9346795,
+      "lon": 6.940759,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Corner bar on Schaafenstraße",
+        "Named by Die Mumu as a neighbor"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "cologne-phoenix",
+      "name": "Phoenix Sauna",
+      "category": "sauna",
+      "neighborhood": "Rudolfplatz",
+      "address": "Richard-Wagner-Straße 12, 50674 Köln",
+      "lat": 50.9356145,
+      "lon": 6.9358077,
+      "hours": {
+        "mon": [
+          "12:00",
+          "06:00"
+        ],
+        "tue": [
+          "12:00",
+          "06:00"
+        ],
+        "wed": [
+          "12:00",
+          "06:00"
+        ],
+        "thu": [
+          "12:00",
+          "06:00"
+        ],
+        "fri": [
+          "12:00",
+          "06:00"
+        ],
+        "sat": [
+          "06:00",
+          "06:00"
+        ],
+        "sun": [
+          "06:00",
+          "06:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Men’s sauna open 365 days",
+        "Cruising labyrinth and cabins",
+        "Whirlpool and steam"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://koeln.phoenixsaunen.net/english/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "cologne-babylon",
+      "name": "Babylon Sauna",
+      "category": "sauna",
+      "neighborhood": "Friesenplatz",
+      "address": "Friesenstraße 23-25, 50670 Köln",
+      "lat": 50.9408209,
+      "lon": 6.9447898,
+      "hours": {
+        "mon": [
+          "10:00",
+          "06:00"
+        ],
+        "tue": [
+          "10:00",
+          "06:00"
+        ],
+        "wed": [
+          "10:00",
+          "06:00"
+        ],
+        "thu": [
+          "10:00",
+          "06:00"
+        ],
+        "fri": [
+          "10:00",
+          "06:00"
+        ],
+        "sat": [
+          "06:00",
+          "06:00"
+        ],
+        "sun": [
+          "06:00",
+          "06:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Finnish sauna and a courtyard pool",
+        "Cruising area",
+        "Open 365 days"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://babylon-cologne.de/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "cologne-pullermanns",
+      "name": "Pullermanns",
+      "category": "cruise",
+      "neighborhood": "Mathiasstraße",
+      "address": "Mathiasstraße 22, 50676 Köln",
+      "lat": 50.9332708,
+      "lon": 6.9594419,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Gay cruising and fetish bar",
+        "Open since 1972",
+        "Leather, rubber, and naked welcome"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "cologne-deck5",
+      "name": "Deck5",
+      "category": "cruise",
+      "neighborhood": "Mathiasstraße",
+      "address": "Mathiasstraße 5, 50676 Köln",
+      "lat": 50.9325575,
+      "lon": 6.9590853,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Cruising bar with a darkroom",
+        "One of two cruising bars named with Pullermanns"
+      ],
+      "instagram": null,
+      "sources": []
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

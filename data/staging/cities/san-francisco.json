@@ -1,0 +1,439 @@
+{
+  "meta": {
+    "slug": "san-francisco",
+    "name": "San Francisco",
+    "country": "USA",
+    "region": "North America",
+    "gayborhood": "The Castro",
+    "lat": 37.7749,
+    "lon": -122.4194,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "America/Los_Angeles"
+  },
+  "venues": [
+    {
+      "id": "san-francisco-steamworks",
+      "name": "Steamworks",
+      "category": "sauna",
+      "neighborhood": "Berkeley",
+      "address": "2107 4th St, Berkeley, CA 94710",
+      "lat": 37.8659136,
+      "lon": -122.2991364,
+      "hours": "24h",
+      "hours_verified": true,
+      "review_features": [
+        "Open 24 hours",
+        "Men's bathhouse",
+        "Lockers and rooms"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.steamworksbaths.com/berkeley",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "san-francisco-twin-peaks",
+      "name": "Twin Peaks Tavern",
+      "category": "bar",
+      "neighborhood": "Castro",
+      "address": "401 Castro St, San Francisco, CA 94114",
+      "lat": 37.7624007,
+      "lon": -122.434998,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Castro people-watching",
+        "Older regulars",
+        "Irish coffee"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "san-francisco-the-edge",
+      "name": "The Edge",
+      "category": "bar",
+      "neighborhood": "Castro",
+      "address": "4149 18th St, San Francisco, CA 94114",
+      "lat": 37.7607436,
+      "lon": -122.4359987,
+      "hours": {
+        "mon": [
+          "14:00",
+          "02:00"
+        ],
+        "tue": [
+          "14:00",
+          "01:00"
+        ],
+        "wed": [
+          "14:00",
+          "02:00"
+        ],
+        "thu": [
+          "14:00",
+          "01:00"
+        ],
+        "fri": [
+          "14:00",
+          "02:00"
+        ],
+        "sat": [
+          "12:00",
+          "02:00"
+        ],
+        "sun": [
+          "12:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Happy hour",
+        "Show-tune nights",
+        "Neighborhood crowd"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://edgesf.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "san-francisco-hi-tops",
+      "name": "Hi Tops",
+      "category": "bar",
+      "neighborhood": "Castro",
+      "address": "2247 Market St, San Francisco, CA 94114",
+      "lat": 37.7649986,
+      "lon": -122.4318228,
+      "hours": {
+        "mon": [
+          "12:00",
+          "00:00"
+        ],
+        "tue": [
+          "12:00",
+          "00:00"
+        ],
+        "wed": [
+          "12:00",
+          "00:00"
+        ],
+        "thu": [
+          "12:00",
+          "02:00"
+        ],
+        "fri": [
+          "12:00",
+          "02:00"
+        ],
+        "sat": [
+          "10:00",
+          "02:00"
+        ],
+        "sun": [
+          "10:00",
+          "00:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Sports on TV",
+        "Bar food",
+        "Trivia night"
+      ],
+      "instagram": "@hitopssf",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://hitopsbar.com/san-francisco/",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/hitopssf",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "san-francisco-440-castro",
+      "name": "440 Castro",
+      "category": "bar",
+      "neighborhood": "Castro",
+      "address": "440 Castro St, San Francisco, CA 94114",
+      "lat": 37.7619126,
+      "lon": -122.4352015,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Loud dance floor",
+        "Younger crowd"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "san-francisco-badlands",
+      "name": "Badlands",
+      "category": "bar",
+      "neighborhood": "Castro",
+      "address": "4121 18th St, San Francisco, CA 94114",
+      "lat": 37.7606735,
+      "lon": -122.4354919,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Packed dance floor",
+        "Music videos",
+        "Weekend lines"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "san-francisco-lookout",
+      "name": "Lookout",
+      "category": "bar",
+      "neighborhood": "Castro",
+      "address": "3600 16th St, San Francisco, CA 94114",
+      "lat": 37.7643689,
+      "lon": -122.4333114,
+      "hours": {
+        "mon": [
+          "15:30",
+          "02:00"
+        ],
+        "tue": [
+          "15:30",
+          "00:00"
+        ],
+        "wed": [
+          "15:30",
+          "00:00"
+        ],
+        "thu": [
+          "15:30",
+          "02:00"
+        ],
+        "fri": [
+          "15:30",
+          "02:00"
+        ],
+        "sat": [
+          "12:00",
+          "02:00"
+        ],
+        "sun": [
+          "13:00",
+          "00:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Market Street balcony",
+        "Drag brunch",
+        "DJs"
+      ],
+      "instagram": "@lookoutsf",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.lookoutsf.com/",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/lookoutsf",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "san-francisco-eagle",
+      "name": "SF Eagle",
+      "category": "cruise",
+      "neighborhood": "SoMa",
+      "address": "398 12th St, San Francisco, CA 94103",
+      "lat": 37.7699933,
+      "lon": -122.4133375,
+      "hours": {
+        "mon": [
+          "18:00",
+          "00:00"
+        ],
+        "wed": [
+          "18:00",
+          "00:00"
+        ],
+        "thu": [
+          "18:00",
+          "00:00"
+        ],
+        "fri": [
+          "14:00",
+          "02:00"
+        ],
+        "sat": [
+          "14:00",
+          "02:00"
+        ],
+        "sun": [
+          "13:00",
+          "00:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Heated patio",
+        "Leather crowd",
+        "Sunday beer bust"
+      ],
+      "instagram": "@sfeagle",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://sf-eagle.com/visit/",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/sfeagle",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "san-francisco-powerhouse",
+      "name": "Powerhouse",
+      "category": "cruise",
+      "neighborhood": "SoMa",
+      "address": "1347 Folsom St, San Francisco, CA 94103",
+      "lat": 37.7731291,
+      "lon": -122.4121937,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Dark cruise bar",
+        "Back room",
+        "Underwear night"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "san-francisco-el-rio",
+      "name": "El Rio",
+      "category": "bar",
+      "neighborhood": "Mission",
+      "address": "3158 Mission St, San Francisco, CA 94110",
+      "lat": 37.7467497,
+      "lon": -122.4193292,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Big patio",
+        "Mixed crowd",
+        "Backyard dancing"
+      ],
+      "instagram": "@elriosf",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/elriosf",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "san-francisco-hole-in-the-wall",
+      "name": "Hole in the Wall",
+      "category": "cruise",
+      "neighborhood": "SoMa",
+      "address": "1369 Folsom St, San Francisco, CA 94103",
+      "lat": 37.7729234,
+      "lon": -122.4124752,
+      "hours": {
+        "mon": [
+          "14:00",
+          "02:00"
+        ],
+        "tue": [
+          "14:00",
+          "02:00"
+        ],
+        "wed": [
+          "14:00",
+          "02:00"
+        ],
+        "thu": [
+          "14:00",
+          "02:00"
+        ],
+        "fri": [
+          "14:00",
+          "02:00"
+        ],
+        "sat": [
+          "12:00",
+          "02:00"
+        ],
+        "sun": [
+          "12:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Biker dive",
+        "Cash only",
+        "Older regulars"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.hitws.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "san-francisco-eros",
+      "name": "Eros",
+      "category": "sex",
+      "neighborhood": "Tenderloin",
+      "address": "132 Turk St, San Francisco, CA 94102",
+      "lat": 37.7833878,
+      "lon": -122.4114666,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Cash only",
+        "Lockers and play spaces",
+        "18 and over"
+      ],
+      "instagram": "@club.eros.sf",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/club.eros.sf",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

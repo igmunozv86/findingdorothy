@@ -1,0 +1,338 @@
+{
+  "meta": {
+    "slug": "miami",
+    "name": "Miami",
+    "country": "USA",
+    "region": "North America",
+    "gayborhood": "South Beach, Wilton Manors",
+    "lat": 25.7742,
+    "lon": -80.1936,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "America/New_York"
+  },
+  "venues": [
+    {
+      "id": "miami-twist",
+      "name": "Twist",
+      "category": "bar",
+      "neighborhood": "South Beach",
+      "address": "1057 Washington Ave, Miami Beach, FL",
+      "lat": 25.7816709,
+      "lon": -80.1323109,
+      "hours": {
+        "mon": [
+          "15:00",
+          "05:00"
+        ],
+        "tue": [
+          "15:00",
+          "05:00"
+        ],
+        "wed": [
+          "15:00",
+          "05:00"
+        ],
+        "thu": [
+          "15:00",
+          "05:00"
+        ],
+        "fri": [
+          "15:00",
+          "05:00"
+        ],
+        "sat": [
+          "15:00",
+          "05:00"
+        ],
+        "sun": [
+          "15:00",
+          "05:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Seven themed bars in one venue",
+        "Open until 5 AM",
+        "2-for-1 happy hour 15:00-21:00"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "http://www.twistsobe.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "miami-georgies-alibi-monkey-bar",
+      "name": "Georgie's Alibi Monkey Bar",
+      "category": "bar",
+      "neighborhood": "Wilton Manors",
+      "address": "2266 Wilton Dr, Wilton Manors, FL",
+      "lat": 26.1566729,
+      "lon": -80.137769,
+      "hours": {
+        "sun": [
+          "11:00",
+          "02:00"
+        ],
+        "mon": [
+          "11:00",
+          "02:00"
+        ],
+        "tue": [
+          "11:00",
+          "02:00"
+        ],
+        "wed": [
+          "11:00",
+          "02:00"
+        ],
+        "thu": [
+          "11:00",
+          "02:00"
+        ],
+        "fri": [
+          "11:00",
+          "03:00"
+        ],
+        "sat": [
+          "11:00",
+          "03:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Video bar with outdoor patio",
+        "Drag shows",
+        "Restaurant and grill"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "http://www.alibiwiltonmanors.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "miami-palace-bar-restaurant",
+      "name": "Palace Bar & Restaurant",
+      "category": "bar",
+      "neighborhood": "South Beach",
+      "address": "1052 Ocean Dr, Miami Beach, FL",
+      "lat": 25.7812488,
+      "lon": -80.130772,
+      "hours": {
+        "sun": [
+          "11:00",
+          "02:00"
+        ],
+        "fri": [
+          "11:00",
+          "02:00"
+        ],
+        "sat": [
+          "11:00",
+          "02:00"
+        ],
+        "mon": [
+          "11:00",
+          "01:00"
+        ],
+        "tue": [
+          "11:00",
+          "01:00"
+        ],
+        "wed": [
+          "11:00",
+          "01:00"
+        ],
+        "thu": [
+          "11:00",
+          "01:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Drag shows and drag brunch",
+        "Ocean Drive location",
+        "Rooftop"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "http://www.palacesouthbeach.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "miami-eagle-wilton-manors",
+      "name": "Eagle Wilton Manors",
+      "category": "bar",
+      "neighborhood": "Wilton Manors",
+      "address": "2209 Wilton Dr, Wilton Manors, FL",
+      "lat": 26.1561753,
+      "lon": -80.1386854,
+      "hours": {
+        "sun": [
+          "17:00",
+          "02:00"
+        ],
+        "mon": [
+          "19:00",
+          "02:00"
+        ],
+        "tue": [
+          "19:00",
+          "02:00"
+        ],
+        "wed": [
+          "19:00",
+          "02:00"
+        ],
+        "thu": [
+          "19:00",
+          "02:00"
+        ],
+        "fri": [
+          "17:00",
+          "03:00"
+        ],
+        "sat": [
+          "17:00",
+          "03:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Leather bar",
+        "Three rooms including Bear Cave",
+        "Cigar nights"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "http://eaglebarwm.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "miami-hunters-nightclub",
+      "name": "Hunters Nightclub",
+      "category": "bar",
+      "neighborhood": "Wilton Manors",
+      "address": "2232-2238 Wilton Dr, Wilton Manors, FL",
+      "lat": 26.1562656,
+      "lon": -80.1383149,
+      "hours": {
+        "sun": [
+          "14:00",
+          "02:00"
+        ],
+        "mon": [
+          "15:00",
+          "02:00"
+        ],
+        "tue": [
+          "15:00",
+          "02:00"
+        ],
+        "wed": [
+          "15:00",
+          "02:00"
+        ],
+        "thu": [
+          "15:00",
+          "02:00"
+        ],
+        "fri": [
+          "15:00",
+          "03:00"
+        ],
+        "sat": [
+          "14:00",
+          "03:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Large dance floor with video screens",
+        "Sunday Classic T-Dance",
+        "Karaoke nights"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.huntersftlauderdale.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "miami-gaythering-mens-sauna",
+      "name": "Men's Sauna at Hotel Gaythering",
+      "category": "sauna",
+      "neighborhood": "South Beach",
+      "address": "1409 Lincoln Rd Ste 1, Miami Beach, FL",
+      "lat": 25.7906077,
+      "lon": -80.143935,
+      "hours": {
+        "sun": [
+          "12:00",
+          "00:00"
+        ],
+        "mon": [
+          "12:00",
+          "00:00"
+        ],
+        "tue": [
+          "12:00",
+          "00:00"
+        ],
+        "wed": [
+          "12:00",
+          "00:00"
+        ],
+        "thu": [
+          "12:00",
+          "00:00"
+        ],
+        "fri": [
+          "12:00",
+          "04:00"
+        ],
+        "sat": [
+          "12:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Men-only sauna",
+        "Jacuzzi, steam room, dry sauna",
+        "Day passes available"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "http://www.gaythering.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

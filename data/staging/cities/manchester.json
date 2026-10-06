@@ -1,0 +1,265 @@
+{
+  "meta": {
+    "slug": "manchester",
+    "name": "Manchester",
+    "country": "UK",
+    "region": "Europe",
+    "gayborhood": "Canal Street",
+    "lat": 53.4425,
+    "lon": -2.2325,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Europe/London"
+  },
+  "venues": [
+    {
+      "id": "manchester-via",
+      "name": "Via",
+      "category": "bar",
+      "neighborhood": "Canal Street",
+      "address": "28-30 Canal St, M1 3EZ Manchester",
+      "lat": 53.4772069,
+      "lon": -2.2367595,
+      "hours": {
+        "mon": [
+          "12:00",
+          "02:00"
+        ],
+        "tue": [
+          "12:00",
+          "02:00"
+        ],
+        "wed": [
+          "12:00",
+          "02:00"
+        ],
+        "thu": [
+          "12:00",
+          "02:00"
+        ],
+        "fri": [
+          "12:00",
+          "04:00"
+        ],
+        "sat": [
+          "12:00",
+          "04:00"
+        ],
+        "sun": [
+          "12:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Open since 1995",
+        "Drag shows and cabaret",
+        "Sunday roast"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.viamanchester.co.uk/manchester",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "manchester-cruz101",
+      "name": "Cruz 101",
+      "category": "bar",
+      "neighborhood": "Canal Street",
+      "address": "101 Princess St, M1 6DD Manchester",
+      "lat": 53.4772188,
+      "lon": -2.2396365,
+      "hours": {
+        "tue": [
+          "00:00",
+          "07:00"
+        ],
+        "wed": [
+          "00:00",
+          "07:00"
+        ],
+        "thu": [
+          "00:00",
+          "07:00"
+        ],
+        "fri": [
+          "23:00",
+          "08:00"
+        ],
+        "sat": [
+          "23:00",
+          "08:00"
+        ],
+        "sun": [
+          "00:00",
+          "07:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Sub 101 basement room",
+        "Pop and house floors",
+        "18+ photo ID required"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.cruz101.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "manchester-eagle",
+      "name": "Eagle Bar Manchester",
+      "category": "sex",
+      "neighborhood": "Canal Street",
+      "address": "15 Bloom St, M1 3HZ Manchester",
+      "lat": 53.4776882,
+      "lon": -2.2368676,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Men-only cruising bar",
+        "Dark room downstairs",
+        "Bear and leather crowd"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "manchester-brewers",
+      "name": "The Brewers",
+      "category": "bar",
+      "neighborhood": "Canal Street",
+      "address": "4 Canal St, M1 3HE Manchester",
+      "lat": 53.4778586,
+      "lon": -2.2356388,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Two floors",
+        "Drag shows and DJs",
+        "2-for-1 cocktails"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "manchester-rembrandt",
+      "name": "The Rembrandt",
+      "category": "bar",
+      "neighborhood": "Canal Street",
+      "address": "33 Sackville St, M1 3LZ Manchester",
+      "lat": 53.4770874,
+      "lon": -2.2369887,
+      "hours": {
+        "mon": [
+          "13:00",
+          "00:30"
+        ],
+        "tue": [
+          "13:00",
+          "00:30"
+        ],
+        "wed": [
+          "13:00",
+          "00:30"
+        ],
+        "thu": [
+          "13:00",
+          "00:30"
+        ],
+        "fri": [
+          "13:00",
+          "02:30"
+        ],
+        "sat": [
+          "12:00",
+          "02:30"
+        ],
+        "sun": [
+          "12:00",
+          "00:30"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Original gay men's bar",
+        "Outdoor terrace",
+        "Drag shows and retro music"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.therembrandtmanchester.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "manchester-barpop",
+      "name": "Bar Pop",
+      "category": "bar",
+      "neighborhood": "Canal Street",
+      "address": "10 Canal St, M1 3EZ Manchester",
+      "lat": 53.4774037,
+      "lon": -2.2365898,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Poptastic club night",
+        "Drag cabaret and karaoke",
+        "Late-night outdoor seating"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "manchester-taurus",
+      "name": "Taurus",
+      "category": "bar",
+      "neighborhood": "Canal Street",
+      "address": "1 Canal St, M1 3HE Manchester",
+      "lat": 53.4780601,
+      "lon": -2.2353133,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Cocktail bar and restaurant",
+        "Relaxed, unpretentious vibe",
+        "Art exhibitions and theatre"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "manchester-gay",
+      "name": "G-A-Y Manchester",
+      "category": "bar",
+      "neighborhood": "Canal Street",
+      "address": "63 Richmond St, M1 3WB Manchester",
+      "lat": 53.4766206,
+      "lon": -2.237979,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "3 floors plus rooftop terrace",
+        "Cheap drinks, chart pop",
+        "Young crowd"
+      ],
+      "instagram": null,
+      "sources": []
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

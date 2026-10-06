@@ -83,6 +83,27 @@ CREATE TABLE venue_links (
   PRIMARY KEY (old_venue_id, new_venue_id)
 );
 
+-- Pride calendar. Phase 0 reads data/pride-events.json, same fields.
+-- A date ships only when the organizer's own page states that year's dates.
+-- Do not project next year from a tradition such as "the last weekend in June".
+CREATE TABLE calendar_events (
+  id TEXT PRIMARY KEY,
+  parent_id TEXT REFERENCES calendar_events(id),
+  kind TEXT NOT NULL, -- pride-week | parade | festival
+  name TEXT NOT NULL,
+  city_id TEXT NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  place TEXT,
+  note TEXT,
+  source_url TEXT NOT NULL,
+  source_name TEXT NOT NULL,
+  retrieved_at DATE NOT NULL,
+  CHECK (end_date >= start_date),
+  CHECK (kind IN ('pride-week', 'parade', 'festival')),
+  CHECK (source_url ~ '^https://')
+);
+
 CREATE INDEX idx_signals_venue ON signals(venue_id);
 CREATE INDEX idx_live_signals_venue_ts ON live_signals(venue_id, ts DESC);
 CREATE INDEX idx_predictions_venue_ts ON predictions(venue_id, ts DESC);

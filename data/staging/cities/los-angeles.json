@@ -1,0 +1,320 @@
+{
+  "meta": {
+    "slug": "los-angeles",
+    "name": "Los Angeles",
+    "country": "USA",
+    "region": "North America",
+    "gayborhood": "West Hollywood",
+    "lat": 34.0537,
+    "lon": -118.2428,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "America/Los_Angeles"
+  },
+  "venues": [
+    {
+      "id": "los-angeles-the-abbey",
+      "name": "The Abbey",
+      "category": "bar",
+      "neighborhood": "West Hollywood",
+      "address": "692 N Robertson Blvd, West Hollywood, CA 90069",
+      "lat": 34.0833871,
+      "lon": -118.385144,
+      "hours": {
+        "mon": [
+          "11:00",
+          "02:00"
+        ],
+        "tue": [
+          "11:00",
+          "02:00"
+        ],
+        "wed": [
+          "11:00",
+          "02:00"
+        ],
+        "thu": [
+          "11:00",
+          "02:00"
+        ],
+        "fri": [
+          "11:00",
+          "02:00"
+        ],
+        "sat": [
+          "10:00",
+          "02:00"
+        ],
+        "sun": [
+          "10:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Large outdoor patio",
+        "Restaurant and bar",
+        "Drag shows at night"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://theabbeyweho.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "los-angeles-mickys",
+      "name": "Micky's",
+      "category": "bar",
+      "neighborhood": "West Hollywood",
+      "address": "8857 Santa Monica Blvd, West Hollywood, CA 90069",
+      "lat": 34.0854465,
+      "lon": -118.383787,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Two-story dance club",
+        "Drag shows and go-go dancers",
+        "Late-night kitchen"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "los-angeles-revolver",
+      "name": "Revolver",
+      "category": "bar",
+      "neighborhood": "West Hollywood",
+      "address": "8851 Santa Monica Blvd, West Hollywood, CA 90069",
+      "lat": 34.0855201,
+      "lon": -118.383621,
+      "hours": {
+        "mon": [
+          "17:00",
+          "02:00"
+        ],
+        "tue": [
+          "17:00",
+          "02:00"
+        ],
+        "wed": [
+          "17:00",
+          "02:00"
+        ],
+        "thu": [
+          "17:00",
+          "02:00"
+        ],
+        "fri": [
+          "17:00",
+          "02:00"
+        ],
+        "sat": [
+          "16:00",
+          "02:00"
+        ],
+        "sun": [
+          "16:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Video bar with go-go dancers",
+        "Karaoke and drink specials",
+        "Gay-owned since 1984"
+      ],
+      "instagram": "@revolverweho",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://revolverweho.com/",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/revolverweho",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "los-angeles-trunks",
+      "name": "Trunks",
+      "category": "bar",
+      "neighborhood": "West Hollywood",
+      "address": "8809 Santa Monica Blvd, West Hollywood, CA",
+      "lat": 34.0858071,
+      "lon": -118.3833317,
+      "hours": {
+        "mon": [
+          "13:00",
+          "02:00"
+        ],
+        "tue": [
+          "13:00",
+          "02:00"
+        ],
+        "wed": [
+          "13:00",
+          "02:00"
+        ],
+        "thu": [
+          "13:00",
+          "02:00"
+        ],
+        "fri": [
+          "13:00",
+          "02:00"
+        ],
+        "sat": [
+          "13:00",
+          "02:00"
+        ],
+        "sun": [
+          "12:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Sports screens",
+        "Outdoor patio",
+        "Pool tables"
+      ],
+      "instagram": "@trunksbar",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://trunksbar.com/",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/trunksbar",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "los-angeles-gym-bar",
+      "name": "GYM Bar WeHo",
+      "category": "bar",
+      "neighborhood": "West Hollywood",
+      "address": "8919 Santa Monica Blvd, West Hollywood, CA 90069",
+      "lat": 34.0847455,
+      "lon": -118.3846841,
+      "hours": {
+        "mon": [
+          "12:00",
+          "00:00"
+        ],
+        "tue": [
+          "12:00",
+          "00:00"
+        ],
+        "wed": [
+          "12:00",
+          "00:00"
+        ],
+        "thu": [
+          "12:00",
+          "00:00"
+        ],
+        "fri": [
+          "12:00",
+          "02:00"
+        ],
+        "sat": [
+          "10:00",
+          "02:00"
+        ],
+        "sun": [
+          "10:00",
+          "00:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Gay sports bar",
+        "15 big-screen TVs",
+        "Karaoke and bar food"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://gymbarweho.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "los-angeles-mother-lode",
+      "name": "Mother Lode",
+      "category": "bar",
+      "neighborhood": "West Hollywood",
+      "address": "8944 Santa Monica Blvd, West Hollywood, CA",
+      "lat": 34.0838612,
+      "lon": -118.38516,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Dive bar, open since 1979",
+        "Karaoke nights",
+        "Pool table"
+      ],
+      "instagram": "@motherlodebar",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/motherlodebar",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "los-angeles-eagle-la",
+      "name": "Eagle LA",
+      "category": "bar",
+      "neighborhood": "Silver Lake",
+      "address": "4219 Santa Monica Blvd, Los Angeles, CA 90029",
+      "lat": 34.0911531,
+      "lon": -118.2839618,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Leather/Levi/fetish bar",
+        "Large outdoor patio",
+        "Pool tables"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "los-angeles-flex-spa",
+      "name": "FLEX Spas Los Angeles",
+      "category": "sauna",
+      "neighborhood": "East Hollywood",
+      "address": "4424 Melrose Avenue, Los Angeles, CA 90029",
+      "lat": 34.0836564,
+      "lon": -118.2968363,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Men-only bathhouse",
+        "Outdoor pool and gym",
+        "Dry sauna and steam"
+      ],
+      "instagram": null,
+      "sources": []
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

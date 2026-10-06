@@ -1,0 +1,162 @@
+{
+  "meta": {
+    "slug": "amsterdam",
+    "name": "Amsterdam",
+    "country": "Netherlands",
+    "region": "Europe",
+    "gayborhood": "Reguliersdwarsstraat",
+    "lat": 52.3731,
+    "lon": 4.8925,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Europe/Amsterdam"
+  },
+  "venues": [
+    {
+      "id": "amsterdam-taboo",
+      "name": "Taboo Bar",
+      "category": "bar",
+      "neighborhood": "Reguliersdwarsstraat",
+      "address": "Reguliersdwarsstraat 45, 1017 BJ Amsterdam",
+      "lat": 52.3664557,
+      "lon": 4.8909886,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Two daily happy hours",
+        "Terrace",
+        "Smoking lounge"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "amsterdam-soho",
+      "name": "SOHO",
+      "category": "bar",
+      "neighborhood": "Reguliersdwarsstraat",
+      "address": "Reguliersdwarsstraat 36, 1017 BM Amsterdam",
+      "lat": 52.3662911,
+      "lon": 4.8909603,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "LGBTQIA+ venue for 20+ years",
+        "Dance bar"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "amsterdam-exit",
+      "name": "Exit Cafe",
+      "category": "bar",
+      "neighborhood": "Reguliersdwarsstraat",
+      "address": "Reguliersdwarsstraat 42, 1017 BL Amsterdam",
+      "lat": 52.3662696,
+      "lon": 4.8913243,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Late-night gay cafe",
+        "Cocktails and shots"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "amsterdam-blend-xl",
+      "name": "Blend XL",
+      "category": "bar",
+      "neighborhood": "Reguliersdwarsstraat",
+      "address": "Reguliersdwarsstraat 44, 1017 BL Amsterdam",
+      "lat": 52.3662189,
+      "lon": 4.8914911,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Drag shows",
+        "Queer dance bar",
+        "Weekly entertainment"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "amsterdam-montmartre",
+      "name": "Cafe Montmartre",
+      "category": "bar",
+      "neighborhood": "Reguliersdwarsstraat",
+      "address": "Reguliersdwarsstraat 129, 1017 BM Amsterdam",
+      "lat": 52.3658704,
+      "lon": 4.8952407,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Gay cafe for 40+ years",
+        "Nederlandstalige muziek",
+        "Monthly theme nights"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "amsterdam-church",
+      "name": "Club Church",
+      "category": "sex",
+      "neighborhood": "Kerkstraat",
+      "address": "Kerkstraat 52, 1017 GM Amsterdam",
+      "lat": 52.3652055,
+      "lon": 4.8856002,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Two floors of dance and play space",
+        "Themed nights (naked, underwear, fetish)",
+        "Admission 10-15 EUR"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "amsterdam-spijker",
+      "name": "Spijker Bar",
+      "category": "bar",
+      "neighborhood": "Kerkstraat",
+      "address": "Kerkstraat 4, 1017 GP Amsterdam",
+      "lat": 52.3662362,
+      "lon": 4.8839483,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Darkroom",
+        "Pool table",
+        "Speakeasy-style gay bar"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "amsterdam-blend",
+      "name": "Bar BLEND",
+      "category": "bar",
+      "neighborhood": "Reguliersdwarsstraat",
+      "address": "Reguliersdwarsstraat 41, 1017 BJ Amsterdam",
+      "lat": 52.3664654,
+      "lon": 4.8908277,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Sunny terrace",
+        "Drag queens",
+        "Open since July 2019"
+      ],
+      "instagram": null,
+      "sources": []
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

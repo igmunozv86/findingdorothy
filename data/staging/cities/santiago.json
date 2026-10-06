@@ -1,0 +1,155 @@
+{
+  "meta": {
+    "slug": "santiago",
+    "name": "Santiago",
+    "country": "Chile",
+    "region": "Latin America",
+    "gayborhood": "Bellavista",
+    "lat": -33.4489,
+    "lon": -70.6693,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "America/Santiago"
+  },
+  "venues": [
+    {
+      "id": "santiago-fausto",
+      "name": "Fausto",
+      "category": "bar",
+      "neighborhood": "Providencia",
+      "address": "Av. Santa María 832, Providencia, Santiago, Chile",
+      "lat": -33.42978,
+      "lon": -70.625254,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Two dance floors",
+        "Drag shows",
+        "Gay disco"
+      ],
+      "instagram": "@faustochile",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/faustochile",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "santiago-dionisio",
+      "name": "Dionisio",
+      "category": "bar",
+      "neighborhood": "Bellavista",
+      "address": "Bombero Núñez 111, Recoleta, Santiago, Chile",
+      "lat": -33.432781,
+      "lon": -70.639982,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Drag and shows",
+        "Neighborhood bar"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "santiago-illuminati",
+      "name": "Illuminati",
+      "category": "bar",
+      "neighborhood": "Bellavista",
+      "address": "Antonia López de Bello 133, Recoleta, Santiago, Chile",
+      "lat": -33.431797,
+      "lon": -70.639282,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Pop music",
+        "Theme nights",
+        "Younger crowd"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "santiago-club-soda",
+      "name": "Club Soda",
+      "category": "bar",
+      "neighborhood": "Bellavista",
+      "address": "Antonia López de Bello 125, Recoleta, Santiago, Chile",
+      "lat": -33.431682,
+      "lon": -70.639093,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Late-night dancing",
+        "DJs",
+        "Patio"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "santiago-sauna-282",
+      "name": "Sauna 282",
+      "category": "sauna",
+      "neighborhood": "Bellavista",
+      "address": "Bellavista 282, Recoleta, Santiago, Chile",
+      "lat": -33.433223,
+      "lon": -70.643824,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Men's sauna",
+        "Steam and jacuzzi",
+        "Cabins"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "santiago-oasis",
+      "name": "Oasis Spa Club",
+      "category": "sauna",
+      "neighborhood": "Providencia",
+      "address": "Ricardo Matte Pérez 216, Providencia, Santiago, Chile",
+      "lat": -33.439677,
+      "lon": -70.629645,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Men's sauna",
+        "Lockers",
+        "Older crowd"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "santiago-bar-105",
+      "name": "Bar 105",
+      "category": "cruise",
+      "neighborhood": "Bellavista",
+      "address": "Bombero Núñez 105, Recoleta, Santiago, Chile",
+      "lat": -33.433002,
+      "lon": -70.64004,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Fetish nights",
+        "Dark room",
+        "Leather crowd"
+      ],
+      "instagram": null,
+      "sources": []
+    }
+  ],
+  "pride": {
+    "2026": {
+      "date": "2026-06-27",
+      "event_name": "Marcha del Orgullo",
+      "source_url": "https://www.movilh.cl/xxvi-marcha-del-orgullo-convocan-para-el-27-de-junio/"
+    },
+    "2027": null
+  }
+}

@@ -879,6 +879,20 @@ export async function fetchScruffGrindr(_venue, options = {}) {
   return [];
 }
 
+export async function fetchInstagram(_venue, options = {}) {
+  if (options.dryRun) {
+    notePlan(options, redact({
+      source: 'instagram',
+      env: 'NONE',
+      method: 'NONE',
+      url: '',
+      skip: true,
+      note: 'MANUAL_ONLY. Instagram has no public API for a third-party profile. No request is sent. Hours, events, and follower counts are read by a person from the venue profile.',
+    }));
+  }
+  return [];
+}
+
 export async function enrichVenue(venue, options = {}) {
   const plans = [];
   const run = { ...options, plans };
@@ -900,6 +914,7 @@ export async function enrichVenue(venue, options = {}) {
     fetchMisterbnb,
     fetchResidentAdvisor,
     fetchScruffGrindr,
+    fetchInstagram,
   ];
   let stopped = null;
   for (const fetchSource of sources) {
@@ -924,6 +939,7 @@ export async function enrichVenue(venue, options = {}) {
     tripadvisor: 'MANUAL_ONLY',
     resident_advisor: 'MANUAL_ONLY',
     scruff_grindr: 'MANUAL_ONLY',
+    instagram: 'MANUAL_ONLY',
     forums: 'NO_UNIVERSAL_API',
     requests: plans,
     signals,

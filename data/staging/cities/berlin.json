@@ -1,0 +1,226 @@
+{
+  "meta": {
+    "slug": "berlin",
+    "name": "Berlin",
+    "country": "Germany",
+    "region": "Europe",
+    "gayborhood": "Schöneberg, Kreuzberg",
+    "lat": 52.5174,
+    "lon": 13.3951,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Europe/Berlin"
+  },
+  "venues": [
+    {
+      "id": "berlin-kitkatclub",
+      "name": "KitKatClub",
+      "category": "sex",
+      "neighborhood": "Mitte (near Kreuzberg)",
+      "address": "Kopenicker Strasse 76, 10179 Berlin",
+      "lat": 52.5112074,
+      "lon": 13.4169157,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Strict fetish dress code",
+        "Phones and cameras banned",
+        "3 floors plus outdoor pool"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "berlin-boiler",
+      "name": "Boiler Berlin",
+      "category": "sauna",
+      "neighborhood": "Kreuzberg",
+      "address": "Mehringdamm 34, 10961 Berlin",
+      "lat": 52.4936405,
+      "lon": 13.3876998,
+      "hours": {
+        "mon": [
+          "12:00",
+          "06:00"
+        ],
+        "tue": [
+          "12:00",
+          "06:00"
+        ],
+        "wed": [
+          "12:00",
+          "06:00"
+        ],
+        "thu": [
+          "12:00",
+          "06:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Wellness and cruising areas",
+        "In the BKA-Theater basement"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "http://boiler-berlin.de/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "berlin-rauschgold",
+      "name": "Rauschgold",
+      "category": "bar",
+      "neighborhood": "Kreuzberg",
+      "address": "Mehringdamm 62, 10961 Berlin",
+      "lat": 52.490996,
+      "lon": 13.3864183,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Open daily from 20:00",
+        "Kreuzberg venue since 2005",
+        "Berlin DJ sets"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "berlin-melitta",
+      "name": "Melitta Sundstrom",
+      "category": "bar",
+      "neighborhood": "Kreuzberg",
+      "address": "Mehringdamm 61, 10961 Berlin",
+      "lat": 52.4907729,
+      "lon": 13.3873561,
+      "hours": {
+        "mon": [
+          "17:00",
+          "02:00"
+        ],
+        "tue": [
+          "17:00",
+          "02:00"
+        ],
+        "wed": [
+          "17:00",
+          "02:00"
+        ],
+        "thu": [
+          "17:00",
+          "02:00"
+        ],
+        "fri": [
+          "17:00",
+          "04:00"
+        ],
+        "sat": [
+          "17:00",
+          "04:00"
+        ],
+        "sun": [
+          "17:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Cafe by day, bar by night",
+        "Terrace",
+        "Cocktails and cake"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.melitta-sundstroem.de/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "berlin-heile-welt",
+      "name": "Heile Welt",
+      "category": "bar",
+      "neighborhood": "Schoneberg",
+      "address": "Motzstrasse 5, 10777 Berlin",
+      "lat": 52.498605,
+      "lon": 13.351631,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Cocktails",
+        "Smoking room",
+        "Gay and lesbian crowd"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "berlin-bull",
+      "name": "BULL Berlin",
+      "category": "cruise",
+      "neighborhood": "Schoneberg",
+      "address": "Kleiststrasse 35, 10787 Berlin",
+      "lat": 52.5002413,
+      "lon": 13.3493875,
+      "hours": "24h",
+      "hours_verified": true,
+      "review_features": [
+        "Open 24/7",
+        "Darkroom access",
+        "Fetish-friendly"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://bullbar-berlin.de/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "berlin-woof",
+      "name": "Woof Berlin",
+      "category": "bar",
+      "neighborhood": "Schoneberg",
+      "address": "Fuggerstrasse 37, 10777 Berlin",
+      "lat": 52.4990874,
+      "lon": 13.3416676,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Bear bar",
+        "Open since 2006",
+        "International crowd"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "berlin-roses",
+      "name": "Roses",
+      "category": "bar",
+      "neighborhood": "Kreuzberg",
+      "address": "Oranienstrasse 187, 10999 Berlin",
+      "lat": 52.5002973,
+      "lon": 13.4213134,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Late-night bar (opens 22:00)",
+        "Kreuzberg institution"
+      ],
+      "instagram": null,
+      "sources": []
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

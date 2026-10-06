@@ -1,0 +1,162 @@
+{
+  "meta": {
+    "slug": "buenos-aires",
+    "name": "Buenos Aires",
+    "country": "Argentina",
+    "region": "Latin America",
+    "gayborhood": "Palermo",
+    "lat": -34.6096,
+    "lon": -58.3888,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "America/Argentina/Buenos_Aires"
+  },
+  "venues": [
+    {
+      "id": "buenos-aires-peuteo",
+      "name": "Peuteo",
+      "category": "bar",
+      "neighborhood": "Palermo Soho",
+      "address": "Gurruchaga 1867",
+      "lat": -34.5878033,
+      "lon": -58.426564,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Opens 19:00, before midnight",
+        "Creative cocktails",
+        "Drag and karaoke nights"
+      ],
+      "instagram": "@peuteopalermosoho",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/peuteopalermosoho",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "buenos-aires-amerika",
+      "name": "Amerika",
+      "category": "bar",
+      "neighborhood": "Almagro",
+      "address": "Gascón 1040",
+      "lat": -34.5982211,
+      "lon": -58.4235423,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Three dance floors",
+        "Capacity around 1,866",
+        "Open-bar nights"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "buenos-aires-contramano",
+      "name": "Contramano",
+      "category": "bar",
+      "neighborhood": "Recoleta",
+      "address": "Rodríguez Peña 1082",
+      "lat": -34.5961064,
+      "lon": -58.3920195,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Bear bar since the 1980s",
+        "Men-only",
+        "Entry includes a drink"
+      ],
+      "instagram": "@contramano_oficial",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/contramano_oficial",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "buenos-aires-club-69",
+      "name": "Club 69",
+      "category": "bar",
+      "neighborhood": "Palermo Hollywood",
+      "address": "Niceto Vega 5510 (Niceto Club)",
+      "lat": -34.5874108,
+      "lon": -58.4389128,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Thursday-night institution",
+        "Theatrical drag and dance troupe",
+        "Nu-disco, house, tech-house"
+      ],
+      "instagram": "@club69.ba",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/club69.ba",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "buenos-aires-homo-sapiens",
+      "name": "Homo Sapiens",
+      "category": "sauna",
+      "neighborhood": "Palermo",
+      "address": "Gascón 956",
+      "lat": -34.5998104,
+      "lon": -58.4237223,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Three-floor sauna",
+        "Cinema room and dark room",
+        "Bar area"
+      ],
+      "instagram": "@homosapiensspaok",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/homosapiensspaok",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "buenos-aires-feliza",
+      "name": "Feliza",
+      "category": "bar",
+      "neighborhood": "Almagro",
+      "address": "Avenida Córdoba 3271",
+      "lat": -34.5978392,
+      "lon": -58.412882,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Queer cultural multi-space",
+        "Two patios",
+        "Drag shows and karaoke"
+      ],
+      "instagram": "@felizarcoiris",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/felizarcoiris",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    }
+  ],
+  "pride": {
+    "2026": {
+      "date": "2026-11-07",
+      "event_name": "Marcha del Orgullo",
+      "source_url": "https://marchadelorgullo.org.ar/"
+    },
+    "2027": null
+  }
+}

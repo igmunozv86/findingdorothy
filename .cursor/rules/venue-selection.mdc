@@ -1,16 +1,18 @@
 ---
-description: How to scan and select venues when a city is added or its list changes
+description: City pages are rendered only from validated city files
 alwaysApply: true
 ---
 
-# Venue selection
+# City data
 
-When a city is added or its venues change, follow `services/ingestion/select-venues.md`. Do not ask for those rules again.
+Cursor renders. Cursor does not research venues and does not hand-edit city content. Do not edit `apps/web/index.html`.
 
-- `venue.city` must match `name` in `data/cities.json`. Set `live` only after the venue pass.
-- Search in English and in the city's language, and log the language.
-- Select from the venue's own site, its official Instagram, or the city's official tourism page. Drop a venue if those sources disagree on the address or say it closed.
-- `hours_verified` is true only when that own site or official Instagram states a full open and close, with `source_url`. Otherwise `hours` is null and `hours_note` says why. Never store `{}`.
-- Coordinates come from Nominatim for the street address. Do not invent them. Do not store a phone number.
-- Categories: `bar`, `sauna`, `cruise`, `sex`. Do not add a venue only to fill a section.
-- Run `node scripts/select-venues.mjs`, then `node scripts/build-web.mjs`.
+- Workers write one city to `data/staging/cities/<slug>.json`. Mimi merges only files that pass `node scripts/merge-cities.mjs`. That script prints a diff and leaves a failing file in staging.
+- The page reads `data/cities/<slug>.json` only. The build stops while any staging file is still invalid, and it stops if a merged file fails validation.
+- Automated checks: schema, enums, exact region strings, at least two sources with a url and retrieved_at. Source tiers are 0, 1, 2, or 3. Tier 4 is Nacho's QA, not a source. `hours_verified` is true only when a tier 3 source is present. Unknown hours are `"no recent data"`.
+- Two-tier confirmation of a name and address, and a thin city, are review flags. They are not a reason to invent a source.
+- Region is one of: North America, Europe, Latin America, Asia-Pacific, Middle East, Africa. Tel Aviv is Middle East.
+- Pride is one published date per year, or null. Do not copy last year forward.
+- A layout change is one template edit. Adding a city is one JSON file.
+- When a published city is wrong, change the spec or the brief, then re-run that city's worker. Do not patch the venue by hand.
+- `tz` stays on the city file so the clock can show local time.

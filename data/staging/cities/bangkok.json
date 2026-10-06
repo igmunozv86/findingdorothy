@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "slug": "bangkok",
+    "name": "Bangkok",
+    "country": "Thailand",
+    "region": "Asia-Pacific",
+    "gayborhood": "Silom",
+    "lat": 13.7525,
+    "lon": 100.4935,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Asia/Bangkok"
+  },
+  "venues": [
+    {
+      "id": "bangkok-dj-station",
+      "name": "DJ Station",
+      "category": "bar",
+      "neighborhood": "Silom (Soi 2)",
+      "address": "Silom Soi 2, Bang Rak, Bangkok",
+      "lat": 13.7230724,
+      "lon": 100.5331972,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Three-floor nightclub",
+        "Nightly drag shows",
+        "Silom Soi 2 institution"
+      ],
+      "instagram": null,
+      "sources": []
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

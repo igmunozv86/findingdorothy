@@ -1,0 +1,78 @@
+{
+  "meta": {
+    "slug": "milan",
+    "name": "Milan",
+    "country": "Italy",
+    "region": "Europe",
+    "gayborhood": "Porta Venezia",
+    "lat": 45.4642,
+    "lon": 9.1896,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Europe/Rome"
+  },
+  "venues": [
+    {
+      "id": "milan-la-boum",
+      "name": "La Boum",
+      "category": "bar",
+      "neighborhood": "no recent data",
+      "address": "Via Pietrasanta 16 (Magazzini Generali)",
+      "lat": 45.4440969,
+      "lon": 9.1952615,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Weekly Friday night",
+        "Drag queen shows",
+        "Pop and commercial music"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "milan-fenix",
+      "name": "Fenix Sauna",
+      "category": "sauna",
+      "neighborhood": "no recent data",
+      "address": "Via Oropa 3",
+      "lat": 45.497943,
+      "lon": 9.2356339,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Sauna with cruising areas",
+        "Popular with bears and older men",
+        "Same building as Hot Dog Club"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "milan-illumined",
+      "name": "Illumined",
+      "category": "cruise",
+      "neighborhood": "Centrale (Via Napo Torriani)",
+      "address": "Via Napo Torriani 12",
+      "lat": 45.4816104,
+      "lon": 9.2036276,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Open 24 hours daily",
+        "Three floors",
+        "Membership card required (Anddos)"
+      ],
+      "instagram": null,
+      "sources": []
+    }
+  ],
+  "pride": {
+    "2026": {
+      "date": "2026-06-27",
+      "event_name": "Milano Pride",
+      "source_url": "https://www.milanopride.it/it/parata/"
+    },
+    "2027": null
+  }
+}

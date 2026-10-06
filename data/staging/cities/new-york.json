@@ -1,0 +1,286 @@
+{
+  "meta": {
+    "slug": "new-york",
+    "name": "New York",
+    "country": "USA",
+    "region": "North America",
+    "gayborhood": "Chelsea, Hell's Kitchen",
+    "lat": 40.7127,
+    "lon": -74.006,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "America/New_York"
+  },
+  "venues": [
+    {
+      "id": "new-york-stonewall-inn",
+      "name": "The Stonewall Inn",
+      "category": "bar",
+      "neighborhood": "West Village",
+      "address": "53 Christopher St, New York, NY 10014",
+      "lat": 40.7338379,
+      "lon": -74.0021637,
+      "hours": {
+        "mon": [
+          "14:00",
+          "04:00"
+        ],
+        "tue": [
+          "14:00",
+          "04:00"
+        ],
+        "wed": [
+          "14:00",
+          "04:00"
+        ],
+        "thu": [
+          "14:00",
+          "04:00"
+        ],
+        "fri": [
+          "14:00",
+          "04:00"
+        ],
+        "sat": [
+          "13:00",
+          "04:00"
+        ],
+        "sun": [
+          "13:00",
+          "04:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "National Historic Landmark",
+        "Nightly drag and variety shows",
+        "Site of the 1969 Stonewall riots"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "http://www.thestonewallinnnyc.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "new-york-industry-bar",
+      "name": "Industry Bar",
+      "category": "bar",
+      "neighborhood": "Hell's Kitchen",
+      "address": "355 W 52nd St, New York, NY",
+      "lat": 40.7644871,
+      "lon": -73.9868683,
+      "hours": {
+        "mon": [
+          "17:00",
+          "04:00"
+        ],
+        "tue": [
+          "17:00",
+          "04:00"
+        ],
+        "wed": [
+          "17:00",
+          "04:00"
+        ],
+        "thu": [
+          "17:00",
+          "04:00"
+        ],
+        "fri": [
+          "17:00",
+          "04:00"
+        ],
+        "sat": [
+          "17:00",
+          "04:00"
+        ],
+        "sun": [
+          "17:00",
+          "04:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Large multi-room nightclub",
+        "2-for-1 happy hour 17:00-21:00",
+        "Nightly drag revues"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "http://www.industry-bar.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "new-york-julius",
+      "name": "Julius'",
+      "category": "bar",
+      "neighborhood": "West Village",
+      "address": "159 W 10th St, New York, NY",
+      "lat": 40.7345357,
+      "lon": -74.00163,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Oldest continuously operating gay bar in NYC",
+        "Site of the 1966 'Sip-In'",
+        "NYC landmark tavern"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "new-york-eagle-nyc",
+      "name": "The Eagle NYC",
+      "category": "bar",
+      "neighborhood": "Chelsea",
+      "address": "554 W 28th St, New York, NY 10001",
+      "lat": 40.751476,
+      "lon": -74.003645,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Leather bar",
+        "Rooftop bar",
+        "Operating since 1970"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "new-york-hardware",
+      "name": "Hardware",
+      "category": "bar",
+      "neighborhood": "Hell's Kitchen",
+      "address": "697 10th Ave, New York, NY",
+      "lat": 40.7632783,
+      "lon": -73.9932124,
+      "hours": {
+        "mon": [
+          "14:00",
+          "04:00"
+        ],
+        "tue": [
+          "14:00",
+          "04:00"
+        ],
+        "wed": [
+          "14:00",
+          "04:00"
+        ],
+        "thu": [
+          "14:00",
+          "04:00"
+        ],
+        "fri": [
+          "14:00",
+          "04:00"
+        ],
+        "sat": [
+          "14:00",
+          "04:00"
+        ],
+        "sun": [
+          "14:00",
+          "04:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Drag shows and go-go dancers",
+        "Spacious dance floor",
+        "Gay owned and operated"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.hardware-bar.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "new-york-vers",
+      "name": "VERS",
+      "category": "bar",
+      "neighborhood": "Hell's Kitchen",
+      "address": "714 9th Ave, New York, NY",
+      "lat": 40.762571,
+      "lon": -73.9892388,
+      "hours": {
+        "sun": [
+          "14:00",
+          "02:00"
+        ],
+        "mon": [
+          "17:00",
+          "02:00"
+        ],
+        "tue": [
+          "17:00",
+          "02:00"
+        ],
+        "wed": [
+          "17:00",
+          "02:00"
+        ],
+        "thu": [
+          "17:00",
+          "02:00"
+        ],
+        "fri": [
+          "16:00",
+          "04:00"
+        ],
+        "sat": [
+          "14:00",
+          "04:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Craft cocktails and bar snacks",
+        "Drag entertainment",
+        "Happy hour"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.versnyc.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "new-york-east-side-club",
+      "name": "East Side Club",
+      "category": "sauna",
+      "neighborhood": "Midtown",
+      "address": "227 E 56th St, New York, NY",
+      "lat": 40.7593327,
+      "lon": -73.9668206,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "24-hour men's sauna",
+        "Private cabins and lockers",
+        "Operating since 1976"
+      ],
+      "instagram": null,
+      "sources": []
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

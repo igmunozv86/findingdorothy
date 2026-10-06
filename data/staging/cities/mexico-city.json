@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "slug": "mexico-city",
+    "name": "Mexico City",
+    "country": "Mexico",
+    "region": "Latin America",
+    "gayborhood": "Zona Rosa",
+    "lat": 19.3208,
+    "lon": -99.1515,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "America/Mexico_City"
+  },
+  "venues": [
+    {
+      "id": "mexico-city-cabaretito",
+      "name": "Cabaretito Fusión",
+      "category": "bar",
+      "neighborhood": "Zona Rosa",
+      "address": "Londres 77, Zona Rosa, CDMX",
+      "lat": 19.4266977,
+      "lon": -99.1620942,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Drag shows",
+        "DJ sets",
+        "Karaoke"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "mexico-city-marikoteca",
+      "name": "Marikoteca",
+      "category": "bar",
+      "neighborhood": "Zona Rosa",
+      "address": "Calle Amberes 1, Juárez, Cuauhtémoc, 06600 Ciudad de México",
+      "lat": 19.4270473,
+      "lon": -99.1662341,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Lounge, video bar, and terrace",
+        "Formerly Kinky",
+        "Thursday is ladies night"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "mexico-city-blow",
+      "name": "Blow Bar",
+      "category": "bar",
+      "neighborhood": "Zona Rosa",
+      "address": "Niza 40, Zona Rosa, CDMX",
+      "lat": 19.4267908,
+      "lon": -99.162347,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Cocktail bar",
+        "Late-night dancefloor",
+        "Daring themed nights"
+      ],
+      "instagram": "@blowrespaldo",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/blowrespaldo",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "mexico-city-toms",
+      "name": "Tom's Leather Bar",
+      "category": "cruise",
+      "neighborhood": "Condesa",
+      "address": "Av. Insurgentes Sur 357, Condesa, CDMX",
+      "lat": 19.4113127,
+      "lon": -99.1671163,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Leather and cruising bar",
+        "Dark room upstairs",
+        "Go-go dancers"
+      ],
+      "instagram": null,
+      "sources": []
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

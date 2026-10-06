@@ -8,6 +8,7 @@ const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
 const PRIORS = {
   bar: { weekend: 0.66, weeknight: 0.38, name: 'bar' },
+  club: { weekend: 0.7, weeknight: 0.42, name: 'club' },
   cruise: { weekend: 0.68, weeknight: 0.4, name: 'cruising bar' },
   sex: { weekend: 0.58, weeknight: 0.4, name: 'sex club' },
   sauna: { weekend: 0.84, weeknight: 0.5, name: 'bathhouse' },
@@ -28,6 +29,11 @@ const MISSING = [
   { name: 'Google Trends', kind: 'missing', detail: 'Not pulled' },
   { name: 'Event calendar', kind: 'missing', detail: 'Not pulled' },
 ];
+
+export function summaryWithCountNote(pattern, hasLiveCount) {
+  const base = String(pattern).replace(/ No live count\.$/, '').trimEnd();
+  return hasLiveCount ? base : `${base} No live count.`;
+}
 
 export function isShutdown(venue) {
   const flag = String(venue.status || '').toLowerCase();
@@ -111,7 +117,8 @@ export function assembleForecast(venue, when, extras = {}) {
   const where = venue.neighborhood ? `${venue.neighborhood} ${cat.name}` : cat.name;
   const reviewBit = crowd.length && phase === 'peak' ? ` Reviews mention ${crowd[0].toLowerCase()}.` : '';
   const rainBit = weather?.raining ? ` Rain is in the weather reading.` : '';
-  const summary = `${dayWord} pattern for a ${where}, ${timing}.${reviewBit}${rainBit} No live count.`;
+  const pattern = `${dayWord} pattern for a ${where}, ${timing}.${reviewBit}${rainBit}`;
+  const summary = summaryWithCountNote(pattern, extras.liveCount);
 
   return {
     ...scored,

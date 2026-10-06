@@ -1,0 +1,502 @@
+{
+  "meta": {
+    "slug": "paris",
+    "name": "Paris",
+    "country": "France",
+    "region": "Europe",
+    "gayborhood": "Le Marais",
+    "lat": 48.8566,
+    "lon": 2.3522,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Europe/Paris"
+  },
+  "venues": [
+    {
+      "id": "paris-raidd",
+      "name": "Le Raidd",
+      "category": "bar",
+      "neighborhood": "Le Marais",
+      "address": "23 rue du Temple, 75004 Paris",
+      "lat": 48.8588639,
+      "lon": 2.3534734,
+      "hours": {
+        "sun": [
+          "18:00",
+          "04:00"
+        ],
+        "mon": [
+          "18:00",
+          "04:00"
+        ],
+        "tue": [
+          "18:00",
+          "04:00"
+        ],
+        "wed": [
+          "18:00",
+          "04:00"
+        ],
+        "thu": [
+          "18:00",
+          "04:00"
+        ],
+        "fri": [
+          "18:00",
+          "05:00"
+        ],
+        "sat": [
+          "18:00",
+          "05:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Shower shows from midnight",
+        "Happy hour until 22:00",
+        "Open daily in Le Marais"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://raiddbar.com/en/index.html",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "paris-cox",
+      "name": "Cox",
+      "category": "bar",
+      "neighborhood": "Saint-Merri",
+      "address": "15 rue des Archives, 75004 Paris",
+      "lat": 48.8582474,
+      "lon": 2.3548281,
+      "hours": {
+        "mon": [
+          "17:00",
+          "02:00"
+        ],
+        "tue": [
+          "17:00",
+          "02:00"
+        ],
+        "wed": [
+          "17:00",
+          "02:00"
+        ],
+        "thu": [
+          "17:00",
+          "02:00"
+        ],
+        "fri": [
+          "17:00",
+          "02:00"
+        ],
+        "sat": [
+          "17:00",
+          "02:00"
+        ],
+        "sun": [
+          "17:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Open every day",
+        "Happy hour until 22:00",
+        "Metro Hôtel de Ville"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://cox.fr/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "paris-quetzal",
+      "name": "Quetzal",
+      "category": "bar",
+      "neighborhood": "Le Marais",
+      "address": "10 rue de la Verrerie, 75004 Paris",
+      "lat": 48.8572208,
+      "lon": 2.3551092,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Cocktails and a terrace",
+        "Gay bar in Le Marais since the late 1980s"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "paris-freedj",
+      "name": "Freedj",
+      "category": "bar",
+      "neighborhood": "Le Marais",
+      "address": "35 rue Sainte-Croix de la Bretonnerie, 75004 Paris",
+      "lat": 48.8585756,
+      "lon": 2.3549056,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Upstairs bar and a basement dance floor",
+        "DJs after dark"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "paris-cud",
+      "name": "Le CUD",
+      "category": "bar",
+      "neighborhood": "Le Marais",
+      "address": "12 rue des Haudriettes, 75003 Paris",
+      "lat": 48.8618407,
+      "lon": 2.357171,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Bar upstairs and a dance floor downstairs",
+        "Late-night DJs"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "paris-euro-mens-club",
+      "name": "Euro Men's Club",
+      "category": "sauna",
+      "neighborhood": "Paris 2e",
+      "address": "10 rue Saint-Marc, 75002 Paris",
+      "lat": 48.8703879,
+      "lon": 2.3413762,
+      "hours": {
+        "mon": [
+          "11:00",
+          "20:00"
+        ],
+        "tue": [
+          "11:00",
+          "20:00"
+        ],
+        "wed": [
+          "11:00",
+          "20:00"
+        ],
+        "thu": [
+          "11:00",
+          "20:00"
+        ],
+        "fri": [
+          "11:00",
+          "20:00"
+        ],
+        "sat": [
+          "11:00",
+          "20:00"
+        ],
+        "sun": [
+          "11:00",
+          "20:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Roman-antiquity sauna",
+        "Bar, lounges, and a cinema"
+      ],
+      "instagram": "@euromensclub",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://e-m-c.fr/",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/euromensclub",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "paris-sun-city",
+      "name": "Sun City",
+      "category": "sauna",
+      "neighborhood": "Sainte-Avoye",
+      "address": "62 boulevard de Sébastopol, 75003 Paris",
+      "lat": 48.8638015,
+      "lon": 2.351465,
+      "hours": {
+        "sun": [
+          "12:00",
+          "02:00"
+        ],
+        "mon": [
+          "12:00",
+          "02:00"
+        ],
+        "tue": [
+          "12:00",
+          "02:00"
+        ],
+        "wed": [
+          "12:00",
+          "02:00"
+        ],
+        "thu": [
+          "12:00",
+          "02:00"
+        ],
+        "fri": [
+          "12:00",
+          "06:00"
+        ],
+        "sat": [
+          "12:00",
+          "06:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Pool",
+        "Sauna, steam, and a cruising area",
+        "Cinema and a bar"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.suncity-paris.fr/welcome-suncity-sauna-gay-paris/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "paris-idm",
+      "name": "IDM",
+      "category": "sauna",
+      "neighborhood": "Grands Boulevards",
+      "address": "4 rue du Faubourg Montmartre, 75009 Paris",
+      "lat": 48.8717419,
+      "lon": 2.3432378,
+      "hours": {
+        "mon": [
+          "12:00",
+          "01:00"
+        ],
+        "tue": [
+          "12:00",
+          "01:00"
+        ],
+        "wed": [
+          "12:00",
+          "01:00"
+        ],
+        "thu": [
+          "12:00",
+          "01:00"
+        ],
+        "fri": [
+          "12:00",
+          "02:00"
+        ],
+        "sat": [
+          "12:00",
+          "02:00"
+        ],
+        "sun": [
+          "12:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Finnish sauna and a large hammam",
+        "Jacuzzi, bar, and darkroom"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.idm-sauna.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "paris-impact",
+      "name": "L'Impact",
+      "category": "cruise",
+      "neighborhood": "Bonne-Nouvelle",
+      "address": "18 rue Greneta, 75002 Paris",
+      "lat": 48.8652653,
+      "lon": 2.3511582,
+      "hours": {
+        "mon": [
+          "19:00",
+          "04:00"
+        ],
+        "tue": [
+          "19:00",
+          "04:00"
+        ],
+        "wed": [
+          "19:00",
+          "04:00"
+        ],
+        "thu": [
+          "19:00",
+          "06:00"
+        ],
+        "fri": [
+          "19:00",
+          "06:00"
+        ],
+        "sat": [
+          "19:00",
+          "06:00"
+        ],
+        "sun": [
+          "17:00",
+          "04:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Naturist cruising bar on two levels",
+        "Backroom and a sling",
+        "Open 7 days"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://impact-bar.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "paris-krash",
+      "name": "Krash Bar",
+      "category": "cruise",
+      "neighborhood": "Saint-Merri",
+      "address": "12 rue Simon Lefranc, 75004 Paris",
+      "lat": 48.8602089,
+      "lon": 2.3534261,
+      "hours": {
+        "mon": [
+          "15:00",
+          "05:00"
+        ],
+        "tue": [
+          "15:00",
+          "05:00"
+        ],
+        "wed": [
+          "15:00",
+          "05:00"
+        ],
+        "thu": [
+          "15:00",
+          "05:00"
+        ],
+        "fri": [
+          "15:00",
+          "07:00"
+        ],
+        "sat": [
+          "14:00",
+          "07:00"
+        ],
+        "sun": [
+          "14:00",
+          "05:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Cruising bar",
+        "Free entry with a required drink",
+        "Men 18 and over"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.krashbar.com/sex-club-paris/infos-pratiques/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "paris-redzone",
+      "name": "Redzone",
+      "category": "cruise",
+      "neighborhood": "Palais Royal",
+      "address": "9 rue du Pélican, 75001 Paris",
+      "lat": 48.8626311,
+      "lon": 2.3396468,
+      "hours": {
+        "mon": [
+          "18:00",
+          "04:00"
+        ],
+        "tue": [
+          "18:00",
+          "04:00"
+        ],
+        "wed": [
+          "18:00",
+          "04:00"
+        ],
+        "thu": [
+          "18:00",
+          "04:00"
+        ],
+        "fri": [
+          "18:00",
+          "04:00"
+        ],
+        "sat": [
+          "18:00",
+          "04:00"
+        ],
+        "sun": [
+          "18:00",
+          "04:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Cruising bar on two levels",
+        "Underwear or naturist dress code",
+        "Open 7 days until 04:00"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://redzone-bar.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    }
+  ],
+  "pride": {
+    "2026": {
+      "date": "2026-10-03",
+      "event_name": "Marche des Fiertés",
+      "source_url": "https://www.marchedesfiertes.org/fr"
+    },
+    "2027": null
+  }
+}

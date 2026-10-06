@@ -1,0 +1,234 @@
+{
+  "meta": {
+    "slug": "seattle",
+    "name": "Seattle",
+    "country": "USA",
+    "region": "North America",
+    "gayborhood": "Capitol Hill",
+    "lat": 47.6038,
+    "lon": -122.3301,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "America/Los_Angeles"
+  },
+  "venues": [
+    {
+      "id": "seattle-queer-bar",
+      "name": "Queer/Bar",
+      "category": "bar",
+      "neighborhood": "Capitol Hill",
+      "address": "1518 11th Ave, Seattle, WA",
+      "lat": 47.6147249,
+      "lon": -122.3179286,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Drag shows multiple nights weekly",
+        "Karaoke and burlesque",
+        "21+ dance nights"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "seattle-neighbours",
+      "name": "Neighbours Nightclub",
+      "category": "bar",
+      "neighborhood": "Capitol Hill",
+      "address": "1509 Broadway, Seattle, WA",
+      "lat": 47.6144236,
+      "lon": -122.3210341,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Two floors, three bars",
+        "Weekly Sunday Latin night",
+        "Open until 4am weekends"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "seattle-pony",
+      "name": "Pony",
+      "category": "bar",
+      "neighborhood": "Capitol Hill",
+      "address": "1221 E Madison St, Seattle, WA 98122",
+      "lat": 47.6130849,
+      "lon": -122.3157619,
+      "hours": {
+        "mon": [
+          "17:00",
+          "02:00"
+        ],
+        "tue": [
+          "17:00",
+          "02:00"
+        ],
+        "wed": [
+          "17:00",
+          "02:00"
+        ],
+        "thu": [
+          "17:00",
+          "02:00"
+        ],
+        "fri": [
+          "15:00",
+          "02:00"
+        ],
+        "sat": [
+          "15:00",
+          "02:00"
+        ],
+        "sun": [
+          "15:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Fire-pit patio",
+        "Sunday Tiny Tea Dance",
+        "Weekly karaoke nights"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.ponyseattle.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "seattle-unicorn",
+      "name": "Unicorn",
+      "category": "bar",
+      "neighborhood": "Capitol Hill",
+      "address": "1118 E Pike St, Seattle, WA 98122",
+      "lat": 47.614234,
+      "lon": -122.317246,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Carnival-themed decor",
+        "Drag bingo and karaoke",
+        "Arcade games downstairs"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "seattle-cuff-complex",
+      "name": "The Cuff Complex",
+      "category": "bar",
+      "neighborhood": "Capitol Hill",
+      "address": "1533 13th Ave, Seattle, WA",
+      "lat": 47.6149435,
+      "lon": -122.3161591,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Leather and fetish bar",
+        "Outdoor patio",
+        "Guest DJs"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "seattle-wildrose",
+      "name": "The Wildrose",
+      "category": "bar",
+      "neighborhood": "Capitol Hill",
+      "address": "1021 E Pike St, Seattle, WA",
+      "lat": 47.6139709,
+      "lon": -122.3182962,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Lesbian bar, open since 1985",
+        "Drag bingo",
+        "Karaoke nights"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "seattle-diesel",
+      "name": "Diesel",
+      "category": "bar",
+      "neighborhood": "Capitol Hill",
+      "address": "1413 14th Ave, Seattle, WA",
+      "lat": 47.6133645,
+      "lon": -122.3144509,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Bear-friendly crowd",
+        "Themed social nights",
+        "No cover"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "seattle-steamworks",
+      "name": "Steamworks Seattle",
+      "category": "sauna",
+      "neighborhood": "Capitol Hill",
+      "address": "1520 Summit Ave, Seattle, WA 98122",
+      "lat": 47.6147841,
+      "lon": -122.3252329,
+      "hours": {
+        "mon": [
+          "00:00",
+          "23:59"
+        ],
+        "tue": [
+          "00:00",
+          "23:59"
+        ],
+        "wed": [
+          "00:00",
+          "23:59"
+        ],
+        "thu": [
+          "00:00",
+          "23:59"
+        ],
+        "fri": [
+          "00:00",
+          "23:59"
+        ],
+        "sat": [
+          "00:00",
+          "23:59"
+        ],
+        "sun": [
+          "00:00",
+          "23:59"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "18+ men-only bathhouse",
+        "Open 24/7/365",
+        "Darkroom and video lounges"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.swbaths.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

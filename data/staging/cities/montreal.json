@@ -1,0 +1,262 @@
+{
+  "meta": {
+    "slug": "montreal",
+    "name": "Montreal",
+    "country": "Canada",
+    "region": "North America",
+    "gayborhood": "Le Village",
+    "lat": 45.5032,
+    "lon": -73.5698,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "America/Toronto"
+  },
+  "venues": [
+    {
+      "id": "montreal-club-unity",
+      "name": "Club Unity",
+      "category": "bar",
+      "neighborhood": "Le Village",
+      "address": "1171 Rue Sainte-Catherine E, Montreal, QC",
+      "lat": 45.5183456,
+      "lon": -73.5564576,
+      "hours": {
+        "thu": [
+          "22:00",
+          "03:00"
+        ],
+        "fri": [
+          "22:00",
+          "03:00"
+        ],
+        "sat": [
+          "22:00",
+          "03:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Three-floor nightclub",
+        "Rooftop terrace",
+        "Two dance rooms and VIP lounge"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://clubunity.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "montreal-cabaret-mado",
+      "name": "Cabaret Mado",
+      "category": "bar",
+      "neighborhood": "Le Village",
+      "address": "1115 Rue Sainte-Catherine E, Montreal, QC",
+      "lat": 45.5177832,
+      "lon": -73.5571169,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Nightly drag cabaret",
+        "Founded 2002 by Mado Lamotte",
+        "Reservations accepted"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "montreal-complexe-sky",
+      "name": "Complexe Sky",
+      "category": "bar",
+      "neighborhood": "Le Village",
+      "address": "1478 Rue Sainte-Catherine E, Montreal, QC",
+      "lat": 45.5208549,
+      "lon": -73.5537492,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Multi-level gay complex",
+        "Rooftop terrace",
+        "Drag shows and dance floors"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "montreal-bar-le-cocktail",
+      "name": "Bar Le Cocktail",
+      "category": "bar",
+      "neighborhood": "Le Village",
+      "address": "1669 Rue Ste-Catherine E, Montreal, QC",
+      "lat": 45.5222297,
+      "lon": -73.5530443,
+      "hours": {
+        "mon": [
+          "14:00",
+          "03:00"
+        ],
+        "tue": [
+          "14:00",
+          "03:00"
+        ],
+        "wed": [
+          "14:00",
+          "03:00"
+        ],
+        "thu": [
+          "14:00",
+          "03:00"
+        ],
+        "fri": [
+          "14:00",
+          "03:00"
+        ],
+        "sat": [
+          "14:00",
+          "03:00"
+        ],
+        "sun": [
+          "14:00",
+          "03:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Nightly karaoke",
+        "Drag shows",
+        "Mezzanine and terrace"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "http://barlecocktail.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "montreal-le-stud",
+      "name": "Le Stud",
+      "category": "bar",
+      "neighborhood": "Le Village",
+      "address": "1812 Rue Sainte-Catherine E, Montreal, QC",
+      "lat": 45.5225826,
+      "lon": -73.5519554,
+      "hours": {
+        "mon": [
+          "14:00",
+          "03:00"
+        ],
+        "tue": [
+          "14:00",
+          "03:00"
+        ],
+        "wed": [
+          "14:00",
+          "03:00"
+        ],
+        "thu": [
+          "14:00",
+          "03:00"
+        ],
+        "fri": [
+          "14:00",
+          "03:00"
+        ],
+        "sat": [
+          "14:00",
+          "03:00"
+        ],
+        "sun": [
+          "14:00",
+          "03:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Men's bar with dance floor",
+        "No cover charge",
+        "Affordable drinks"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "http://lestudmontreal.ca/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "montreal-sauna-gi-joe",
+      "name": "Sauna G.I. Joe",
+      "category": "sauna",
+      "neighborhood": "Le Village",
+      "address": "1166 Rue Sainte-Catherine E, Montreal, QC",
+      "lat": 45.5180798,
+      "lon": -73.5561929,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Men-only gay sauna",
+        "After-hours parties",
+        "Black & Blue festival partner"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "montreal-stock-bar",
+      "name": "Stock Bar",
+      "category": "sex",
+      "neighborhood": "Le Village",
+      "address": "1171 Rue Sainte-Catherine E, Montreal, QC",
+      "lat": 45.5183456,
+      "lon": -73.5564576,
+      "hours": {
+        "sun": [
+          "20:00",
+          "03:00"
+        ],
+        "wed": [
+          "20:00",
+          "03:00"
+        ],
+        "thu": [
+          "20:00",
+          "03:00"
+        ],
+        "fri": [
+          "20:00",
+          "03:00"
+        ],
+        "sat": [
+          "20:00",
+          "03:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Male dance club",
+        "Live dance performances",
+        "Two bars"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "http://stockbarmontreal.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

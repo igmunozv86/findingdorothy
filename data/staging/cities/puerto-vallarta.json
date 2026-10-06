@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "slug": "puerto-vallarta",
+    "name": "Puerto Vallarta",
+    "country": "Mexico",
+    "region": "Latin America",
+    "gayborhood": "Zona Romántica",
+    "lat": 20.6407,
+    "lon": -105.2203,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "America/Mexico_City"
+  },
+  "venues": [
+    {
+      "id": "puerto-vallarta-mantamar",
+      "name": "Mantamar Beach Club",
+      "category": "bar",
+      "neighborhood": "Playa Los Muertos",
+      "address": "Malecón 169, Playa Los Muertos, Amapas, Puerto Vallarta, Jal.",
+      "lat": 20.5967232,
+      "lon": -105.2395248,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Gay beach club",
+        "Suspended pool",
+        "DJ sessions"
+      ],
+      "instagram": null,
+      "sources": []
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

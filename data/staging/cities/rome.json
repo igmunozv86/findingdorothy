@@ -1,0 +1,116 @@
+{
+  "meta": {
+    "slug": "rome",
+    "name": "Rome",
+    "country": "Italy",
+    "region": "Europe",
+    "gayborhood": null,
+    "lat": 41.8933,
+    "lon": 12.4829,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Europe/Rome"
+  },
+  "venues": [
+    {
+      "id": "rome-coming-out",
+      "name": "Coming Out",
+      "category": "bar",
+      "neighborhood": "Gay Street",
+      "address": "Via di S. Giovanni in Laterano 8",
+      "lat": 41.8900128,
+      "lon": 12.4944125,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Colosseum-view terrace",
+        "Drag shows and bingo nights",
+        "Open since 2001"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "rome-muccassassina",
+      "name": "Muccassassina",
+      "category": "bar",
+      "neighborhood": "Prenestino",
+      "address": "Via di Portonaccio 212 (Qube Disco)",
+      "lat": 41.8972795,
+      "lon": 12.5399624,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Weekly Friday party since 1990",
+        "Multiple rooms across Qube",
+        "Drag shows and go-go dancers"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "rome-company-roma",
+      "name": "Company Roma",
+      "category": "bar",
+      "neighborhood": "Esquilino (near Termini)",
+      "address": "Piazza Manfredo Fanti 40",
+      "lat": 41.898112,
+      "lon": 12.501942,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Bear bar near Termini station",
+        "Aperitivo served",
+        "Turns into a dance floor late night"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "rome-censured",
+      "name": "Censured Club",
+      "category": "cruise",
+      "neighborhood": "Monti",
+      "address": "Via dei Quattro Cantoni 5",
+      "lat": 41.8968569,
+      "lon": 12.4961975,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Cruising club",
+        "Dark room",
+        "Opens 22:00 nightly"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "rome-gender-klub",
+      "name": "Gender Klub Roma",
+      "category": "cruise",
+      "neighborhood": "San Giovanni",
+      "address": "Via Faleria 9",
+      "lat": 41.8829015,
+      "lon": 12.5099235,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Fetish bar",
+        "Trans-inclusive",
+        "Thursday to Saturday nights"
+      ],
+      "instagram": "@gender_degrado",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/gender_degrado",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

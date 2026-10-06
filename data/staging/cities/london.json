@@ -1,0 +1,287 @@
+{
+  "meta": {
+    "slug": "london",
+    "name": "London",
+    "country": "UK",
+    "region": "Europe",
+    "gayborhood": "Soho, Vauxhall",
+    "lat": 51.5074,
+    "lon": -0.1278,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Europe/London"
+  },
+  "venues": [
+    {
+      "id": "london-ku",
+      "name": "Ku Bar",
+      "category": "bar",
+      "neighborhood": "Soho",
+      "address": "30 Lisle St, WC2H 7BA London",
+      "lat": 51.5117885,
+      "lon": -0.1296497,
+      "hours": {
+        "mon": [
+          "13:00",
+          "01:00"
+        ],
+        "tue": [
+          "13:00",
+          "01:00"
+        ],
+        "wed": [
+          "13:00",
+          "01:00"
+        ],
+        "thu": [
+          "13:00",
+          "01:00"
+        ],
+        "fri": [
+          "13:00",
+          "01:00"
+        ],
+        "sat": [
+          "13:00",
+          "01:00"
+        ],
+        "sun": [
+          "13:00",
+          "22:30"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "3 floors",
+        "Basement Ku Klub with DJs",
+        "Outdoor terrace"
+      ],
+      "instagram": "@kubarlondon",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://ku-bar.co.uk/ku-bar/",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/kubarlondon",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "london-eagle",
+      "name": "Eagle London",
+      "category": "bar",
+      "neighborhood": "Vauxhall",
+      "address": "349 Kennington Ln, SE11 5QY London",
+      "lat": 51.4862744,
+      "lon": -0.1192968,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Private beer garden",
+        "Pool table",
+        "Horse Meat Disco Sundays"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "london-rvt",
+      "name": "The Royal Vauxhall Tavern",
+      "category": "bar",
+      "neighborhood": "Vauxhall",
+      "address": "372 Kennington Ln, SE11 5HY London",
+      "lat": 51.4863812,
+      "lon": -0.1218439,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Grade II-listed venue",
+        "Cabaret 7 nights a week",
+        "Open since the 1980s"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "london-comptons",
+      "name": "Comptons",
+      "category": "bar",
+      "neighborhood": "Soho",
+      "address": "51-53 Old Compton St, W1D 6HN London",
+      "lat": 51.5126049,
+      "lon": -0.1325151,
+      "hours": {
+        "mon": [
+          "12:00",
+          "23:30"
+        ],
+        "tue": [
+          "12:00",
+          "23:30"
+        ],
+        "wed": [
+          "12:00",
+          "23:30"
+        ],
+        "thu": [
+          "12:00",
+          "23:30"
+        ],
+        "fri": [
+          "12:00",
+          "00:00"
+        ],
+        "sat": [
+          "12:00",
+          "00:00"
+        ],
+        "sun": [
+          "12:00",
+          "22:30"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Open since 1986",
+        "Upstairs lounge",
+        "Weekend DJs"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.comptonsofsoho.co.uk/opening-times",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "london-yard",
+      "name": "The Yard Bar",
+      "category": "bar",
+      "neighborhood": "Soho",
+      "address": "57 Rupert St, W1D 7PL London",
+      "lat": 51.512006,
+      "lon": -0.133848,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Heated courtyard",
+        "Upstairs loft bar with balcony"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "london-sweatbox",
+      "name": "Sweatbox Soho",
+      "category": "sauna",
+      "neighborhood": "Soho",
+      "address": "Ramillies House, 1-2 Ramillies St, W1F 7LN London",
+      "lat": 51.5149553,
+      "lon": -0.1387301,
+      "hours": "24h",
+      "hours_verified": true,
+      "review_features": [
+        "24/7 gay sauna and gym",
+        "30-person jacuzzi",
+        "Card only, no cash"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.sweatboxsoho.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "london-halfway",
+      "name": "Halfway To Heaven",
+      "category": "bar",
+      "neighborhood": "Charing Cross",
+      "address": "7 Duncannon St, WC2N 4JF London",
+      "lat": 51.5084752,
+      "lon": -0.1267238,
+      "hours": {
+        "mon": [
+          "12:00",
+          "23:00"
+        ],
+        "tue": [
+          "12:00",
+          "23:00"
+        ],
+        "wed": [
+          "12:00",
+          "23:00"
+        ],
+        "thu": [
+          "12:00",
+          "00:00"
+        ],
+        "fri": [
+          "13:00",
+          "01:00"
+        ],
+        "sat": [
+          "12:00",
+          "01:00"
+        ],
+        "sun": [
+          "12:00",
+          "21:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Cabaret every evening",
+        "Two floors",
+        "18+ only"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.halfway2heaven.net/opening-times",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "london-heaven",
+      "name": "Heaven",
+      "category": "bar",
+      "neighborhood": "Charing Cross",
+      "address": "The Arches, 9 Villiers St, WC2N 6NG London",
+      "lat": 51.5085674,
+      "lon": -0.1243935,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Under Charing Cross station",
+        "Open since 1979",
+        "Hosts G-A-Y Saturdays"
+      ],
+      "instagram": null,
+      "sources": []
+    }
+  ],
+  "pride": {
+    "2026": {
+      "date": "2026-07-04",
+      "event_name": "Pride in London",
+      "source_url": "https://prideinlondon.org/join-the-parade"
+    },
+    "2027": {
+      "date": "2027-07-03",
+      "event_name": "Pride in London",
+      "source_url": "https://prideinlondon.org/"
+    }
+  }
+}

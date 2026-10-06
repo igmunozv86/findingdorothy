@@ -1,0 +1,185 @@
+{
+  "meta": {
+    "slug": "sydney",
+    "name": "Sydney",
+    "country": "Australia",
+    "region": "Asia-Pacific",
+    "gayborhood": "Oxford Street, Newtown, Erskineville",
+    "lat": -33.8698,
+    "lon": 151.2083,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Australia/Sydney"
+  },
+  "venues": [
+    {
+      "id": "sydney-stonewall-hotel",
+      "name": "Stonewall Hotel",
+      "category": "bar",
+      "neighborhood": "Oxford Street, Darlinghurst",
+      "address": "175 Oxford St, Darlinghurst NSW 2010",
+      "lat": -33.880408,
+      "lon": 151.2162818,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Three levels of bars",
+        "Drag shows seven nights a week",
+        "Themed nights"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "sydney-oxford-hotel",
+      "name": "The Oxford Hotel",
+      "category": "bar",
+      "neighborhood": "Oxford Street, Darlinghurst",
+      "address": "134 Oxford St, Darlinghurst NSW 2010",
+      "lat": -33.8801791,
+      "lon": 151.2167237,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Four levels with rooftop terrace",
+        "Drag bingo and trivia nights",
+        "$6 happy hour 17:00-19:00"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "sydney-universal",
+      "name": "Universal",
+      "category": "bar",
+      "neighborhood": "Oxford Street, Darlinghurst",
+      "address": "85-91 Oxford St, Darlinghurst NSW 2010",
+      "lat": -33.8790473,
+      "lon": 151.2146574,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Two levels: bar plus nightclub",
+        "Drag shows nightly",
+        "Pumphouse Sundays party"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "sydney-palms-on-oxford",
+      "name": "Palms on Oxford",
+      "category": "bar",
+      "neighborhood": "Oxford Street, Darlinghurst",
+      "address": "124 Oxford St, Darlinghurst NSW 2010",
+      "lat": -33.8800584,
+      "lon": 151.2165579,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Tropical-themed dive bar",
+        "Basement dance floor",
+        "100% gay owned and operated"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "sydney-imperial-erskineville",
+      "name": "The Imperial Erskineville",
+      "category": "bar",
+      "neighborhood": "Erskineville (Newtown area)",
+      "address": "35 Erskineville Rd, Erskineville NSW 2043",
+      "lat": -33.8991723,
+      "lon": 151.1826169,
+      "hours": {
+        "mon": [
+          "16:00",
+          "22:00"
+        ],
+        "tue": [
+          "16:00",
+          "22:00"
+        ],
+        "wed": [
+          "16:00",
+          "00:00"
+        ],
+        "thu": [
+          "16:00",
+          "00:00"
+        ],
+        "fri": [
+          "16:00",
+          "04:00"
+        ],
+        "sat": [
+          "12:00",
+          "04:00"
+        ],
+        "sun": [
+          "12:00",
+          "22:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Priscilla, Queen of the Desert filming location",
+        "Drag-and-dine shows",
+        "Rooftop bar"
+      ],
+      "instagram": "@imperialerskineville",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://imperialerskineville.com.au/",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/imperialerskineville",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "sydney-colombian-hotel",
+      "name": "The Colombian Hotel",
+      "category": "bar",
+      "neighborhood": "Oxford Street, Darlinghurst",
+      "address": "117-125 Oxford St, Darlinghurst NSW 2010",
+      "lat": -33.8796594,
+      "lon": 151.2152997,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Corner position at Oxford and Crown",
+        "Views of the strip",
+        "Parade viewing during Mardi Gras"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "sydney-sydney-sauna",
+      "name": "Sydney Sauna",
+      "category": "sauna",
+      "neighborhood": "Oxford Street, Darlinghurst",
+      "address": "Level 1/38-42 Oxford St, Darlinghurst NSW 2010",
+      "lat": -33.8778502,
+      "lon": 151.2139057,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Men-only sauna",
+        "Oxford Street location"
+      ],
+      "instagram": null,
+      "sources": []
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

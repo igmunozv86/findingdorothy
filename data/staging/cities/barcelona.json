@@ -1,0 +1,240 @@
+{
+  "meta": {
+    "slug": "barcelona",
+    "name": "Barcelona",
+    "country": "Spain",
+    "region": "Europe",
+    "gayborhood": "Gaixample",
+    "lat": 41.3826,
+    "lon": 2.1771,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Europe/Madrid"
+  },
+  "venues": [
+    {
+      "id": "barcelona-moeem",
+      "name": "Moeem",
+      "category": "bar",
+      "neighborhood": "Eixample (Gaixample)",
+      "address": "Carrer de Muntaner, 11, 08011 Barcelona",
+      "lat": 41.3840024,
+      "lon": 2.1625479,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Terrace for people-watching",
+        "DJ sets on weekends",
+        "Cocktails and vermut"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "barcelona-punto-bcn",
+      "name": "Punto BCN",
+      "category": "bar",
+      "neighborhood": "Eixample (Gaixample)",
+      "address": "Carrer de Muntaner, 65, 08007 Barcelona",
+      "lat": 41.3866794,
+      "lon": 2.1591527,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Pool tables",
+        "Happy hour",
+        "Permanent art exhibitions"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "barcelona-arena-xperience",
+      "name": "Arena Xperience",
+      "category": "bar",
+      "neighborhood": "Eixample",
+      "address": "Ronda de Sant Pere, 19-21, 08010 Barcelona",
+      "lat": 41.3895686,
+      "lon": 2.1739427,
+      "hours": {
+        "mon": [
+          "00:30",
+          "05:00"
+        ],
+        "tue": [
+          "00:30",
+          "05:00"
+        ],
+        "wed": [
+          "00:30",
+          "05:00"
+        ],
+        "thu": [
+          "00:30",
+          "05:00"
+        ],
+        "fri": [
+          "00:30",
+          "05:00"
+        ],
+        "sat": [
+          "00:30",
+          "05:00"
+        ],
+        "sun": [
+          "00:30",
+          "05:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "2 dance floors",
+        "Pop, charts, house",
+        "Admission 10-15 EUR incl. 1 drink"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "http://www.arenadisco.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "barcelona-candy-darling",
+      "name": "Candy Darling",
+      "category": "bar",
+      "neighborhood": "Eixample (Gaixample)",
+      "address": "Gran Via de les Corts Catalanes, 586, 08011 Barcelona",
+      "lat": 41.3849398,
+      "lon": 2.1630135,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Drag performances and cabaret",
+        "Kitchen and restaurant",
+        "Queer bar near Placa Universitat"
+      ],
+      "instagram": "@candydarlingbar",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/candydarlingbar",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "barcelona-bacon-bear",
+      "name": "Bacon Bear Bar",
+      "category": "bar",
+      "neighborhood": "Eixample (Gaixample)",
+      "address": "Carrer de Casanova, 64, 08011 Barcelona",
+      "lat": 41.3852769,
+      "lon": 2.1591432,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Bear bar",
+        "Thursday happy hour 19:00-22:00"
+      ],
+      "instagram": "@baconbearbar",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/baconbearbar",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "barcelona-la-chapelle",
+      "name": "La Chapelle",
+      "category": "bar",
+      "neighborhood": "Eixample (Gaixample)",
+      "address": "Carrer de Muntaner, 67, 08011 Barcelona",
+      "lat": 41.386746,
+      "lon": 2.1590623,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Religious-themed decor",
+        "Street terrace",
+        "Cafe-bar by day"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "barcelona-night",
+      "name": "Night Barcelona",
+      "category": "cruise",
+      "neighborhood": "Eixample (Gaixample)",
+      "address": "Carrer de la Diputacio, 161, 08015 Barcelona",
+      "lat": 41.3842982,
+      "lon": 2.1587144,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Dark room",
+        "Glory holes",
+        "Local art exhibitions"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "barcelona-sauna-condal",
+      "name": "Sauna Condal",
+      "category": "sauna",
+      "neighborhood": "Barri Gotic (near Eixample)",
+      "address": "Carrer d'Espolsa-sacs, 1, 08002 Barcelona",
+      "lat": 41.3862705,
+      "lon": 2.1734193,
+      "hours": "24h",
+      "hours_verified": true,
+      "review_features": [
+        "Open 24 hours daily",
+        "3 floors",
+        "Mature and bear clientele"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://saunaspases.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "barcelona-sauna-casanova",
+      "name": "Sauna Casanova",
+      "category": "sauna",
+      "neighborhood": "l'Antiga Esquerra de l'Eixample",
+      "address": "Carrer de Casanova, 57, 08011 Barcelona",
+      "lat": 41.3848457,
+      "lon": 2.1592757,
+      "hours": "24h",
+      "hours_verified": true,
+      "review_features": [
+        "Open 24 hours, every day",
+        "Giant jacuzzi and steam room",
+        "Dark rooms and video cabins"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://saunaspases.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

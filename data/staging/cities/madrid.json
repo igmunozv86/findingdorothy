@@ -1,0 +1,536 @@
+{
+  "meta": {
+    "slug": "madrid",
+    "name": "Madrid",
+    "country": "Spain",
+    "region": "Europe",
+    "gayborhood": "Chueca",
+    "lat": 40.4168,
+    "lon": -3.7038,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Europe/Madrid"
+  },
+  "venues": [
+    {
+      "id": "madrid-delirio",
+      "name": "Delirio",
+      "category": "bar",
+      "neighborhood": "Chueca",
+      "address": "Calle de Pelayo, 59, Chueca, Madrid, Spain",
+      "lat": 40.4248932,
+      "lon": -3.6969418,
+      "hours": {
+        "fri": [
+          "00:00",
+          "06:00"
+        ],
+        "mon": [
+          "00:00",
+          "05:30"
+        ],
+        "sat": [
+          "00:00",
+          "06:00"
+        ],
+        "sun": [
+          "00:00",
+          "05:30"
+        ],
+        "thu": [
+          "00:00",
+          "05:30"
+        ],
+        "tue": [
+          "00:00",
+          "05:30"
+        ],
+        "wed": [
+          "00:00",
+          "05:30"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Drag and live shows",
+        "Cocktails",
+        "Downstairs dance floor"
+      ],
+      "instagram": "@dlrolive",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://deliriochueca.com/",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/dlrolive",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "madrid-black-white",
+      "name": "Black & White",
+      "category": "bar",
+      "neighborhood": "Chueca",
+      "address": "Calle de la Libertad, 34, Chueca, Madrid, Spain",
+      "lat": 40.4225937,
+      "lon": -3.6968168,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Cabaret and drag",
+        "Two floors",
+        "Downstairs dance floor"
+      ],
+      "instagram": "@blackwhitemadrid",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/blackwhitemadrid",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "madrid-why-not",
+      "name": "Why Not",
+      "category": "bar",
+      "neighborhood": "Chueca",
+      "address": "Calle de San Bartolomé, 7, Chueca, Madrid, Spain",
+      "lat": 40.4216955,
+      "lon": -3.698707,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Disco",
+        "Basement bar"
+      ],
+      "instagram": "@whynot.mad",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/whynot.mad",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "madrid-sauna-center",
+      "name": "Sauna Center",
+      "category": "sauna",
+      "neighborhood": "Malasaña",
+      "address": "Calle de Valverde, 32, Malasaña, Madrid, Spain",
+      "lat": 40.4227676,
+      "lon": -3.7015771,
+      "hours": "24h",
+      "hours_verified": true,
+      "review_features": [
+        "Finnish sauna",
+        "Turkish steam",
+        "Bar"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://saunacentermadrid.es/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "madrid-sauna-paraiso",
+      "name": "Sauna Paraíso",
+      "category": "sauna",
+      "neighborhood": "Noviciado",
+      "address": "Calle del Norte, 15, Noviciado, Madrid, Spain",
+      "lat": 40.4264115,
+      "lon": -3.7073705,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Pool and jacuzzi",
+        "Private cabins",
+        "Dark rooms"
+      ],
+      "instagram": "@sauna_paraiso",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/sauna_paraiso",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "madrid-shower",
+      "name": "Shower & Bar",
+      "category": "cruise",
+      "neighborhood": "Chueca",
+      "address": "Calle de Pelayo, 25, Chueca, Madrid, Spain",
+      "lat": 40.4228613,
+      "lon": -3.6984871,
+      "hours": {
+        "fri": [
+          "23:00",
+          "10:30"
+        ],
+        "sat": [
+          "23:00",
+          "10:30"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Dark rooms",
+        "Private cabins",
+        "Glory holes"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://madridgayclub.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "madrid-studio54",
+      "name": "Studio54 Madrid",
+      "category": "bar",
+      "neighborhood": "Chueca",
+      "address": "Calle de Barbieri, 7, Chueca, Madrid, Spain",
+      "lat": 40.4209931,
+      "lon": -3.6982231,
+      "hours": {
+        "fri": [
+          "22:00",
+          "03:30"
+        ],
+        "sat": [
+          "22:00",
+          "03:30"
+        ],
+        "sun": [
+          "22:00",
+          "03:30"
+        ],
+        "thu": [
+          "22:00",
+          "03:30"
+        ],
+        "wed": [
+          "22:00",
+          "03:30"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "DJs and drag shows",
+        "Chueca disco",
+        "Door tickets on ordinary nights"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.studio54madrid.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "madrid-fluide",
+      "name": "Fluide Scape",
+      "category": "bar",
+      "neighborhood": "Chueca",
+      "address": "Calle de Gravina, 13, Chueca, Madrid, Spain",
+      "lat": 40.422965,
+      "lon": -3.697252,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Queer disco",
+        "Performances",
+        "Cocktails"
+      ],
+      "instagram": "@fluidescape_chueca",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/fluidescape_chueca",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "madrid-ll",
+      "name": "LL Bar",
+      "category": "bar",
+      "neighborhood": "Chueca",
+      "address": "Calle de Pelayo, 11, Chueca, Madrid, Spain",
+      "lat": 40.4223411,
+      "lon": -3.6988498,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Nightly drag shows",
+        "Two floors",
+        "Show starts at 22:30"
+      ],
+      "instagram": "@llshowbar",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/llshowbar",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "madrid-muerde",
+      "name": "Muerde o Chupa",
+      "category": "bar",
+      "neighborhood": "Chueca",
+      "address": "Calle de Hortaleza, 10, Chueca, Madrid, Spain",
+      "lat": 40.4207926,
+      "lon": -3.7006262,
+      "hours": {
+        "fri": [
+          "17:00",
+          "02:00"
+        ],
+        "mon": [
+          "17:00",
+          "02:00"
+        ],
+        "sat": [
+          "17:00",
+          "02:00"
+        ],
+        "sun": [
+          "17:00",
+          "02:00"
+        ],
+        "thu": [
+          "17:00",
+          "02:00"
+        ],
+        "tue": [
+          "17:00",
+          "02:00"
+        ],
+        "wed": [
+          "17:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "LGBT bar",
+        "Hot dogs and nachos",
+        "Open seven days"
+      ],
+      "instagram": "@muerdeochupa",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://muerdeochupa.es/",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/muerdeochupa",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "madrid-ricks",
+      "name": "Rick's",
+      "category": "bar",
+      "neighborhood": "Chueca",
+      "address": "Calle del Clavel, 8, Chueca, Madrid, Spain",
+      "lat": 40.420365,
+      "lon": -3.6992144,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Gay night bar",
+        "Cocktails",
+        "DJ sessions"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "madrid-sauna-principe",
+      "name": "Sauna Príncipe",
+      "category": "sauna",
+      "neighborhood": "Malasaña",
+      "address": "Travesía de las Beatas, 3, Malasaña, Madrid, Spain",
+      "lat": 40.4230419,
+      "lon": -3.708182,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Finnish sauna",
+        "Jacuzzi",
+        "Private cabins"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "madrid-sauna-gran-via",
+      "name": "Sauna Gran Vía",
+      "category": "sauna",
+      "neighborhood": "Malasaña",
+      "address": "Calle del Barco, 6, Malasaña, Madrid, Spain",
+      "lat": 40.4212563,
+      "lon": -3.7028011,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Gay sauna",
+        "Adult venue"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "madrid-sauna-adan",
+      "name": "Sauna Adán",
+      "category": "sauna",
+      "neighborhood": "Malasaña",
+      "address": "Calle de San Bernardo, 38, Malasaña, Madrid, Spain",
+      "lat": 40.4238052,
+      "lon": -3.7073118,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Steam and sauna",
+        "Cabins",
+        "Bar"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "madrid-strong",
+      "name": "Strong",
+      "category": "cruise",
+      "neighborhood": "Barrio de los Austrias",
+      "address": "Calle de Trujillos, 7, Barrio de los Austrias, Madrid, Spain",
+      "lat": 40.4186817,
+      "lon": -3.7074887,
+      "hours": {
+        "fri": [
+          "23:00",
+          "06:00"
+        ],
+        "sat": [
+          "23:00",
+          "06:00"
+        ],
+        "sun": [
+          "23:00",
+          "06:00"
+        ],
+        "thu": [
+          "23:00",
+          "06:00"
+        ],
+        "wed": [
+          "23:00",
+          "06:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Men-only Saturday club",
+        "Dance floor",
+        "Cruising area"
+      ],
+      "instagram": "@strongtheclub",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://strong.madrid/",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/strongtheclub",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "madrid-boyberry",
+      "name": "Boyberry",
+      "category": "sex",
+      "neighborhood": "Malasaña",
+      "address": "Calle de Valverde, 3, Malasaña, Madrid, Spain",
+      "lat": 40.4207139,
+      "lon": -3.7022746,
+      "hours": {
+        "fri": [
+          "12:00",
+          "03:30"
+        ],
+        "mon": [
+          "12:00",
+          "03:00"
+        ],
+        "sat": [
+          "15:00",
+          "03:30"
+        ],
+        "sun": [
+          "15:00",
+          "03:00"
+        ],
+        "thu": [
+          "12:00",
+          "03:00"
+        ],
+        "tue": [
+          "12:00",
+          "03:00"
+        ],
+        "wed": [
+          "12:00",
+          "03:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Sex venue",
+        "Cruising maze",
+        "Dark room and cabins"
+      ],
+      "instagram": "@boyberry_madrid",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://boyberry.com/en/madrid/faqs/",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/boyberry_madrid",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

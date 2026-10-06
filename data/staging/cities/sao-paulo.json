@@ -1,0 +1,400 @@
+{
+  "meta": {
+    "slug": "sao-paulo",
+    "name": "São Paulo",
+    "country": "Brazil",
+    "region": "Latin America",
+    "gayborhood": "Frei Caneca, Rua Augusta",
+    "lat": -23.5505,
+    "lon": -46.6333,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "America/Sao_Paulo"
+  },
+  "venues": [
+    {
+      "id": "sao-paulo-hotel-chilli",
+      "name": "Hotel Chilli",
+      "category": "sauna",
+      "neighborhood": "Santa Cecília",
+      "address": "Largo do Arouche, 610, Santa Cecília, São Paulo, Brazil",
+      "lat": -23.5415391,
+      "lon": -46.6480272,
+      "hours": "24h",
+      "hours_verified": true,
+      "review_features": [
+        "Men's hotel",
+        "Sauna and pools",
+        "Dark rooms"
+      ],
+      "instagram": "@hotelchilli",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://hotelchilli.com.br/",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/hotelchilli",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "sao-paulo-sauna-269",
+      "name": "Sauna 269",
+      "category": "sauna",
+      "neighborhood": "Consolação",
+      "address": "Rua Bela Cintra, 269, Consolação, São Paulo, Brazil",
+      "lat": -23.5524276,
+      "lon": -46.6552395,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Dark room",
+        "Lockers"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "sao-paulo-lagoa",
+      "name": "Lagoa Sauna",
+      "category": "sauna",
+      "neighborhood": "Consolação",
+      "address": "Rua Pedro Taques, 130, Consolação, São Paulo, Brazil",
+      "lat": -23.5527012,
+      "lon": -46.6566076,
+      "hours": {
+        "fri": [
+          "15:00",
+          "00:00"
+        ],
+        "mon": [
+          "15:00",
+          "00:00"
+        ],
+        "sat": [
+          "15:00",
+          "00:00"
+        ],
+        "sun": [
+          "15:00",
+          "00:00"
+        ],
+        "thu": [
+          "15:00",
+          "00:00"
+        ],
+        "tue": [
+          "15:00",
+          "00:00"
+        ],
+        "wed": [
+          "15:00",
+          "00:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Steam sauna",
+        "Dry sauna",
+        "Lockers"
+      ],
+      "instagram": "@espacolagoa_sauna",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.espacolagoasauna.com.br/",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/espacolagoa_sauna",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "sao-paulo-blue-space",
+      "name": "Blue Space",
+      "category": "bar",
+      "neighborhood": "Barra Funda",
+      "address": "Rua Brigadeiro Galvão, 723, Barra Funda, São Paulo, Brazil",
+      "lat": -23.5298717,
+      "lon": -46.6583114,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Drag shows",
+        "Electronic music"
+      ],
+      "instagram": "@bluespacesp",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/bluespacesp",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "sao-paulo-a-loca",
+      "name": "A Lôca",
+      "category": "bar",
+      "neighborhood": "Consolação",
+      "address": "Rua Frei Caneca, 916, Consolação, São Paulo, Brazil",
+      "lat": -23.5550601,
+      "lon": -46.6558179,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Dance floor",
+        "Drag shows"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "sao-paulo-bubu",
+      "name": "Bubu Lounge",
+      "category": "bar",
+      "neighborhood": "Pinheiros",
+      "address": "Rua dos Pinheiros, 791, Pinheiros, São Paulo, Brazil",
+      "lat": -23.5668441,
+      "lon": -46.6854723,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Live music",
+        "Electronic dance floor"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "sao-paulo-tunnel",
+      "name": "Tunnel",
+      "category": "bar",
+      "neighborhood": "Bela Vista",
+      "address": "Rua dos Ingleses, 355, Bela Vista, São Paulo, Brazil",
+      "lat": -23.5610878,
+      "lon": -46.6468998,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Drag shows",
+        "Pop and electronic"
+      ],
+      "instagram": "@balada_tunnel",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/balada_tunnel",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "sao-paulo-the-graus",
+      "name": "The Graus Bar",
+      "category": "cruise",
+      "neighborhood": "República",
+      "address": "Rua Aurora, 704, República, São Paulo, Brazil",
+      "lat": -23.5414675,
+      "lon": -46.6426895,
+      "hours": {
+        "fri": [
+          "12:00",
+          "04:00"
+        ],
+        "mon": [
+          "12:00",
+          "23:30"
+        ],
+        "sat": [
+          "12:00",
+          "04:00"
+        ],
+        "sun": [
+          "12:00",
+          "23:30"
+        ],
+        "thu": [
+          "12:00",
+          "23:30"
+        ],
+        "tue": [
+          "12:00",
+          "23:30"
+        ],
+        "wed": [
+          "12:00",
+          "23:30"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Cruising bar",
+        "Adult cinema",
+        "Glory hole"
+      ],
+      "instagram": "@thegrausbar",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://thegrausbar.com.br/faq/",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/thegrausbar",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "sao-paulo-dedalos",
+      "name": "Dédalos Bar",
+      "category": "cruise",
+      "neighborhood": "República",
+      "address": "Rua Bento Freitas, 38, República, São Paulo, Brazil",
+      "lat": -23.5421892,
+      "lon": -46.6455548,
+      "hours": "24h",
+      "hours_verified": true,
+      "review_features": [
+        "Minicine",
+        "Glory holes",
+        "Cabins"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.dedalosbar.com.br/home",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "sao-paulo-eagle",
+      "name": "Eagle São Paulo",
+      "category": "cruise",
+      "neighborhood": "Consolação",
+      "address": "Rua Augusta, 538, Consolação, São Paulo, Brazil",
+      "lat": -23.5515295,
+      "lon": -46.6511805,
+      "hours": {
+        "fri": [
+          "19:00",
+          "05:00"
+        ],
+        "sat": [
+          "19:00",
+          "05:00"
+        ],
+        "sun": [
+          "19:00",
+          "02:00"
+        ],
+        "thu": [
+          "19:00",
+          "02:00"
+        ],
+        "wed": [
+          "19:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Cruising bar",
+        "Darkroom",
+        "Video room"
+      ],
+      "instagram": "@eaglesaopauloinsta",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.eaglesaopaulo.com.br/",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/eaglesaopauloinsta",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "sao-paulo-zuno",
+      "name": "ZUNO",
+      "category": "sex",
+      "neighborhood": "Santana",
+      "address": "Rua Dr. Olavo Egídio, 327, Santana, São Paulo, Brazil",
+      "lat": -23.4998269,
+      "lon": -46.6224969,
+      "hours": {
+        "fri": [
+          "17:00",
+          "23:00"
+        ],
+        "sun": [
+          "17:00",
+          "23:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Dark room",
+        "Adult cinema",
+        "Glory holes"
+      ],
+      "instagram": "@zunoficial",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.zunobar.com/general-8",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/zunoficial",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "sao-paulo-cineclub",
+      "name": "Cineclub",
+      "category": "sex",
+      "neighborhood": "República",
+      "address": "Rua Aurora, 706, República, São Paulo, Brazil",
+      "lat": -23.541485,
+      "lon": -46.6427174,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Adult cinema",
+        "Darkroom",
+        "Cabins"
+      ],
+      "instagram": null,
+      "sources": []
+    }
+  ],
+  "pride": {
+    "2026": {
+      "date": "2026-06-07",
+      "event_name": "Parada do Orgulho LGBT+",
+      "source_url": "https://paradasp.org.br/"
+    },
+    "2027": {
+      "date": "2027-05-30",
+      "event_name": "Parada do Orgulho LGBT+",
+      "source_url": "https://paradasp.org.br/eventos-relacionados/"
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "meta": {
+    "slug": "cape-town",
+    "name": "Cape Town",
+    "country": "South Africa",
+    "region": "Africa",
+    "gayborhood": "De Waterkant",
+    "lat": -33.9288,
+    "lon": 18.4172,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Africa/Johannesburg"
+  },
+  "venues": [
+    {
+      "id": "cape-town-cafe-manhattan",
+      "name": "Café Manhattan",
+      "category": "bar",
+      "neighborhood": "De Waterkant",
+      "address": "74 Waterkant St, De Waterkant, Cape Town",
+      "lat": -33.9162396,
+      "lon": 18.417165,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Cape Town's longest-running gay venue",
+        "Terrace seating"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "cape-town-shaft-cruise-zone",
+      "name": "Shaft Cruise Zone",
+      "category": "cruise",
+      "neighborhood": "Observatory",
+      "address": "299 Lower Main Rd, Observatory, Cape Town",
+      "lat": -33.9329264,
+      "lon": 18.4662819,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Bar, nightclub and sauna combined",
+        "Open daily"
+      ],
+      "instagram": null,
+      "sources": []
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

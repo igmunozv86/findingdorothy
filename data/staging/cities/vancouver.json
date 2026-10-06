@@ -1,0 +1,198 @@
+{
+  "meta": {
+    "slug": "vancouver",
+    "name": "Vancouver",
+    "country": "Canada",
+    "region": "North America",
+    "gayborhood": "Davie Village",
+    "lat": 49.2609,
+    "lon": -123.114,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "America/Vancouver"
+  },
+  "venues": [
+    {
+      "id": "vancouver-celebrities",
+      "name": "Celebrities Nightclub",
+      "category": "bar",
+      "neighborhood": "Davie Village",
+      "address": "1022 Davie St, Vancouver, BC",
+      "lat": 49.2793851,
+      "lon": -123.129915,
+      "hours": {
+        "tue": [
+          "22:00",
+          "03:00"
+        ],
+        "thu": [
+          "22:00",
+          "03:00"
+        ],
+        "fri": [
+          "22:00",
+          "03:00"
+        ],
+        "sat": [
+          "22:00",
+          "03:00"
+        ]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "International DJs",
+        "Weekly themed club nights",
+        "EDM and house music"
+      ],
+      "instagram": "@celebrities_van",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.celebritiesnightclub.com/contact",
+          "retrieved_at": "2026-10-05"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/celebrities_van",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    },
+    {
+      "id": "vancouver-numbers",
+      "name": "Numbers Cabaret",
+      "category": "bar",
+      "neighborhood": "Davie Village",
+      "address": "1042 Davie St, Vancouver, BC",
+      "lat": 49.2796989,
+      "lon": -123.130399,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Operating since 1980",
+        "DJs seven nights a week",
+        "Video-bar"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "vancouver-1181",
+      "name": "1181",
+      "category": "bar",
+      "neighborhood": "Davie Village",
+      "address": "1181 Davie St, Vancouver, BC",
+      "lat": 49.281603,
+      "lon": -123.132897,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Craft cocktail lounge",
+        "Sunday drag shows",
+        "Late-night dancing"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "vancouver-junction",
+      "name": "The Junction",
+      "category": "bar",
+      "neighborhood": "Davie Village",
+      "address": "1138 Davie St, Vancouver, BC V6E 4L7",
+      "lat": 49.2807293,
+      "lon": -123.132345,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Drag shows",
+        "Pub kitchen",
+        "Front patio"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "vancouver-pumpjack",
+      "name": "PumpJack Pub",
+      "category": "bar",
+      "neighborhood": "Davie Village",
+      "address": "1167 Davie St, Vancouver, BC",
+      "lat": 49.2814951,
+      "lon": -123.132742,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Go-go dancer nights",
+        "Leather/bear crowd",
+        "Patio"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "vancouver-score",
+      "name": "Score on Davie",
+      "category": "bar",
+      "neighborhood": "Davie Village",
+      "address": "1262 Davie St, Vancouver, BC",
+      "lat": 49.2823322,
+      "lon": -123.134561,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Gay sports bar",
+        "Over-the-top Caesars",
+        "Big game screenings"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "vancouver-fountainhead",
+      "name": "The Fountainhead Pub",
+      "category": "bar",
+      "neighborhood": "Davie Village",
+      "address": "1025 Davie St, Vancouver, BC",
+      "lat": 49.279654,
+      "lon": -123.12973,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Gastropub",
+        "Monday karaoke nights",
+        "Select Wednesday drag bingo"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "vancouver-steamworks",
+      "name": "Steamworks Vancouver",
+      "category": "sauna",
+      "neighborhood": "Gastown",
+      "address": "123 W Pender St, Vancouver, BC V6B 1S4",
+      "lat": 49.2813559,
+      "lon": -123.108216,
+      "hours": "24h",
+      "hours_verified": true,
+      "review_features": [
+        "24/7 men-only bathhouse",
+        "Dry sauna, steam room, whirlpool",
+        "Gym and private rooms"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.steamworksbaths.com/vancouver-1",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

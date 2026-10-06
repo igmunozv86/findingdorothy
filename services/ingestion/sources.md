@@ -6,7 +6,7 @@ Nothing here invents a fact. An empty response is logged as `no recent data` and
 
 The client sends one request at a time, waits 1 second between calls, and stops the run on HTTP 429. Overpass is never parallelized, and a repeated Overpass or Nominatim query is served from the in-memory cache.
 
-Run order: OpenStreetMap Overpass, Wikidata, Yelp, Foursquare, Google Places, Eventbrite, Reddit, Songkick, Ticketmaster, Bandsintown, then GayCities, Travel Gay, and Misterb&b. Resident Advisor, Scruff, and Grindr are manual. TripAdvisor stays manual. Forums stay without a universal API.
+Run order: OpenStreetMap Overpass, Wikidata, Yelp, Foursquare, Google Places, Eventbrite, Reddit, Songkick, Ticketmaster, Bandsintown, then GayCities, Travel Gay, and Misterb&b. Resident Advisor, Scruff, Grindr, TripAdvisor, and Instagram are manual. Forums stay without a universal API.
 
 A venue whose city is São Paulo, or any city string that names Brazil, is searched in English and in Portuguese. Each request records `query_language`.
 
@@ -162,3 +162,40 @@ Aspects the table allows: `cleanliness`, `safety`, `crowd`, `facilities`, `staff
 - There is no API that searches every forum. This client does not crawl a guessed list of boards.
 - Forum posts that are on Reddit are covered by the Reddit search above.
 - A page from any other forum still needs `source_url` and `retrieved_at`, and it is not fetched here.
+
+## Hotel Chilli live counter
+
+- Page: https://hotelchilli.com.br/
+- The counter is not in the cached HTML. The page script calls `GET https://hotelchilli.com.br/wp-admin/admin-ajax.php?action=atualizar_contador_chilli` and reads JSON `{ success, data: { contagem, hora } }`.
+- HTML fallback, only if that JSON call fails and is not a 429: the text inside `.chilli-card-counter`. That node is a cached shortcode, so it is not the live number.
+- Auth: none. Gate: `CHILLI_POLL=1`. Without that flag the 5-minute loop does not start. `--dry-run` sends one request and does not loop or store a count.
+- A stored row is one entry in `data/live-occupancy.json`, keyed by `venue_id`. Hotel Chilli uses `sp-hotel-chilli`, `kind` `live-occupancy`, `count`, `source_url` `https://hotelchilli.com.br/`, and `retrieved_at`. The headcount is not turned into `sentiment`. Any later venue counter writes the same shape under its own id.
+- The venue card keeps its forecast. A reading under 15 minutes old replaces the “Not enough live signal” line inside the busyness block with a pulsing green dot, a Live badge, and “N inside right now”. A failed poll, a missing row, or an older reading leaves that forecast line as it is. The number is never left on screen after it goes stale.
+- Rate limit: one request at a time, then a 5-minute wait. HTTP 429 stops the loop and drops this venue’s latest reading.
+- Robots: https://hotelchilli.com.br/robots.txt disallows `/wp-admin/` and allows `/wp-admin/admin-ajax.php`. The venue's own page calls this action every minute. This client uses the same action, slower, and only when the flag is on.
+- ToS: the counter is published by the hotel on its homepage. Do not poll it until someone has read the hotel's terms and set `CHILLI_POLL=1`.
+
+## Pride calendar
+
+- File: `data/pride-events.json`. The Pride Calendar page reads this file. `calendar_events` in `infra/schema.sql` is the same shape.
+- A row needs the organizer's own page, or the city's official tourism page when that page states the dates. A guide, a news article, or last year's pattern is not a date.
+- Required: `start`, `end`, `source_url`, `source_name`, `retrieved_at`. A one-day march sets `end` equal to `start`.
+- Kinds: `pride-week`, `parade`, `festival`. A march inside a published week uses `parent_id` and its own source.
+- Do not fill next year from a sentence like "the last weekend in June" or "the Sunday after Corpus Christi". Wait until that year's date is written on the page.
+- A side party mentioned only as "see Instagram" is not added.
+
+## Instagram
+
+- Status: `MANUAL_ONLY`.
+- There is no public API for a third-party profile. Do not scrape instagram.com. The site blocks automated reads, and the terms do not allow that collection.
+- No request is sent. A person reads the venue's own profile and writes the notes below. A handle is stored only when the venue's own site, or the city's official tourism page for that venue, names that profile. A guessed handle is not stored.
+- Seed field: `instagram` is `{ "handle": "@name", "url": "https://www.instagram.com/name" }`, or `null` when no profile was verified.
+
+### Extraction checklist
+
+For each verified profile, record only what that profile itself shows:
+
+- Hours from the bio, a story highlight, or a post. `source_url` is the profile URL. `hours_note` says where on the profile the hours were read (bio, highlight, or post). `hours_verified` is true only when that place states a full open and a full close for each open day. An open time with no close does not verify hours.
+- Address or location tag from the bio. A guide can still not verify hours.
+- Recurring parties and events from recent posts: the party name and the weeknight. A one-off date is not a weekly hour.
+- Follower count as a rough popularity signal, with `retrieved_at`, because the number changes. It is not an aspect and it is not a sentiment.

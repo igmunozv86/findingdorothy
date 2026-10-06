@@ -13,12 +13,22 @@ Read sources in this order:
 1. The venue's own website.
 2. The venue's official Instagram.
 3. The city's official tourism page.
+4. Another page that is clearly about that venue, when the three above do not print the street.
 
-Guides, Google hours, and GayCities, Travel Gay, or Misterb&b do not select a venue and do not verify hours.
+Hours are read only from the first two. The other pages can supply the address and nothing else.
 
 ## Select
 
-Keep a venue only when one of those three sources names it and gives one street address. Drop it when two of those sources disagree on the address, or when a page says it has closed. Do not add a place to fill a section. A section can be one card.
+Keep a venue when a real page names it and gives one street address. That page can be the venue's own site, its official Instagram, the city's tourism page, or another page that is clearly about that venue. Drop it when two of those pages disagree on the address, or when a page says it has closed. Guides can place a venue. They cannot verify hours.
+
+Do not stop after the first few official sites. A live city needs four lanes before the list is done:
+
+1. Saturday clubs. A disco or Saturday dance club is stored as `bar`.
+2. Neighborhood bars, also `bar`.
+3. Saunas, stored as `sauna`.
+4. Cruise bars and sex clubs, stored as `cruise` or `sex`.
+
+Floor for a major city: at least 4 Saturday clubs, at least 6 bars and saunas beyond that first handful, and more than one cruise or sex venue. A short list with no clubs is a failed pass. Do not invent a name to hit the floor. If a real page is missing, leave that venue out and say so.
 
 Neighborhood is the one the venue's own page names. If that page does not name one, use the Nominatim suburb.
 
@@ -35,6 +45,14 @@ A tourism page, a guide, or an open time with no close does not verify hours. Le
 `00:00` as an end means midnight. An end earlier than the start crosses midnight. A window that starts at `00:00` is stored as written.
 
 Categories: `bar` is Drinks and Dance, `sauna` is Saunas and Bathhouses, `cruise` and `sex` are Fun Fun.
+
+## Pride date
+
+Adding a city includes its pride date. Read the organizer's own page, or the city's official tourism page when that page states the dates. Write the row in `data/pride-events.json`. `city_id` matches the city `id`. Required fields are `start`, `end`, `source_url`, `source_name`, and `retrieved_at`. A one-day march sets `end` equal to `start`. A march inside a published week is a second row with `parent_id` and its own source.
+
+If that year's date is not on the page, add no row. Do not copy last year's dates forward from a habit such as "the last weekend in June."
+
+The city page uses the same frame for every live city, and it shows the pride notice only while those dates are underway. The Pride Calendar lists the row under that year and month. Search on that page is by city and by year.
 
 ## Ids
 

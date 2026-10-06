@@ -42,7 +42,7 @@ export function periodLabel(hour) {
 }
 
 export function placeStatus(hours, when) {
-  if (hours == null) {
+  if (hours == null || hours === 'no recent data') {
     return {
       open: true,
       unconfirmed: true,

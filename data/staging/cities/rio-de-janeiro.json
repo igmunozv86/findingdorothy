@@ -1,0 +1,44 @@
+{
+  "meta": {
+    "slug": "rio-de-janeiro",
+    "name": "Rio de Janeiro",
+    "country": "Brazil",
+    "region": "Latin America",
+    "gayborhood": "Ipanema",
+    "lat": -22.911,
+    "lon": -43.2094,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "America/Sao_Paulo"
+  },
+  "venues": [
+    {
+      "id": "rio-de-janeiro-silencio",
+      "name": "Silêncio",
+      "category": "bar",
+      "neighborhood": "Ipanema",
+      "address": "Rua Teixeira de Melo 47",
+      "lat": -22.9852125,
+      "lon": -43.1988105,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Cocktail bar",
+        "DJ sets",
+        "Free entry"
+      ],
+      "instagram": "@silencio.ipanema",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/silencio.ipanema",
+          "retrieved_at": "2026-10-05"
+        }
+      ]
+    }
+  ],
+  "pride": {
+    "2026": null,
+    "2027": null
+  }
+}

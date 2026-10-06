@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "slug": "taipei",
+    "name": "Taipei",
+    "country": "Taiwan",
+    "region": "Asia-Pacific",
+    "gayborhood": "Ximending",
+    "lat": 25.0375,
+    "lon": 121.5637,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Asia/Taipei"
+  },
+  "venues": [
+    {
+      "id": "taipei-gstar-club",
+      "name": "G*Star Club",
+      "category": "bar",
+      "neighborhood": "Zhongshan",
+      "address": "B1, No. 23, Long Jiang Rd, Zhongshan, Taipei",
+      "lat": 25.0480037,
+      "lon": 121.5405138,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Two-floor dance club",
+        "Drag and go-go shows",
+        "Late-night hours"
+      ],
+      "instagram": null,
+      "sources": []
+    },
+    {
+      "id": "taipei-tianlong-sauna",
+      "name": "天龍三溫暖",
+      "category": "sauna",
+      "neighborhood": "Datong",
+      "address": "No. 73, Sec 1, Chongqing N Rd, Datong, Taipei",
+      "lat": 25.0523577,
+      "lon": 121.5142839,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Men-only sauna",
+        "Two floors, 1000 ping",
+        "NT$700 entry"
+      ],
+      "instagram": null,
+      "sources": []
+    }
+  ],
+  "pride": {
+    "2026": {
+      "date": "2026-10-31",
+      "event_name": "Taiwan LGBT+ Pride",
+      "source_url": "https://www.taiwanpride.lgbt/"
+    },
+    "2027": null
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "meta": {
+    "slug": "tel-aviv",
+    "name": "Tel Aviv",
+    "country": "Israel",
+    "region": "Middle East",
+    "gayborhood": null,
+    "lat": 32.0853,
+    "lon": 34.7818,
+    "status": "live",
+    "last_updated": "2026-10-06",
+    "tz": "Asia/Jerusalem"
+  },
+  "venues": [],
+  "pride": {
+    "2026": {
+      "date": "2026-06-12",
+      "event_name": "Tel Aviv Pride Parade",
+      "source_url": "https://www.tel-aviv.gov.il/Pages/MainItemPage.aspx?ItemID=24629&ListID=5a9823a9-22cf-40a3-8a59-e9f3305db983&WebID=3af57d92-807c-43c5-8d5f-6fd455eb2776"
+    },
+    "2027": null
+  }
+}
