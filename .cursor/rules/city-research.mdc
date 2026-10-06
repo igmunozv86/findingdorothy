@@ -51,6 +51,9 @@ below. Workers write to `data/staging/cities/<slug>.json` only — never to
 6. **Fields:** `id` is `<slug>-<name-slug>`, unique. `review_features`: 2–4
    short factual strings. `instagram`: handle or null. No unknown fields —
    the validator rejects them. No phone numbers, ever.
+   `events_url` is optional: the venue's own events or what's-on page, or
+   null. Omit it when there is no such page. It is a tier-3 source. Do not
+   invent a calendar.
 7. **Pride:** `{"2026": {date, event_name, source_url} | null, "2027": …}`.
    ONLY dates the organizer has actually published. Never infer from prior
    years. Null is a valid, honest answer.

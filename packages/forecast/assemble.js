@@ -1,34 +1,20 @@
-// Turn the sources we actually have into one score and a sentence.
-// Closed is still a hard zero. Nothing here is a live headcount.
+// Turn posted hours, the Beta prior, and whatever signals we actually have
+// into one probability. Closed is still a hard zero. No live headcount is invented.
 
-import { labelFor, scoreForecast } from './score.js';
+import { readFileSync } from 'node:fs';
 import { placeStatus } from './open.js';
+import { extractSignals, INITIAL_WEIGHTS, loadWeights } from './signals.js';
+import {
+  CATEGORY_PRIORS,
+  labelFor,
+  resolveCell,
+  scoreForecast,
+  slotForDow,
+  startingCells,
+} from './score.js';
 
 const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-
-const PRIORS = {
-  bar: { weekend: 0.66, weeknight: 0.38, name: 'bar' },
-  club: { weekend: 0.7, weeknight: 0.42, name: 'club' },
-  cruise: { weekend: 0.68, weeknight: 0.4, name: 'cruising bar' },
-  sex: { weekend: 0.58, weeknight: 0.4, name: 'sex club' },
-  sauna: { weekend: 0.84, weeknight: 0.5, name: 'bathhouse' },
-};
-
-const HOUR_FACTOR = { early: 0.62, mid: 0.86, peak: 1.08, late: 0.72 };
-const PHASE_WORDS = {
-  early: 'early in its posted hours',
-  mid: 'building through the evening',
-  peak: 'in the busy part of the night',
-  late: 'near closing',
-};
-
-const MISSING = [
-  { name: 'Check-ins', kind: 'missing', detail: 'No live check-ins' },
-  { name: 'Venue counter', kind: 'missing', detail: 'No staff count' },
-  { name: 'Popular Times', kind: 'missing', detail: 'Google does not offer this API' },
-  { name: 'Google Trends', kind: 'missing', detail: 'Not pulled' },
-  { name: 'Event calendar', kind: 'missing', detail: 'Not pulled' },
-];
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export function summaryWithCountNote(pattern, hasLiveCount) {
   const base = String(pattern).replace(/ No live count\.$/, '').trimEnd();
@@ -40,119 +26,150 @@ export function isShutdown(venue) {
   return flag === 'closed' || flag === 'out_of_business' || flag === 'shutdown' || venue.out_of_business === true;
 }
 
-export function dayScore(venue, dow) {
+export function loadCells(fileUrl) {
+  const cells = startingCells();
+  try {
+    const raw = JSON.parse(readFileSync(fileUrl, 'utf8'));
+    const stored = raw.cells && typeof raw.cells === 'object' ? raw.cells : raw;
+    for (const [key, cell] of Object.entries(stored)) {
+      if (cell && Number.isFinite(cell.alpha) && Number.isFinite(cell.beta)) cells[key] = cell;
+    }
+  } catch {
+    // Starting assumptions only.
+  }
+  return cells;
+}
+
+export function dayScore(venue, dow, cells = startingCells()) {
   if (!openOnDow(venue.hours, dow)) return 0;
-  const p = dayPrior(venue.category, dow);
-  return Math.round(p * 10 * 10) / 10;
+  const slot = slotForDow(dow);
+  const cell = resolveCell(cells, venue, slot);
+  const scored = scoreForecast({ cell, signals: [], weights: INITIAL_WEIGHTS });
+  return scored.percent;
 }
 
 export function assembleForecast(venue, when, extras = {}) {
   const status = placeStatus(venue.hours, when);
-  const weekend = status.patternDay === 0 || status.patternDay === 5 || status.patternDay === 6;
-  const cat = PRIORS[venue.category] ?? PRIORS.bar;
+  const cells = extras.cells || startingCells();
+  const weights = extras.weights || INITIAL_WEIGHTS;
+  const slot = slotForDow(status.patternDay);
+  const category = CATEGORY_PRIORS[venue.category] ? venue.category : 'bar';
+  const cat = CATEGORY_PRIORS[category];
+  const cell = resolveCell(cells, venue, slot);
   const features = venue.review_features || [];
   const sources = [
     { name: status.unconfirmed ? 'Hours' : 'Posted hours', kind: 'gate', detail: status.text },
   ];
 
   if (!status.open) {
-    const scored = scoreForecast(
-      { p_busy: 0, n_obs: 12, drivers: ['Closed now'] },
-      [{ kind: 'closed', value: 1 }],
-    );
-    const { label } = labelFor(scored.score, scored.confidence, { closed: true });
+    const scored = scoreForecast({ cell, signals: [], weights, closed: true });
+    const { label, action } = labelFor(scored.percent, scored.confidence, { closed: true });
     return {
       ...scored,
       label,
+      action,
       status,
       summary: 'Closed right now, so expected busyness is 0.',
-      sources: sources.concat(MISSING),
+      sources: sources.concat(staticMissing()),
+      cell_key: cell.key,
     };
   }
 
-  const dayWord = weekend ? 'Weekend' : 'Weeknight';
-  let p = weekend ? cat.weekend : cat.weeknight;
+  const extracted = extractSignals({
+    features,
+    phase: status.phase || 'mid',
+    weekday: status.patternDay,
+    weather: extras.weather,
+    extras,
+  });
+  const scored = scoreForecast({ cell, signals: extracted.signals, weights });
+  const rejected = [...extracted.rejected, ...scored.rejected];
+  const dayName = DAY_NAMES[status.patternDay] || 'Tonight';
+  const { label, action } = labelFor(scored.percent, scored.confidence, {
+    dayName,
+    categoryName: cat.name,
+    drivers: scored.drivers,
+  });
+
   sources.push({
     name: 'Category prior',
-    kind: 'prior',
-    detail: `${dayWord.toLowerCase()} ${cat.name}`,
+    kind: cell.assumption === false ? 'learned' : 'assumption',
+    detail: `${cell.key} · starting mean ${Math.round(scored.p_prior * 100)}% · n=${trimNum(scored.effective_n)}`,
   });
-
-  const phase = status.phase || 'mid';
-  const timing = status.unconfirmed ? unconfirmedTiming(phase) : (PHASE_WORDS[phase] || phase);
-  p *= HOUR_FACTOR[phase] ?? 1;
-  sources.push({
-    name: 'Hour prior',
-    kind: 'prior',
-    detail: timing,
-  });
-
-  const crowd = features.filter((feature) => /packed|lines|loud dance|dance floor/i.test(feature));
-  if (crowd.length && weekend && phase === 'peak') {
-    p += 0.08;
-    sources.push({ name: 'Recurring reviews', kind: 'prior', detail: crowd.join(', ') });
-  } else if (features.length) {
-    sources.push({ name: 'Recurring reviews', kind: 'context', detail: features.slice(0, 3).join(', ') });
-  } else {
-    sources.push({ name: 'Recurring reviews', kind: 'missing', detail: 'None noted' });
+  for (const used of scored.used) {
+    sources.push({ name: used.kind, kind: 'signal', detail: `x=${used.x} · w=${used.w} · Δlogit=${trimNum(used.delta)}` });
+  }
+  for (const item of extracted.missing) {
+    sources.push({ name: item.kind, kind: 'missing', detail: item.reason });
+  }
+  for (const item of rejected) {
+    sources.push({ name: item.kind, kind: 'rejected', detail: item.reason });
   }
 
-  const weather = extras.weather;
-  if (weather) {
-    const outdoor = features.some((feature) => /patio|backyard|balcony/i.test(feature));
-    if (weather.raining) p *= outdoor ? 0.72 : 0.94;
-    sources.push({
-      name: 'Weather',
-      kind: weather.raining ? 'live' : 'context',
-      detail: `${weather.source} · ${weather.summary}`,
+  const summary = summaryWithCountNote(label, extras.liveCount);
+  if (typeof extras.onPredict === 'function') {
+    const signalMap = {};
+    for (const used of scored.used) signalMap[used.kind] = used.x;
+    extras.onPredict({
+      venue_id: venue.id,
+      timestamp_utc: new Date().toISOString(),
+      p_pred: scored.p_busy,
+      p_prior: scored.p_prior,
+      features: { category, slot, phase: status.phase || 'mid', cell_key: cell.key },
+      signals: signalMap,
     });
-  } else {
-    sources.push({ name: 'Weather', kind: 'missing', detail: 'Not fetched' });
   }
-
-  p = Math.min(0.92, Math.max(0.05, p));
-  const drivers = [timing, crowd[0] || `${dayWord} ${cat.name}`].filter(Boolean);
-  const scored = scoreForecast({ p_busy: p, n_obs: 12, drivers }, []);
-  const { label } = labelFor(scored.score, scored.confidence);
-  const where = venue.neighborhood ? `${venue.neighborhood} ${cat.name}` : cat.name;
-  const reviewBit = crowd.length && phase === 'peak' ? ` Reviews mention ${crowd[0].toLowerCase()}.` : '';
-  const rainBit = weather?.raining ? ` Rain is in the weather reading.` : '';
-  const pattern = `${dayWord} pattern for a ${where}, ${timing}.${reviewBit}${rainBit}`;
-  const summary = summaryWithCountNote(pattern, extras.liveCount);
 
   return {
     ...scored,
     label,
+    action,
     status,
     summary,
-    sources: sources.concat(MISSING),
+    sources,
+    cell_key: cell.key,
+  };
+}
+
+export function defaultForecastPaths(rootUrl) {
+  return {
+    cells: new URL('../data/forecast/cells.json', rootUrl),
+    weights: new URL('../data/forecast/weights.json', rootUrl),
+  };
+}
+
+export function loadForecastInputs(rootUrl) {
+  const paths = defaultForecastPaths(rootUrl);
+  return {
+    cells: loadCells(paths.cells),
+    weights: loadWeights(paths.weights),
   };
 }
 
 export const SOURCE_NOTES = [
-  ['Posted hours', 'Venue sites where we have them, otherwise public listings. A closed door scores 0.'],
-  ['Category prior', 'Hand-set weekend and weeknight odds for bars, cruising bars, sex clubs, and bathhouses.'],
-  ['Hour prior', '8pm–2am is the busy stretch. The last 75 minutes before close taper off.'],
-  ['Recurring reviews', 'Phrases noted on the venue. Crowd phrases nudge a weekend peak. Not a headcount.'],
-  ['Weather', 'Open-Meteo, current conditions. Rain nudges patios down. Not a crowd count.'],
-  ['Not used yet', 'Check-ins, venue counters, Popular Times, Google Trends, event calendar.'],
+  ['Posted hours', 'A closed door is 0%. Unconfirmed hours stay open for the pattern and say so.'],
+  ['Beta prior', 'Starting assumption from the old category odds, α+β = 10. A venue cell replaces it only after a real busy/quiet outcome.'],
+  ['Signals', 'Log-odds weights are starting assumptions until calibration refits them. A missing signal is logged, not treated as zero evidence.'],
+  ['Hour phase', 'Time-of-night nudge from posted hours. Starting assumption, not a fitted weight.'],
+  ['Weather', 'Open-Meteo. Rain lowers an outdoor venue. Indoor rain is not a signal.'],
+  ['Not wired', 'Check-ins, venue occupancy (0–1), Google Trends. A raw headcount is rejected until it is an occupancy fraction.'],
 ];
 
-function unconfirmedTiming(phase) {
-  if (phase === 'peak') return 'in the usual busy part of the night';
-  if (phase === 'mid') return 'in the evening';
-  if (phase === 'late') return 'late in the night';
-  return 'outside the usual busy hours';
-}
-
-function dayPrior(category, dow) {
-  const weekend = dow === 0 || dow === 5 || dow === 6;
-  const cat = PRIORS[category] ?? PRIORS.bar;
-  return weekend ? cat.weekend : cat.weeknight;
+function staticMissing() {
+  return [
+    { name: 'event_tonight', kind: 'missing', detail: 'events file missing' },
+    { name: 'trends_spike', kind: 'missing', detail: 'Google Trends not pulled' },
+    { name: 'counter', kind: 'missing', detail: 'venue counter unwired' },
+    { name: 'checkin', kind: 'missing', detail: 'check-ins unwired' },
+  ];
 }
 
 function openOnDow(hours, dow) {
   if (hours === '24h') return true;
-  if (!hours || typeof hours !== 'object') return true;
+  if (!hours || hours === 'no recent data' || typeof hours !== 'object') return true;
   return Boolean(hours[DAY_KEYS[dow]]);
+}
+
+function trimNum(value) {
+  return Math.round(Number(value) * 1000) / 1000;
 }

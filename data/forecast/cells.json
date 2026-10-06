@@ -1,0 +1,66 @@
+{
+  "note": "Starting assumptions from the old category priors. Effective sample size alpha+beta = 10. Not learned. Zero observation updates.",
+  "updated_at": null,
+  "cells": {
+    "category:bar:weekend": {
+      "alpha": 6.6,
+      "beta": 3.4,
+      "assumption": true,
+      "updated_at": null
+    },
+    "category:bar:weeknight": {
+      "alpha": 3.8,
+      "beta": 6.2,
+      "assumption": true,
+      "updated_at": null
+    },
+    "category:club:weekend": {
+      "alpha": 7,
+      "beta": 3,
+      "assumption": true,
+      "updated_at": null
+    },
+    "category:club:weeknight": {
+      "alpha": 4.2,
+      "beta": 5.8,
+      "assumption": true,
+      "updated_at": null
+    },
+    "category:cruise:weekend": {
+      "alpha": 6.8,
+      "beta": 3.2,
+      "assumption": true,
+      "updated_at": null
+    },
+    "category:cruise:weeknight": {
+      "alpha": 4,
+      "beta": 6,
+      "assumption": true,
+      "updated_at": null
+    },
+    "category:sex:weekend": {
+      "alpha": 5.8,
+      "beta": 4.2,
+      "assumption": true,
+      "updated_at": null
+    },
+    "category:sex:weeknight": {
+      "alpha": 4,
+      "beta": 6,
+      "assumption": true,
+      "updated_at": null
+    },
+    "category:sauna:weekend": {
+      "alpha": 8.4,
+      "beta": 1.6,
+      "assumption": true,
+      "updated_at": null
+    },
+    "category:sauna:weeknight": {
+      "alpha": 5,
+      "beta": 5,
+      "assumption": true,
+      "updated_at": null
+    }
+  }
+}

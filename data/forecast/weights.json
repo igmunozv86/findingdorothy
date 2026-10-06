@@ -1,0 +1,14 @@
+{
+  "note": "Starting assumptions. Not learned. Zero refits.",
+  "updated_at": null,
+  "weights": {
+    "event_tonight": 1.2,
+    "recurring_night": 0.5,
+    "trends_spike": 0.6,
+    "crowd_phrase": 0.3,
+    "rain_outdoor": -0.7,
+    "counter": 2,
+    "checkin": 0.8,
+    "hour_phase": 1
+  }
+}

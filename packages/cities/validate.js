@@ -1,5 +1,9 @@
 // Schema for data/cities/<slug>.json. The build calls this and stops on any error.
 // venue_count and verified_pct are computed later. They must not be stored.
+// Run: node packages/cities/validate.js
+
+import { readdirSync, readFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
 
 const REGIONS = ['North America', 'Europe', 'Latin America', 'Asia-Pacific', 'Middle East', 'Africa'];
 const CATEGORIES = ['bar', 'club', 'sauna', 'cruise', 'sex'];
@@ -7,7 +11,7 @@ const DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 const CLOCK = /^([01]\d|2[0-3]):[0-5]\d$/;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const TZ = /^[A-Za-z0-9_+-]+(?:\/[A-Za-z0-9_+-]+)+$/;
-const VENUE_KEYS = ['id', 'name', 'category', 'neighborhood', 'address', 'lat', 'lon', 'hours', 'hours_verified', 'review_features', 'instagram', 'sources'];
+const VENUE_KEYS = ['id', 'name', 'category', 'neighborhood', 'address', 'lat', 'lon', 'hours', 'hours_verified', 'review_features', 'instagram', 'sources', 'events_url'];
 const PRIDE_YEARS = ['2026', '2027'];
 
 export { REGIONS, CATEGORIES };
@@ -82,6 +86,11 @@ function validateVenue(slug, venue, seen) {
   }
   if (!(venue.instagram === null || typeof venue.instagram === 'string')) {
     errors.push(`${label}: instagram is a handle or null`);
+  }
+  if ('events_url' in venue && venue.events_url !== null) {
+    if (typeof venue.events_url !== 'string' || !/^https?:\/\//.test(venue.events_url)) {
+      errors.push(`${label}: events_url must be an http(s) url or null`);
+    }
   }
   errors.push(...validateSources(label, venue.sources));
   if (venue.hours_verified === true && !(venue.sources || []).some((source) => source && source.tier === 3)) {
@@ -170,4 +179,20 @@ function validatePride(slug, pride) {
     }
   }
   return errors;
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const dir = new URL('../../data/cities/', import.meta.url);
+  const names = readdirSync(dir).filter((name) => name.endsWith('.json')).sort();
+  const errors = [];
+  for (const name of names) {
+    const city = JSON.parse(readFileSync(new URL(name, dir), 'utf8'));
+    errors.push(...validateCity(city, name));
+  }
+  if (errors.length) {
+    console.error(errors.slice(0, 40).join('\n'));
+    console.error(`${errors.length} city schema errors`);
+    process.exit(1);
+  }
+  console.log(`ok ${names.length} city files`);
 }

@@ -4,9 +4,9 @@
 // A city is one file in data/cities/<slug>.json. The template reads that file only.
 // A fresh live reading on any venue drops "No live count." from that card.
 
-import { writeFileSync } from 'node:fs';
+import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { periodLabel, placeStatus, zonedNow } from '../packages/forecast/open.js';
-import { assembleForecast, dayScore, isShutdown, summaryWithCountNote } from '../packages/forecast/assemble.js';
+import { assembleForecast, dayScore, isShutdown, loadForecastInputs, summaryWithCountNote } from '../packages/forecast/assemble.js';
 import { freshOccupancy, signalMarkup } from '../packages/forecast/live.js';
 import { fetchWeather } from '../packages/forecast/weather.js';
 import { loadCities } from '../packages/cities/load.js';
@@ -54,6 +54,8 @@ const FLAGS = {
   Australia: '🇦🇺',
   Thailand: '🇹🇭',
   Taiwan: '🇹🇼',
+  Japan: '🇯🇵',
+  'Hong Kong': '🇭🇰',
   Israel: '🇮🇱',
   'South Africa': '🇿🇦',
 };
@@ -84,9 +86,18 @@ function escapeHtml(value) {
 }
 
 function scoreVenue(v, when) {
+  const city = CITIES.find((item) => item.name === v.city);
+  const eventsFile = eventsFor(city?.tz);
+  const event = eventsFile && eventsFile[v.id];
   return assembleForecast(v, when, {
     weather: weatherByCity[v.city] || null,
     liveCount: liveByVenue.get(v.id) || null,
+    eventsFile,
+    eventTonight: Boolean(event?.event_tonight),
+    eventName: event?.event_name || null,
+    cells: forecastInputs.cells,
+    weights: forecastInputs.weights,
+    onPredict: recordPrediction,
   });
 }
 
@@ -101,14 +112,14 @@ const WEEK = [
 ];
 
 function scoreForDow(v, day) {
-  return dayScore(v, day);
+  return dayScore(v, day, forecastInputs.cells);
 }
 
 function weekHtml(v, when, shut) {
   const days = WEEK.map((day) => ({ ...day, score: scoreForDow(v, day.dow) }));
   const peak = Math.max(...days.map((day) => day.score));
   const cols = days.map((day) => {
-    const height = Math.max(8, Math.min(100, (day.score / 10) * 100));
+    const height = Math.max(8, Math.min(100, day.score));
     const opacity = day.score === peak ? 1 : 0.4;
     const today = day.dow === when.weekday ? ' is-today' : '';
     const peakClass = day.score === peak ? ' is-peak' : '';
@@ -164,14 +175,45 @@ function loadLiveByVenue(nowMs) {
 }
 
 const liveByVenue = loadLiveByVenue(Date.now());
+const forecastInputs = loadForecastInputs(import.meta.url);
+const eventsCache = new Map();
+const predicted = new Set();
+
+function localDateKey(timeZone) {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+}
+
+function eventsFor(timeZone) {
+  const dateKey = localDateKey(timeZone || 'UTC');
+  if (eventsCache.has(dateKey)) return eventsCache.get(dateKey);
+  let file = null;
+  try {
+    file = JSON.parse(readFileSync(new URL(`../data/events/${dateKey}.json`, import.meta.url), 'utf8'));
+  } catch {
+    file = null;
+  }
+  eventsCache.set(dateKey, file);
+  return file;
+}
+
+function recordPrediction(row) {
+  if (!row.venue_id || predicted.has(row.venue_id)) return;
+  predicted.add(row.venue_id);
+  appendFileSync(new URL('../data/forecast/predictions.log', import.meta.url), `${JSON.stringify(row)}\n`);
+}
 
 function cardHtml(v, when, basic) {
-  const { score, confidence, label, summary, status } = scoreVenue(v, when);
-  const width = Math.max(0, Math.min(100, (score / 10) * 100));
-  const scoreText = `${score.toFixed(1)}/10`;
+  const { percent, confidence, label, summary, status } = scoreVenue(v, when);
+  const width = Math.max(0, Math.min(100, percent));
+  const scoreText = `${percent}%`;
   const closingSoon = !basic && status.minutesLeft != null && status.minutesLeft <= 60;
   const quiet = basic || closingSoon;
-  const hot = !quiet && score >= 8 ? `<span class="hot">Hot</span>` : '';
+  const hot = !quiet && confidence !== 'low' && percent >= 80 ? `<span class="hot">Hot</span>` : '';
   const tag = basic
     ? `<span class="badge closed">Closed</span>`
     : closingSoon
@@ -199,7 +241,7 @@ function cardHtml(v, when, basic) {
               <span style="width:${width}%"></span>
             </div>
             <div class="meter-scale"><span>Quiet</span><span>Packed</span></div>
-            ${signalMarkup(label, live)}
+            ${signalMarkup(confidence === 'low' ? 'Pattern, not a live count' : label, live)}
             <p class="why"${whyAttr}>${escapeHtml(summary)}</p>
           </div>`;
 
@@ -224,8 +266,8 @@ function previewHtml() {
       const forecast = scoreVenue(venue, when);
       if (
         !best
-        || forecast.score > best.forecast.score
-        || (forecast.score === best.forecast.score && venue.name.localeCompare(best.venue.name) < 0)
+        || forecast.percent > best.forecast.percent
+        || (forecast.percent === best.forecast.percent && venue.name.localeCompare(best.venue.name) < 0)
       ) {
         best = { venue, forecast };
       }
@@ -233,8 +275,8 @@ function previewHtml() {
   }
   if (!best) return '';
   const { venue, forecast } = best;
-  const width = Math.max(0, Math.min(100, (forecast.score / 10) * 100));
-  const scoreText = `${forecast.score.toFixed(1)}/10`;
+  const width = Math.max(0, Math.min(100, forecast.percent));
+  const scoreText = `${forecast.percent}%`;
   const place = venue.neighborhood
     ? `<p class="hero-preview-place">${escapeHtml(venue.neighborhood)}</p>`
     : '';
@@ -258,7 +300,7 @@ function isClosingSoon(forecast) {
 function groupHtml(group, venues, when, cityId) {
   const operating = venues.filter((venue) => !isShutdown(venue));
   const scored = operating.map((venue) => ({ venue, forecast: scoreVenue(venue, when) }));
-  const byScore = (a, b) => b.forecast.score - a.forecast.score || a.venue.name.localeCompare(b.venue.name);
+  const byScore = (a, b) => b.forecast.percent - a.forecast.percent || a.venue.name.localeCompare(b.venue.name);
   const byName = (a, b) => a.venue.name.localeCompare(b.venue.name);
   const ranked = scored
     .filter(({ forecast }) => forecast.status.open && !forecast.status.unconfirmed && !isClosingSoon(forecast))
