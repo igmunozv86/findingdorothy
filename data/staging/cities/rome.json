@@ -1,1 +1,484 @@
-{"meta":{"country":"Italy","gayborhood":null,"last_updated":"2026-10-06","lat":41.9028,"lon":12.4964,"name":"Rome","region":"Europe","slug":"rome","status":"live","tz":"Europe/Rome"},"pride":{"2026":{"date":"2026-06-20","event_name":"Roma Pride","source_url":"https://quiikymagazine.com/en/pride-2026-in-italy/"},"2027":null},"venues":[{"address":"Via di S. Giovanni in Laterano 8, 00184 Roma","category":"bar","hours":{"mon":["08:00","02:00"],"tue":["08:00","02:00"],"wed":["08:00","02:00"],"thu":["08:00","02:00"],"fri":["08:00","02:00"],"sat":["08:00","02:00"],"sun":["08:00","02:00"]},"hours_verified":true,"id":"rome-coming-out","instagram":null,"lat":41.889998,"lon":12.494528,"name":"Coming Out","neighborhood":"Colosseo (Gay Street)","review_features":["Most famous gay bar in Rome, open since 2001","Next to the Colosseum on Gay Street","Drag shows Monday, Wednesday, Saturday","Breakfast, lunch and dinner daily"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"http://www.comingout.it/"},{"retrieved_at":"2026-10-06","tier":2,"url":"https://www.patroc.com/gay/rome/d/comingout.html"}]},{"address":"Via di S. Giovanni in Laterano 12, 00184 Roma","category":"bar","hours":{"mon":["08:00","02:00"],"tue":["08:00","02:00"],"wed":["08:00","02:00"],"thu":["08:00","02:00"],"fri":["08:00","02:00"],"sat":["08:00","02:00"],"sun":["08:00","02:00"]},"hours_verified":true,"id":"rome-my-bar","instagram":null,"lat":41.889973,"lon":12.494574,"name":"My Bar","neighborhood":"Colosseo (Gay Street)","review_features":["Second bar of Rome's Gay Street","Next door to Coming Out near the Colosseum","Karaoke nights and exotic dancers"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"http://www.facebook.com/mybarroma"},{"retrieved_at":"2026-10-06","tier":2,"url":"https://www.patroc.com/gay/rome/d/mybar.html"}]},{"address":"Via di Portonaccio 212, 00159 Roma","category":"club","hours":{"fri":["23:00","05:00"]},"hours_verified":true,"id":"rome-muccassassina","instagram":null,"lat":41.897225,"lon":12.539989,"name":"Muccassassina","neighborhood":"Tiburtina (Qube)","review_features":["In its 37th season in 2026","Every Friday night at Qube Disco","Three dance floors, drag and live shows"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"https://muccassassina.com/"},{"retrieved_at":"2026-10-06","tier":2,"url":"https://www.patroc.com/gay/rome/d/muccassassina.html"}]},{"address":"Via di Monte Testaccio 44/40, 00153 Roma","category":"club","hours":{"fri":["23:00","05:00"],"sat":["23:00","05:00"]},"hours_verified":true,"id":"rome-alibi-club","instagram":null,"lat":41.875511,"lon":12.474261,"name":"Alibi Club","neighborhood":"Testaccio","review_features":["One of Rome's first and largest gay discos","Two floors plus a rooftop terrace","ARCI/ARCO membership card required"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"http://alibiclubroma.com/"},{"retrieved_at":"2026-10-06","tier":2,"url":"https://www.patroc.com/gay/rome/gayguide.html"}]},{"address":"Piazza Manfredo Fanti 40, 00185 Roma","category":"bar","hours":{"fri":["21:00","04:00"],"sat":["21:00","05:00"],"sun":["21:00","03:00"],"thu":["21:00","03:00"]},"hours_verified":true,"id":"rome-company-roma","instagram":null,"lat":41.898255,"lon":12.502104,"name":"Company Roma","neighborhood":"Esquilino","review_features":["Rome's bear den near Termini station","Basement bar, music and smoking room","ARCO membership card required"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"https://www.companyclubroma.it/"},{"retrieved_at":"2026-10-06","tier":2,"url":"https://www.patroc.com/gay/rome/d/company.html"}]},{"address":"Via dei Quattro Cantoni 5, 00184 Roma","category":"cruise","hours":{"fri":["22:00","05:00"],"mon":["22:00","04:00"],"sat":["22:00","05:00"],"sun":["22:00","03:00"],"thu":["22:00","04:00"],"tue":["22:00","03:00"],"wed":["22:00","05:00"]},"hours_verified":true,"id":"rome-censured-club","instagram":"censured.roma","lat":41.896846,"lon":12.496177,"name":"Censured Club","neighborhood":"Monti","review_features":["Gay cruising club since 2017","ENTES-affiliated members club","Small cruising club in central Rome"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"http://www.censuredclubroma.it/"},{"retrieved_at":"2026-10-06","tier":2,"url":"https://gaytravelr.com/italy/rome/cruise-bars/censured-club-roma-gay-cruising-bar"}]},{"address":"Via Faleria 9, 00183 Roma","category":"cruise","hours":{"thu":["23:00","03:30"],"fri":["23:00","05:00"],"sat":["23:00","05:00"]},"hours_verified":true,"id":"rome-gender-klub-roma","instagram":"gender_degrado","lat":null,"lon":null,"name":"Gender Klub Roma","neighborhood":"San Giovanni","review_features":["Safe space for nonbinary and trans guests","Seedy-chic underground club","Late-night alternative party venue"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"https://www.instagram.com/gender_degrado/"},{"retrieved_at":"2026-10-06","tier":2,"url":"https://gaytravelr.com/italy/rome/bars-and-clubs/gender-klub-roma"}]}]}
+{
+  "meta": {
+    "country": "Italy",
+    "gayborhood": null,
+    "last_updated": "2026-10-06",
+    "lat": 41.9028,
+    "lon": 12.4964,
+    "name": "Rome",
+    "region": "Europe",
+    "slug": "rome",
+    "status": "live",
+    "tz": "Europe/Rome"
+  },
+  "pride": {
+    "2026": {
+      "date": "2026-06-20",
+      "event_name": "Roma Pride",
+      "source_url": "https://quiikymagazine.com/en/pride-2026-in-italy/"
+    },
+    "2027": null
+  },
+  "venues": [
+    {
+      "address": "Via di S. Giovanni in Laterano 8, 00184 Roma",
+      "category": "bar",
+      "hours": {
+        "mon": [
+          "08:00",
+          "02:00"
+        ],
+        "tue": [
+          "08:00",
+          "02:00"
+        ],
+        "wed": [
+          "08:00",
+          "02:00"
+        ],
+        "thu": [
+          "08:00",
+          "02:00"
+        ],
+        "fri": [
+          "08:00",
+          "02:00"
+        ],
+        "sat": [
+          "08:00",
+          "02:00"
+        ],
+        "sun": [
+          "08:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "rome-coming-out",
+      "instagram": null,
+      "lat": 41.889998,
+      "lon": 12.494528,
+      "name": "Coming Out",
+      "neighborhood": "Colosseo (Gay Street)",
+      "review_features": [
+        "Most famous gay bar in Rome, open since 2001",
+        "Next to the Colosseum on Gay Street",
+        "Drag shows Monday, Wednesday, Saturday",
+        "Breakfast, lunch and dinner daily"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "http://www.comingout.it/"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://www.patroc.com/gay/rome/d/comingout.html"
+        }
+      ]
+    },
+    {
+      "address": "Via di S. Giovanni in Laterano 12, 00184 Roma",
+      "category": "bar",
+      "hours": {
+        "mon": [
+          "08:00",
+          "02:00"
+        ],
+        "tue": [
+          "08:00",
+          "02:00"
+        ],
+        "wed": [
+          "08:00",
+          "02:00"
+        ],
+        "thu": [
+          "08:00",
+          "02:00"
+        ],
+        "fri": [
+          "08:00",
+          "02:00"
+        ],
+        "sat": [
+          "08:00",
+          "02:00"
+        ],
+        "sun": [
+          "08:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "rome-my-bar",
+      "instagram": null,
+      "lat": 41.889973,
+      "lon": 12.494574,
+      "name": "My Bar",
+      "neighborhood": "Colosseo (Gay Street)",
+      "review_features": [
+        "Second bar of Rome's Gay Street",
+        "Next door to Coming Out near the Colosseum",
+        "Karaoke nights and exotic dancers"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "http://www.facebook.com/mybarroma"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://www.patroc.com/gay/rome/d/mybar.html"
+        }
+      ]
+    },
+    {
+      "address": "Via di Portonaccio 212, 00159 Roma",
+      "category": "club",
+      "hours": {
+        "fri": [
+          "23:00",
+          "05:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "rome-muccassassina",
+      "instagram": null,
+      "lat": 41.897225,
+      "lon": 12.539989,
+      "name": "Muccassassina",
+      "neighborhood": "Tiburtina (Qube)",
+      "review_features": [
+        "In its 37th season in 2026",
+        "Every Friday night at Qube Disco",
+        "Three dance floors, drag and live shows"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "https://muccassassina.com/"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://www.patroc.com/gay/rome/d/muccassassina.html"
+        }
+      ]
+    },
+    {
+      "address": "Via di Monte Testaccio 44/40, 00153 Roma",
+      "category": "club",
+      "hours": {
+        "fri": [
+          "23:00",
+          "05:00"
+        ],
+        "sat": [
+          "23:00",
+          "05:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "rome-alibi-club",
+      "instagram": null,
+      "lat": 41.875511,
+      "lon": 12.474261,
+      "name": "Alibi Club",
+      "neighborhood": "Testaccio",
+      "review_features": [
+        "One of Rome's first and largest gay discos",
+        "Two floors plus a rooftop terrace",
+        "ARCI/ARCO membership card required"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "http://alibiclubroma.com/"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://www.patroc.com/gay/rome/gayguide.html"
+        }
+      ]
+    },
+    {
+      "address": "Piazza Manfredo Fanti 40, 00185 Roma",
+      "category": "bar",
+      "hours": {
+        "fri": [
+          "21:00",
+          "04:00"
+        ],
+        "sat": [
+          "21:00",
+          "05:00"
+        ],
+        "sun": [
+          "21:00",
+          "03:00"
+        ],
+        "thu": [
+          "21:00",
+          "03:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "rome-company-roma",
+      "instagram": null,
+      "lat": 41.898255,
+      "lon": 12.502104,
+      "name": "Company Roma",
+      "neighborhood": "Esquilino",
+      "review_features": [
+        "Rome's bear den near Termini station",
+        "Basement bar, music and smoking room",
+        "ARCO membership card required"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "https://www.companyclubroma.it/"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://www.patroc.com/gay/rome/d/company.html"
+        }
+      ]
+    },
+    {
+      "address": "Via dei Quattro Cantoni 5, 00184 Roma",
+      "category": "cruise",
+      "hours": {
+        "fri": [
+          "22:00",
+          "05:00"
+        ],
+        "mon": [
+          "22:00",
+          "04:00"
+        ],
+        "sat": [
+          "22:00",
+          "05:00"
+        ],
+        "sun": [
+          "22:00",
+          "03:00"
+        ],
+        "thu": [
+          "22:00",
+          "04:00"
+        ],
+        "tue": [
+          "22:00",
+          "03:00"
+        ],
+        "wed": [
+          "22:00",
+          "05:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "rome-censured-club",
+      "instagram": "censured.roma",
+      "lat": 41.896846,
+      "lon": 12.496177,
+      "name": "Censured Club",
+      "neighborhood": "Monti",
+      "review_features": [
+        "Gay cruising club since 2017",
+        "ENTES-affiliated members club",
+        "Small cruising club in central Rome"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "http://www.censuredclubroma.it/"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://gaytravelr.com/italy/rome/cruise-bars/censured-club-roma-gay-cruising-bar"
+        }
+      ]
+    },
+    {
+      "address": "Via Faleria 9, 00183 Roma",
+      "category": "cruise",
+      "hours": {
+        "thu": [
+          "23:00",
+          "03:30"
+        ],
+        "fri": [
+          "23:00",
+          "05:00"
+        ],
+        "sat": [
+          "23:00",
+          "05:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "rome-gender-klub-roma",
+      "instagram": "gender_degrado",
+      "lat": null,
+      "lon": null,
+      "name": "Gender Klub Roma",
+      "neighborhood": "San Giovanni",
+      "review_features": [
+        "Safe space for nonbinary and trans guests",
+        "Seedy-chic underground club",
+        "Late-night alternative party venue"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "https://www.instagram.com/gender_degrado/"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://gaytravelr.com/italy/rome/bars-and-clubs/gender-klub-roma"
+        }
+      ]
+    },
+    {
+      "address": "Via Mecenate 59A, 00184 Roma",
+      "category": "sauna",
+      "events_url": "https://www.apollionsauna.it/eventi/",
+      "hours": {
+        "mon": [
+          "14:00",
+          "23:00"
+        ],
+        "tue": [
+          "14:00",
+          "23:00"
+        ],
+        "wed": [
+          "14:00",
+          "23:00"
+        ],
+        "thu": [
+          "14:00",
+          "23:00"
+        ],
+        "fri": [
+          "14:00",
+          "23:00"
+        ],
+        "sat": [
+          "14:00",
+          "23:00"
+        ],
+        "sun": [
+          "14:00",
+          "23:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "rome-apollion-sauna",
+      "instagram": null,
+      "lat": 41.8916371,
+      "lon": 12.4992909,
+      "name": "Apollion Sauna",
+      "neighborhood": "Esquilino",
+      "review_features": [
+        "Founded in 1994 in the cellars of an early-1900s building",
+        "Three-minute walk from Gay Street and the Colosseum",
+        "Turkish bath, sauna, jacuzzi, cabins and a dark room",
+        "ARCO membership card required, over 18"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/4365345589"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "https://apollionsauna.it/"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "https://www.apollionsauna.it/contatti/"
+        }
+      ]
+    },
+    {
+      "address": "Via Pontremoli 28, 00182 Roma",
+      "category": "sauna",
+      "events_url": "https://www.adamsauna.it/events/category/eventi/",
+      "hours": {
+        "mon": [
+          "13:00",
+          "00:00"
+        ],
+        "tue": [
+          "13:00",
+          "00:00"
+        ],
+        "wed": [
+          "13:00",
+          "00:00"
+        ],
+        "thu": [
+          "13:00",
+          "00:00"
+        ],
+        "fri": [
+          "13:00",
+          "05:00"
+        ],
+        "sat": [
+          "13:00",
+          "06:00"
+        ],
+        "sun": [
+          "06:00",
+          "00:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "rome-adam-sauna",
+      "instagram": "adamsaunaroma",
+      "lat": 41.8847714,
+      "lon": 12.5117989,
+      "name": "Adam Sauna",
+      "neighborhood": "San Giovanni",
+      "review_features": [
+        "Near San Giovanni metro, lines A and C",
+        "Finnish sauna, Turkish bath, jacuzzi pool and private cabins",
+        "Members only: Entes card required, over 18",
+        "Entrance includes two towels and slippers"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/4365345890"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "https://www.adamsauna.it/"
+        }
+      ]
+    }
+  ]
+}

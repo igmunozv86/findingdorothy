@@ -19,15 +19,15 @@ function allVenues() {
 }
 
 const GROUPS = [
-  { id: 'dance', title: 'Drinks and Dance', categories: ['bar', 'club'], icon: 'music' },
+  { id: 'dance', title: 'Dance and Bars', categories: ['bar', 'club'], icon: 'music' },
   { id: 'sauna', title: 'Saunas and Bathhouses', categories: ['sauna'], icon: 'sauna' },
-  { id: 'fun', title: 'Fun Fun', categories: ['sex', 'cruise'], icon: 'fire' },
+  { id: 'fun', title: 'Cruisy', categories: ['sex', 'cruise'], icon: 'fire' },
 ];
 
 const SCENES = [
-  { id: 'dance', name: 'Drinks & Dance', copy: 'Bars and clubs — which nights they peak, and how packed they get.' },
-  { id: 'sauna', name: 'Saunas & Bathhouses', copy: 'Hours, vibes, and when the steam is up.' },
-  { id: 'fun', name: 'Fun', copy: 'Cruise bars, sex clubs, after-hours — the wilder side, mapped honestly.' },
+  { id: 'dance', name: 'Dance and Bars', copy: 'Bars and clubs — which nights they peak, and how packed they get.' },
+  { id: 'sauna', name: 'Saunas and Bathhouses', copy: 'Hours, and when the steam is up.' },
+  { id: 'fun', name: 'Cruisy', copy: 'Cruise bars and sex clubs, mapped honestly.' },
 ];
 
 const weatherByCity = {};
@@ -2808,6 +2808,9 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       .tonight-list { gap: var(--card-gap); }
     }
     #city-rails, #city-rails * { overflow-anchor: none; }
+    main.view { transition: opacity 320ms ease; }
+    main.view.is-leaving { opacity: 0; transition-duration: 220ms; pointer-events: none; }
+    main.view.is-entering { opacity: 0; transition: none; }
     #now-line, #city-rails { transition: opacity 320ms ease, transform 320ms ease; }
     #now-line.is-out, #city-rails.is-out { opacity: 0; pointer-events: none; }
     #city-rails.is-out { transform: translateY(8px); }
@@ -2919,6 +2922,38 @@ ${pridePageHtml()}
       toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
     });
     header.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+
+    function settleHome(event) {
+      event.preventDefault();
+      closeMenu();
+      const shown = document.querySelector('main.view:not([hidden])');
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const already = shown && shown.id === 'home' && window.scrollY < 2;
+      const reveal = () => {
+        document.querySelectorAll('main.view').forEach((view) => {
+          view.hidden = view.id !== 'home';
+          view.classList.remove('is-leaving', 'is-entering');
+        });
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        if (location.hash) history.pushState(null, '', location.pathname + location.search);
+      };
+      if (reduce || already) {
+        reveal();
+        return;
+      }
+      shown.classList.add('is-leaving');
+      window.setTimeout(() => {
+        reveal();
+        const home = document.getElementById('home');
+        home.classList.add('is-entering');
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => home.classList.remove('is-entering'));
+        });
+      }, 220);
+    }
+    document.querySelectorAll('a.logo, a.foot-brand, a[href="#home"]').forEach((link) => {
+      link.addEventListener('click', settleHome);
+    });
 
     function paintClock() {
       const clock = document.querySelector('[data-clock]');

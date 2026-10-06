@@ -16,3 +16,4 @@ Cursor renders. Research runs as parallel workers under `.cursor/rules/city-rese
 - A layout change is one template edit. Adding a city is one JSON file.
 - When a published city is wrong, change the spec or the brief, then re-run that city's worker. Do not patch the venue by hand.
 - `tz` stays on the city file so the clock can show local time.
+- The only category names on the page are Dance and Bars, Saunas and Bathhouses, and Cruisy. Stored `category` stays `bar`, `club`, `sauna`, `cruise`, or `sex` and is mapped onto those three. Do not bring back Leather bars, Late-night clubs, Drag & cabaret, Drinks and Dance, Fun Fun, or any other taxonomy.
