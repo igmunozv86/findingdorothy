@@ -58,7 +58,9 @@ below. Workers write to `data/staging/cities/<slug>.json` only — never to
    the validator rejects them. No phone numbers, ever.
    `events_url` is optional: the venue's own events or what's-on page, or
    null. Omit it when there is no such page. It is a tier-3 source. Do not
-   invent a calendar.
+   invent a calendar. `live_counter` is null, or the venue's own page when
+   that page publishes a live headcount. Only Hotel Chilli in São Paulo has
+   one: `https://hotelchilli.com.br/`. Do not invent a counter.
 7. **Pride:** `{"2026": {date, event_name, source_url} | null, "2027": …}`.
    ONLY dates the organizer has actually published. Never infer from prior
    years. Null is a valid, honest answer.
@@ -92,6 +94,19 @@ verify and keep only saunas whose name and address are confirmed in two
 tiers. Check Apollion Sauna (Via Mecenate 59/A), Adam Sauna (Via Pontremoli
 28), and Europa Multiclub. Drop any that fail. Keep the venues already in
 the live file. Stored category for a bathhouse is `sauna`.
+
+QA 2026-10-06 — Steamworks Berkeley belongs in `san-francisco.json`. Nacho
+goes there regularly: it is open, and an earlier closure claim was wrong.
+Tier 4 is not a source. Still confirm the name and address in two tiers,
+and take hours from the venue's own site. Do not drop it for that old
+closure claim. Keep the other San Francisco venues.
+
+QA 2026-10-06 — Berlin lists only Boiler Berlin as a sauna, which is too
+thin. Cross-check several independent sources and add every bathhouse
+whose name and address are confirmed in two tiers. Hours come from each
+venue's own site. Drop anything you cannot verify. Keep the venues already
+in the live file, including Boiler, unless a source shows it has closed.
+Stored category is `sauna`. Tier 4 is not a source.
 
 ## Hours backfill pass
 

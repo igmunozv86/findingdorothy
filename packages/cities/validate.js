@@ -11,7 +11,7 @@ const DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 const CLOCK = /^([01]\d|2[0-3]):[0-5]\d$/;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const TZ = /^[A-Za-z0-9_+-]+(?:\/[A-Za-z0-9_+-]+)+$/;
-const VENUE_KEYS = ['id', 'name', 'category', 'neighborhood', 'address', 'lat', 'lon', 'hours', 'hours_verified', 'review_features', 'instagram', 'sources', 'events_url'];
+const VENUE_KEYS = ['id', 'name', 'category', 'neighborhood', 'address', 'lat', 'lon', 'hours', 'hours_verified', 'review_features', 'instagram', 'sources', 'events_url', 'live_counter'];
 const PRIDE_YEARS = ['2026', '2027'];
 
 export { REGIONS, CATEGORIES };
@@ -86,6 +86,11 @@ function validateVenue(slug, venue, seen) {
   }
   if (!(venue.instagram === null || typeof venue.instagram === 'string')) {
     errors.push(`${label}: instagram is a handle or null`);
+  }
+  if (!('live_counter' in venue)) {
+    errors.push(`${label}: live_counter is required, or null`);
+  } else if (venue.live_counter !== null && (typeof venue.live_counter !== 'string' || !/^https?:\/\//.test(venue.live_counter))) {
+    errors.push(`${label}: live_counter must be null or the venue's own counter page`);
   }
   if ('events_url' in venue && venue.events_url !== null) {
     if (typeof venue.events_url !== 'string' || !/^https?:\/\//.test(venue.events_url)) {

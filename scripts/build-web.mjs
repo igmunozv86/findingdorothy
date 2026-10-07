@@ -33,6 +33,7 @@ const SCENES = [
 const weatherByCity = {};
 
 const RAIN_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.4 15h11.3a3.5 3.5 0 0 0 .4-7 5.1 5.1 0 0 0-9.9-1.2A4 4 0 0 0 6.4 15z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M8.2 17.2v2.3M12 17.2v3.1M15.8 17.2v2.3"/></svg>`;
+const SNOW_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.4 14h11.3a3.5 3.5 0 0 0 .4-7 5.1 5.1 0 0 0-9.9-1.2A4 4 0 0 0 6.4 14z"/><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M8 16.6v2.2M7 17.7h2M12 17v2.4M10.8 18.2h2.4M16 16.6v2.2M15 17.7h2"/></svg>`;
 
 const FLAGS = {
   USA: '🇺🇸',
@@ -750,12 +751,14 @@ function snapshotVenue(venue, city) {
   const eventTonight = Boolean(event?.event_tonight);
   const curve = [];
   const open = [];
+  const hoursLines = [];
   let confidence = 'low';
   let hoursText = '';
   for (let hour = 0; hour < 24; hour += 1) {
     const forecast = forecastAt(venue, city, now.weekday, hour, eventTonight);
     curve.push(forecast.percent);
     open.push(Boolean(forecast.status.open));
+    hoursLines.push(forecast.status.text);
     if (hour === now.hour) {
       confidence = forecast.confidence;
       hoursText = forecast.status.text;
@@ -783,12 +786,16 @@ function snapshotVenue(venue, city) {
     open,
     weekend,
     week: WEEK.map((day) => scoreForDow(venue, day.dow)),
-    live: Boolean(liveByVenue.get(venue.id)),
+    live: (() => {
+      const reading = venue.live_counter ? liveByVenue.get(venue.id) : null;
+      return reading ? { count: reading.count, at: reading.retrievedAt } : null;
+    })(),
     addr: venue.address || '',
     features: venue.review_features || [],
     event: event?.event_name || null,
     eventUrl: venue.events_url || null,
     hoursText,
+    hoursLines,
     lat: typeof venue.lat === 'number' ? venue.lat : null,
     lon: typeof venue.lon === 'number' ? venue.lon : null,
   };
@@ -818,6 +825,7 @@ function buildTonight() {
         temp: weatherByCity[city.name] ? tempLabel(weatherByCity[city.name].tempC) : '',
         rain: Boolean(weatherByCity[city.name]?.rainLikely),
         raining: Boolean(weatherByCity[city.name]?.raining),
+        snowing: Boolean(weatherByCity[city.name]?.snowing),
       },
       pride: Object.values(city.pride || {})
         .filter((row) => row && row.date && row.event_name)
@@ -839,9 +847,13 @@ function tonightLine(venue, mode) {
   return `Open now · peaks ~${peakClock(venue.peak)}`;
 }
 
-function busyNote(venue) {
-  if (venue.live && venue.conf !== 'low') return 'live count in';
+function busyNote() {
   return 'usual for this hour';
+}
+
+function liveLine(venue) {
+  if (!venue.live || !Number.isInteger(venue.live.count)) return '';
+  return `<span class="tonight-live"><span class="live-dot" aria-hidden="true"></span><span class="badge live">Live</span> ${venue.live.count} inside right now</span>`;
 }
 
 function conceptHtml(features) {
@@ -852,10 +864,10 @@ function conceptHtml(features) {
 
 function tonightRow(venue, hour, mode) {
   const percent = mode === 'weekend' ? venue.weekend.percent : venue.curve[hour];
-  const live = venue.live ? '<span class="live-dot" aria-label="Live"></span>' : '';
   const place = venue.area ? ` · ${escapeHtml(venue.area)}` : '';
-  const note = mode === 'weekend' ? 'weekend peak' : busyNote(venue);
-  return `          <li><button type="button" class="tonight-row" data-venue="${escapeHtml(venue.id)}"><span class="tonight-name">${escapeHtml(venue.name)}</span><span class="tonight-score"><span class="forecast-badge">${percent}%</span><span class="forecast-note">${escapeHtml(note)}</span></span>${live}<span class="tonight-meta">${escapeHtml(venue.cat)}${place}</span><span class="tonight-hours">${escapeHtml(venue.hoursText)}</span><span class="tonight-when">${escapeHtml(tonightLine(venue, mode))}</span>${conceptHtml(venue.features)}</button></li>`;
+  const note = mode === 'weekend' ? 'weekend peak' : busyNote();
+  const live = mode === 'weekend' ? '' : liveLine(venue);
+  return `          <li><button type="button" class="tonight-row" data-venue="${escapeHtml(venue.id)}"><span class="tonight-name">${escapeHtml(venue.name)}</span><span class="tonight-score"><span class="forecast-badge">${percent}%</span><span class="forecast-note">${escapeHtml(note)}</span></span><span class="tonight-meta">${escapeHtml(venue.cat)}${place}</span><span class="tonight-hours">${escapeHtml(venue.hoursText)}</span>${live}<span class="tonight-when">${escapeHtml(tonightLine(venue, mode))}</span>${conceptHtml(venue.features)}</button></li>`;
 }
 
 function tonightRail(venues, hour, mode) {
@@ -930,17 +942,29 @@ ${items}
     </section>`;
 }
 
+function barWhen(timeZone) {
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+  });
+  const bag = {};
+  for (const part of fmt.formatToParts(new Date())) bag[part.type] = part.value;
+  return { dayName: bag.weekday, shortDate: `${bag.month} ${Number(bag.day)}` };
+}
+
+function skyMark(city) {
+  if (city.weather.snowing) return `<span class="wx is-snow" data-wx role="img" aria-label="Snowing">${SNOW_ICON}</span>`;
+  if (city.weather.raining) return `<span class="wx is-rain" data-wx role="img" aria-label="Raining">${RAIN_ICON}</span>`;
+  return `<span class="wx" data-wx hidden role="img" aria-label=""></span>`;
+}
+
 function nowLineHtml(city) {
-  const when = zonedNow(new Date(), city.tz);
-  const rainLabel = city.weather.raining ? 'Raining' : 'Rain likely';
-  const rainHidden = city.weather.rain ? '' : ' hidden';
   return `    <div class="now-bar">
-      <button type="button" class="now-line" id="now-line" data-weather data-lat="${city.lat}" data-lon="${city.lon}" aria-expanded="false" aria-controls="city-picker">
+      <button type="button" class="now-line" id="now-line" aria-expanded="false" aria-controls="city-picker">
         <span class="now-flag" data-flag>${city.flag}</span>
         <span class="now-place" data-place>${escapeHtml(city.name)}, ${escapeHtml(city.country)}</span>
-        <span class="now-time" data-clock data-tz="${escapeHtml(city.tz)}">${escapeHtml(when.timeLabel)}</span>
-        <span class="now-temp" data-temp>${escapeHtml(city.weather.temp)}</span>
-        <span class="rain" data-rain${rainHidden} role="img" aria-label="${escapeHtml(rainLabel)}">${RAIN_ICON}</span>
         <svg class="now-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16.5 20.5 21" stroke-linecap="round"/></svg>
       </button>
       <div class="city-picker" id="city-picker" hidden>
@@ -957,18 +981,20 @@ function nowLineHtml(city) {
 
 function homeTonightHtml() {
   const city = tonightData.cities.find((item) => item.id === tonightData.defaultCity) || tonightData.cities[0];
+  const inDance = (venue) => (venue.vibes || []).includes('dance');
   const tonightVenues = city.venues
-    .filter((venue) => venue.open[city.hour])
+    .filter((venue) => inDance(venue) && venue.open[city.hour])
     .sort((a, b) => b.curve[city.hour] - a.curve[city.hour]);
   const weekendVenues = city.venues
-    .filter((venue) => venue.weekend.percent > 0)
+    .filter((venue) => inDance(venue) && venue.weekend.percent > 0)
     .sort((a, b) => b.weekend.percent - a.weekend.percent);
   const closedVenues = city.venues
-    .filter((venue) => !venue.open[city.hour])
+    .filter((venue) => inDance(venue) && !venue.open[city.hour])
     .sort((a, b) => a.name.localeCompare(b.name));
   const chips = SCENE_GROUPS
-    .map((group) => `          <button type="button" class="vibe-chip" data-group="${group.id}" aria-pressed="false">${escapeHtml(group.name)}</button>`)
+    .map((group) => `          <button type="button" class="vibe-chip" data-group="${group.id}" aria-pressed="${group.id === 'dance' ? 'true' : 'false'}">${escapeHtml(group.name)}</button>`)
     .join('\n');
+  const weekendHidden = city.weekday === 5 || city.weekday === 6 ? ' hidden' : '';
   return `    <section class="hero tonight-hero">
       <img class="hero-mark" src="assets/icon-mark.jpg" alt="">
       <h1>Know where the <span class="fun">fun</span><br>is going.</h1>
@@ -979,6 +1005,13 @@ ${nowLineHtml(city)}
     <section class="tonight-block" id="tonight">
       <div class="tonight-head">
         <h2 id="tonight-title">Right now</h2>
+        <p class="now-facts rank-note" id="now-facts" data-weather data-lat="${city.lat}" data-lon="${city.lon}">
+          <span class="now-day" data-day>${escapeHtml(barWhen(city.tz).dayName)}</span>
+          <span class="now-date" data-date>${escapeHtml(barWhen(city.tz).shortDate)}</span>
+          <span class="now-time" data-clock data-tz="${escapeHtml(city.tz)}">${escapeHtml(zonedNow(new Date(), city.tz).timeLabel)}</span>
+          <span class="now-temp" data-temp>${escapeHtml(city.weather.temp)}</span>
+          ${skyMark(city)}
+        </p>
       </div>
       <div class="vibe-row" id="vibe-row">
 ${chips}
@@ -988,7 +1021,7 @@ ${tonightRail(tonightVenues, city.hour, 'tonight')}
       </div>
 ${closedListHtml(closedVenues)}
     </section>
-    <section class="tonight-block" id="weekend">
+    <section class="tonight-block" id="weekend"${weekendHidden}>
       <div class="tonight-head">
         <h2>This weekend</h2>
         <p class="rank-note" id="weekend-dates">${escapeHtml(city.weekend)}</p>
@@ -1000,7 +1033,7 @@ ${chips}
       <div id="weekend-list">
 ${tonightRail(weekendVenues, city.hour, 'weekend')}
       </div>
-${closedListHtml(city.venues.filter((venue) => venue.weekend.percent === 0).sort((a, b) => a.name.localeCompare(b.name)), 'weekend-closed', 'Closed this weekend')}
+${closedListHtml(city.venues.filter((venue) => inDance(venue) && venue.weekend.percent === 0).sort((a, b) => a.name.localeCompare(b.name)), 'weekend-closed', 'Closed this weekend')}
     </section>
 ${upcomingPrideHtml(city)}
     </div>
@@ -1053,10 +1086,31 @@ const html = `<!DOCTYPE html>
     img { max-width: 100%; }
     a { color: inherit; }
     button, a { -webkit-tap-highlight-color: transparent; }
-    .site-header {
+    .top-stack {
       position: sticky;
       top: 0;
       z-index: 30;
+    }
+    .app-banner {
+      margin: 0;
+      padding: 0.38rem 1rem;
+      background: #111;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.35;
+      text-align: center;
+    }
+    .app-banner a,
+    .app-banner a:visited {
+      color: #ff7a18;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .app-banner a:hover,
+    .app-banner a:focus-visible { text-decoration: underline; }
+    .site-header {
+      position: relative;
       display: flex;
       align-items: center;
       gap: 1.25rem;
@@ -1065,6 +1119,39 @@ const html = `<!DOCTYPE html>
       background: #fff;
       border-bottom: 1px solid var(--line);
     }
+    .header-auth {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-login,
+    .btn-signup {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0.4rem 0.95rem;
+      border-radius: 999px;
+      font: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .btn-login {
+      border: 1px solid #111;
+      background: #fff;
+      color: #111;
+    }
+    .btn-login:hover,
+    .btn-login:focus-visible { background: #f6f6f8; }
+    .btn-signup {
+      border: 0;
+      background: #ff7a18;
+      color: #111;
+    }
+    .btn-signup:hover,
+    .btn-signup:focus-visible { background: #ff8d38; }
     .logo {
       display: block;
       flex: none;
@@ -1075,6 +1162,10 @@ const html = `<!DOCTYPE html>
       height: 36px;
       width: auto;
     }
+    .logo { order: 1; }
+    .nav-panel { order: 2; }
+    .header-auth { order: 3; }
+    .nav-toggle { order: 4; }
     .nav-panel {
       display: flex;
       align-items: center;
@@ -1620,7 +1711,7 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       width: min(1120px, calc(100% - 2.5rem));
       margin: 0 auto;
       padding: 2.6rem 0;
-      scroll-margin-top: 84px;
+      scroll-margin-top: 120px;
     }
     .eyebrow {
       margin: 0 0 0.4rem;
@@ -1666,7 +1757,7 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     .rain svg { width: 100%; height: 100%; display: block; }
     .jump-menu { display: none; }
     .menu-back { display: none; }
-    .group { margin-top: 1.6rem; scroll-margin-top: 5.5rem; }
+    .group { margin-top: 1.6rem; scroll-margin-top: 7.5rem; }
     .group h3 {
       display: flex;
       align-items: center;
@@ -1700,7 +1791,7 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       background: #fff;
       border: 1px solid var(--line);
       border-radius: 18px;
-      scroll-margin-top: 84px;
+      scroll-margin-top: 120px;
     }
     .card-top {
       display: flex;
@@ -1996,7 +2087,7 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     .venues-band {
       background: #111;
       color: #fff;
-      scroll-margin-top: 84px;
+      scroll-margin-top: 120px;
     }
     .venues-band .band-inner {
       width: min(1120px, calc(100% - 2.5rem));
@@ -2171,7 +2262,7 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     .site-footer {
       background: #111;
       color: #fff;
-      scroll-margin-top: 84px;
+      scroll-margin-top: 120px;
     }
     .foot-inner {
       width: min(1120px, calc(100% - 2.5rem));
@@ -2219,7 +2310,12 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     }
     .legal p { margin: 0.25rem 0; }
     @media (max-width: 759px) {
-      .nav-toggle { display: inline-block; margin-left: auto; }
+      .site-header { gap: 0.4rem; min-height: 56px; padding: 0.45rem 0.65rem; }
+      .logo, .logo img { height: 26px; }
+      .nav-panel { order: 4; margin-left: 0; }
+      .header-auth { order: 2; margin-left: auto; gap: 0.3rem; }
+      .nav-toggle { display: inline-block; order: 3; margin-left: 0.15rem; width: 36px; height: 36px; }
+      .btn-login, .btn-signup { min-height: 30px; padding: 0.15rem 0.5rem; font-size: 12px; }
       .nav-panel {
         display: none;
         position: absolute;
@@ -2237,6 +2333,7 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       .site-header.is-open .nav-panel { display: flex; }
       .site-nav { flex-direction: column; align-items: stretch; gap: 0; }
       .site-nav a { padding: 0.75rem 0; border-bottom: 1px solid var(--line); }
+      .app-banner { font-size: 12.5px; padding: 0.45rem 0.75rem; }
       .cards, .why-grid, .foot-cols { grid-template-columns: minmax(0, 1fr); }
       .soon h1, .city-hero h1, .why-hero h1, .cities-page h1 { font-size: 42px; }
       .block h2, .why h2, .pride h2, .venues-band h2, .venue-invite h2 { font-size: 28px; }
@@ -2444,7 +2541,7 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       font-size: 22px;
       font-weight: 800;
       letter-spacing: -0.03em;
-      scroll-margin-top: 84px;
+      scroll-margin-top: 120px;
     }
     .continent-cities ul {
       list-style: none;
@@ -2568,14 +2665,41 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       .tonight-hero .hero-mark { width: 156px; height: 156px; }
     }
     .tonight-block { padding: var(--section) 0 0; }
-    .pride-upcoming[hidden] { display: none; }
+    .pride-upcoming[hidden], #weekend[hidden] { display: none; }
     .pride-upcoming h2 { display: flex; align-items: center; gap: 0.55rem; margin: 0 0 0.65rem; font-size: 28px; font-weight: 800; }
     .pride-flag { width: 26px; height: 18px; flex: none; border-radius: 2px; }
     .pride-upcoming article + article { margin-top: 0.85rem; }
     .pride-count { margin: 0.15rem 0 0; color: var(--muted); font-size: 14px; }
-    #tonight, #weekend { scroll-margin-top: 84px; }
+    #tonight, #weekend { scroll-margin-top: 120px; }
     .tonight-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 0.8rem; }
     .tonight-head h2 { margin: 0; font-size: 28px; font-weight: 800; }
+    .now-facts {
+      display: inline-flex;
+      flex: 1 1 0;
+      min-width: 0;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.3rem 0.45rem;
+    }
+    .now-facts .now-day,
+    .now-facts .now-date,
+    .now-facts .now-time,
+    .now-facts .now-temp {
+      font-family: Inter, sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0;
+      color: var(--muted);
+    }
+    .now-facts .wx {
+      display: inline-flex;
+      width: 1.15rem;
+      height: 1.15rem;
+    }
+    .now-facts .wx[hidden] { display: none; }
+    .now-facts .wx.is-rain { color: #2f6fed; }
+    .now-facts .wx.is-snow { color: #6aa7e8; }
+    .now-facts .wx svg { width: 100%; height: 100%; display: block; }
     .rank-note { margin: 0; color: var(--muted); font-size: 14px; }
     .vibe-chip {
       border: 1px solid var(--line);
@@ -2614,6 +2738,17 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       color: transparent;
     }
     .forecast-note { color: var(--muted); font-size: 12px; font-weight: 500; line-height: 1.2; text-align: right; }
+    .tonight-live {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin-top: 0.2rem;
+      color: #111;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .tonight-live .live-dot { display: inline-block; margin: 0; flex: none; }
     .tonight-hours { grid-column: 1 / -1; font-size: 14px; }
     .tonight-concepts { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.15rem; }
     .tonight-concepts span {
@@ -2658,17 +2793,17 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     .show-more summary { cursor: pointer; font-weight: 500; }
     .now-bar {
       position: relative;
-      width: fit-content;
-      max-width: min(1120px, calc(100% - 2.3rem));
-      margin: 0.4rem auto 0;
+      width: min(560px, calc(100% - 2.3rem));
+      margin: 1.35rem auto 1.5rem;
     }
     #now-line {
-      width: fit-content;
+      width: 100%;
       max-width: 100%;
       margin: 0;
       flex-wrap: nowrap;
       justify-content: center;
-      padding: 0.7rem 1.15rem;
+      gap: 0.75rem;
+      padding: 1.05rem 1.5rem;
       border: 1px solid var(--line);
       border-radius: 999px;
       background: #fff;
@@ -2676,8 +2811,8 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       font: inherit;
       cursor: pointer;
     }
-    .now-flag, .now-time, .now-temp, .now-search { flex: none; white-space: nowrap; }
-    .now-flag { font-size: 18px; line-height: 1; }
+    .now-flag, .now-search { flex: none; white-space: nowrap; }
+    .now-flag { font-size: 28px; line-height: 1; }
     .now-place {
       flex: 0 1 auto;
       min-width: 0;
@@ -2685,41 +2820,38 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    #now-line .now-place,
-    #now-line .now-time,
-    #now-line .now-temp {
+    #now-line .now-place {
       font-family: Inter, sans-serif;
-      font-size: 16px;
-      font-weight: 500;
+      font-size: 22px;
+      font-weight: 600;
       letter-spacing: 0;
       line-height: 1.2;
     }
-    .now-search { width: 18px; height: 18px; }
+    .now-search { width: 24px; height: 24px; }
     @media (max-width: 759px) {
-      .now-bar { max-width: calc(100% - 1rem); }
-      #now-line { gap: 0.35rem; padding: 0.5rem 0.6rem; }
-      #now-line .now-place,
-      #now-line .now-time,
-      #now-line .now-temp { font-size: 15px; }
-      .now-search { width: 16px; height: 16px; }
+      .now-bar { width: calc(100% - 1.5rem); margin-top: 1rem; }
+      #now-line { gap: 0.55rem; padding: 0.9rem 1.05rem; }
+      #now-line .now-place { font-size: 18px; }
+      .now-flag { font-size: 22px; }
+      .now-search { width: 20px; height: 20px; }
     }
     .city-picker {
       position: absolute;
       z-index: 40;
-      top: calc(100% + 0.35rem);
-      left: 50%;
-      width: min(320px, calc(100vw - 2rem));
+      top: calc(100% + 0.45rem);
+      left: 0;
+      width: 100%;
       padding: 0.75rem;
       border: 1px solid var(--line);
       border-radius: 16px;
       background: #fff;
       transform-origin: top center;
       opacity: 0;
-      transform: translateX(-50%) scale(0.96);
+      transform: scale(0.96);
     }
     .city-picker.is-on {
       opacity: 1;
-      transform: translateX(-50%);
+      transform: none;
       transition: opacity 180ms ease, transform 180ms ease;
     }
     .city-picker .area-search { margin: 0; }
@@ -2835,21 +2967,28 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
 </head>
 <body>
   <!-- Sauna icon: Freepik via SVG Repo, CC BY 3.0. Flame icon: UXWing. Night photo: Phat Doan, Pexels. -->
-  <header class="site-header">
-    <a class="logo" href="#home" aria-label="FindingDorothy">
-      <img src="assets/logo-v4-warm.jpg" alt="FindingDorothy">
-    </a>
-    <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-    <div class="nav-panel">
-      <nav class="site-nav" aria-label="Primary">
-        <a href="#home">Home</a>
-        <a href="#pride">Fun Calendar</a>
-        <a href="#why">Why FindingDorothy</a>
-      </nav>
-    </div>
-  </header>
+  <div class="top-stack">
+    <p class="app-banner" hidden>Finding Dorothy experience is much better <a id="app-link" href="https://play.google.com/store" target="_blank" rel="noopener noreferrer">using the App</a></p>
+    <header class="site-header">
+      <a class="logo" href="#home" aria-label="FindingDorothy">
+        <img src="assets/logo-v4-warm.jpg" alt="FindingDorothy">
+      </a>
+      <div class="header-auth">
+        <button type="button" class="btn-login">Login</button>
+        <button type="button" class="btn-signup">Sign up for free</button>
+      </div>
+      <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-panel">
+        <nav class="site-nav" aria-label="Primary">
+          <a href="#home">Home</a>
+          <a href="#pride">Fun Calendar</a>
+          <a href="#why">Why FindingDorothy</a>
+        </nav>
+      </div>
+    </header>
+  </div>
   <main class="view" id="home">
 ${homeTonightHtml()}
   </main>
@@ -2893,6 +3032,8 @@ ${pridePageHtml()}
         <a href="#home">Home</a>
         <a href="#pride">Fun Calendar</a>
         <a href="#why">Why FindingDorothy</a>
+        <a href="#login">Login</a>
+        <a href="#signup">Sign up for free</a>
       </nav>
       <p class="legal">© 2026 FindingDorothy</p>
     </div>
@@ -2902,8 +3043,20 @@ ${pridePageHtml()}
     const tonight = ${JSON.stringify(tonightData)};
     const prideCities = ${prideCityLookup};
     const continentNames = ${continentNames};
+    const rainIcon = ${JSON.stringify(RAIN_ICON)};
+    const snowIcon = ${JSON.stringify(SNOW_ICON)};
     const header = document.querySelector('.site-header');
     const toggle = document.querySelector('.nav-toggle');
+    const appLink = document.getElementById('app-link');
+    const appleStore = 'https://apps.apple.com/';
+    const playStore = 'https://play.google.com/store';
+    const agent = navigator.userAgent || '';
+    const applePhone = /iPhone|iPad|iPod/.test(agent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const android = /Android/.test(agent);
+    const apple = applePhone || /Macintosh|Mac OS X/.test(agent);
+    if (applePhone || android) document.querySelector('.app-banner').hidden = false;
+    if (android) appLink.href = playStore;
+    else if (apple) appLink.href = appleStore;
     const areaSearch = document.getElementById('area-search');
     const suggest = document.getElementById('area-suggest');
     const areaBlock = document.getElementById('area-block');
@@ -2956,10 +3109,13 @@ ${pridePageHtml()}
     });
 
     function paintClock() {
-      const clock = document.querySelector('[data-clock]');
+      const clock = document.querySelector('#now-facts [data-clock]');
       if (!clock || !clock.dataset.tz) return;
       const fmt = new Intl.DateTimeFormat('en-US', {
         timeZone: clock.dataset.tz,
+        weekday: 'long',
+        month: 'short',
+        day: 'numeric',
         hour: 'numeric',
         minute: '2-digit',
         hourCycle: 'h23',
@@ -2971,23 +3127,38 @@ ${pridePageHtml()}
       const minute = String(bag.minute).padStart(2, '0');
       const suffix = hour >= 12 ? 'PM' : 'AM';
       clock.textContent = (hour % 12 || 12) + ':' + minute + ' ' + suffix;
+      const day = document.querySelector('#now-facts [data-day]');
+      const date = document.querySelector('#now-facts [data-date]');
+      if (day) day.textContent = bag.weekday;
+      if (date) date.textContent = bag.month + ' ' + Number(bag.day);
     }
     paintClock();
     setInterval(paintClock, 1000);
 
+    function isSnowCode(code) {
+      return (code >= 71 && code <= 77) || code === 85 || code === 86;
+    }
+
+    function paintSky(node, kind) {
+      const icon = node.querySelector('[data-wx]');
+      if (!icon) return;
+      icon.classList.toggle('is-rain', kind === 'rain');
+      icon.classList.toggle('is-snow', kind === 'snow');
+      icon.hidden = !kind;
+      icon.setAttribute('aria-label', kind === 'snow' ? 'Snowing' : kind === 'rain' ? 'Raining' : '');
+      icon.innerHTML = kind === 'snow' ? snowIcon : kind === 'rain' ? rainIcon : '';
+    }
+
     function applyWeather(node, report) {
       const temp = node.querySelector('[data-temp]');
-      const rain = node.querySelector('[data-rain]');
       if (temp && Number.isFinite(report.tempC)) {
         const c = Math.round(report.tempC);
         const f = Math.round(report.tempC * 9 / 5 + 32);
         temp.textContent = c + '°C / ' + f + '°F';
       }
-      if (!rain) return;
-      const raining = report.precipMm >= 0.3 || isRainCode(report.code);
-      const likely = raining || (Number.isFinite(report.probability) && report.probability >= 60);
-      rain.hidden = !likely;
-      rain.setAttribute('aria-label', raining ? 'Raining' : 'Rain likely');
+      const snowing = isSnowCode(report.code);
+      const raining = !snowing && (report.precipMm >= 0.3 || isRainCode(report.code));
+      paintSky(node, snowing ? 'snow' : raining ? 'rain' : '');
     }
 
     function isRainCode(code) {
@@ -3066,8 +3237,8 @@ ${pridePageHtml()}
         const match = tonight.cities.find((city) => city.id === cityLink[1]);
         if (match && match.id !== homeCityId) {
           homeCityId = match.id;
-          nowGroup = null;
-          weekendGroup = null;
+          nowGroup = 'dance';
+          weekendGroup = 'dance';
           try { localStorage.setItem('fd-city', match.id); } catch (err) {}
           renderHome(true);
         }
@@ -3593,8 +3764,8 @@ ${pridePageHtml()}
     const WEEK_DOW = [1, 2, 3, 4, 5, 6, 0];
     const WEEK_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     let homeCityId = tonight.defaultCity;
-    let nowGroup = null;
-    let weekendGroup = null;
+    let nowGroup = 'dance';
+    let weekendGroup = 'dance';
     try {
       const storedCity = localStorage.getItem('fd-city');
       if (storedCity && tonight.cities.some((city) => city.id === storedCity)) homeCityId = storedCity;
@@ -3634,9 +3805,22 @@ ${pridePageHtml()}
       catch (err) { return []; }
     }
 
-    function busyNote(venue) {
-      if (venue.live && venue.conf !== 'low') return 'live count in';
+    function busyNote() {
       return 'usual for this hour';
+    }
+
+    function appendLiveLine(parent, venue) {
+      if (!venue.live || !Number.isInteger(venue.live.count)) return;
+      const line = document.createElement('span');
+      line.className = 'tonight-live';
+      const dot = document.createElement('span');
+      dot.className = 'live-dot';
+      dot.setAttribute('aria-hidden', 'true');
+      const badge = document.createElement('span');
+      badge.className = 'badge live';
+      badge.textContent = 'Live';
+      line.append(dot, badge, document.createTextNode(venue.live.count + ' inside right now'));
+      parent.append(line);
     }
 
     function rowButton(venue, percent, line, note) {
@@ -3661,18 +3845,14 @@ ${pridePageHtml()}
       meta.textContent = venue.area ? venue.cat + ' · ' + venue.area : venue.cat;
       const hours = document.createElement('span');
       hours.className = 'tonight-hours';
-      hours.textContent = venue.hoursText;
+      const clockHour = activeHour(homeCity());
+      hours.textContent = venue.hoursLines ? venue.hoursLines[clockHour] : venue.hoursText;
       const when = document.createElement('span');
       when.className = 'tonight-when';
       when.textContent = line;
-      button.append(name, score);
-      if (venue.live) {
-        const dot = document.createElement('span');
-        dot.className = 'live-dot';
-        dot.setAttribute('aria-label', 'Live');
-        button.append(dot);
-      }
-      button.append(meta, hours, when);
+      button.append(name, score, meta, hours);
+      appendLiveLine(button, venue);
+      button.append(when);
       const concepts = (venue.features || []).slice(0, 5);
       if (concepts.length) {
         const row = document.createElement('span');
@@ -3759,16 +3939,14 @@ ${pridePageHtml()}
 
     function paintNow(city) {
       const line = document.getElementById('now-line');
-      const clock = line.querySelector('[data-clock]');
-      line.dataset.lat = String(city.lat);
-      line.dataset.lon = String(city.lon);
-      clock.dataset.tz = city.tz;
+      const facts = document.getElementById('now-facts');
+      facts.dataset.lat = String(city.lat);
+      facts.dataset.lon = String(city.lon);
+      facts.querySelector('[data-clock]').dataset.tz = city.tz;
       line.querySelector('[data-place]').textContent = city.name + ', ' + city.country;
       line.querySelector('[data-flag]').textContent = city.flag;
-      line.querySelector('[data-temp]').textContent = city.weather.temp;
-      const rain = line.querySelector('[data-rain]');
-      rain.hidden = !city.weather.rain;
-      rain.setAttribute('aria-label', city.weather.raining ? 'Raining' : 'Rain likely');
+      facts.querySelector('[data-temp]').textContent = city.weather.temp;
+      paintSky(facts, city.weather.snowing ? 'snow' : city.weather.raining ? 'rain' : '');
       paintClock();
       paintWeather();
     }
@@ -3900,7 +4078,7 @@ ${pridePageHtml()}
         cat.textContent = venue.cat;
         const hours = document.createElement('span');
         hours.className = 'closed-hours';
-        hours.textContent = venue.hoursText;
+        hours.textContent = venue.hoursLines ? venue.hoursLines[activeHour(homeCity())] : venue.hoursText;
         button.append(name, cat, hours);
         item.append(button);
         list.append(item);
@@ -3916,6 +4094,9 @@ ${pridePageHtml()}
     function paintLists() {
       const city = homeCity();
       const hour = activeHour(city);
+      const clock = cityClock(city.tz);
+      const weekend = document.getElementById('weekend');
+      weekend.hidden = clock.weekday === 5 || clock.weekday === 6;
       paintGroups(document.getElementById('vibe-row'), nowGroup);
       paintGroups(document.getElementById('weekend-groups'), weekendGroup);
       const nowShown = city.venues.filter((venue) => inGroup(venue, nowGroup));
@@ -3947,8 +4128,8 @@ ${pridePageHtml()}
     function chooseCity(id) {
       const same = id === homeCityId;
       homeCityId = id;
-      nowGroup = null;
-      weekendGroup = null;
+      nowGroup = 'dance';
+      weekendGroup = 'dance';
       try { localStorage.setItem('fd-city', id); } catch (err) {}
       closePicker();
       closeSheet();
@@ -4064,12 +4245,7 @@ ${pridePageHtml()}
           ? 'How busy it usually is at this hour. Not a live count.'
           : 'Expected busyness right now.');
       body.append(save, title, badge);
-      if (venue.live) {
-        const dot = document.createElement('span');
-        dot.className = 'live-dot';
-        dot.setAttribute('aria-label', 'Live');
-        body.append(dot);
-      }
+      if (!closedNow) appendLiveLine(body, venue);
       body.append(explain);
       const todayLabel = document.createElement('p');
       todayLabel.className = 'rank-note';
@@ -4080,7 +4256,7 @@ ${pridePageHtml()}
       weekLabel.textContent = 'This week';
       body.append(weekLabel, weekSvg(venue.week, city.weekday));
       const hours = document.createElement('p');
-      hours.textContent = venue.hoursText;
+      hours.textContent = venue.hoursLines ? venue.hoursLines[hour] : venue.hoursText;
       body.append(hours);
       if (venue.verified) {
         const verified = document.createElement('p');
@@ -4190,8 +4366,8 @@ ${pridePageHtml()}
       if (!chip) return;
       const id = chip.getAttribute('data-group');
       const weekend = Boolean(chip.closest('#weekend-groups'));
-      if (weekend) weekendGroup = weekendGroup === id ? null : id;
-      else nowGroup = nowGroup === id ? null : id;
+      if (weekend) weekendGroup = id;
+      else nowGroup = id;
       paintLists();
     });
     document.getElementById('now-line').addEventListener('mousedown', (event) => {

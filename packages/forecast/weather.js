@@ -16,15 +16,17 @@ export async function fetchWeather(lat, lon, timeZone) {
   const precipMm = current.precipitation ?? 0;
   const code = current.weather_code;
   const probability = probabilityNow(data.hourly, current.time);
-  const raining = precipMm >= 0.3 || isRainCode(code);
+  const snowing = isSnowCode(code);
+  const raining = !snowing && (precipMm >= 0.3 || isRainCode(code));
   return {
     tempC,
     precipMm,
     code,
     probability,
     observedAt: current.time,
-    summary: weatherSummary(code, tempC, precipMm),
+    summary: weatherSummary(code, tempC, precipMm, snowing),
     raining,
+    snowing,
     rainLikely: raining || (probability != null && probability >= 60),
     source: 'Open-Meteo',
   };
@@ -43,8 +45,13 @@ function isRainCode(code) {
   return (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || code >= 95;
 }
 
-function weatherSummary(code, tempC, precipMm) {
+function isSnowCode(code) {
+  return (code >= 71 && code <= 77) || code === 85 || code === 86;
+}
+
+function weatherSummary(code, tempC, precipMm, snowing) {
   const temp = Number.isFinite(tempC) ? `${Math.round(tempC)}°C` : 'unknown temp';
+  if (snowing) return `snow ${precipMm} mm, ${temp}`;
   if (precipMm >= 0.3) return `rain ${precipMm} mm, ${temp}`;
   if (code === 0) return `clear, ${temp}`;
   if (code <= 3) return `cloudy, ${temp}`;

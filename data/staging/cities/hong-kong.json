@@ -45,7 +45,8 @@
           "url": "https://www.facebook.com/flmhk",
           "retrieved_at": "2026-10-06"
         }
-      ]
+      ],
+      "live_counter": null
     },
     {
       "id": "hong-kong-ce-sauna",
@@ -119,7 +120,8 @@
           "url": "https://cesauna.com/location-%E4%BD%8D%E7%BD%AE",
           "retrieved_at": "2026-10-06"
         }
-      ]
+      ],
+      "live_counter": null
     }
   ],
   "pride": {

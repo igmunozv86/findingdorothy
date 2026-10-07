@@ -1,1 +1,437 @@
-{"meta":{"country":"USA","gayborhood":"The Castro","last_updated":"2026-10-06","lat":37.7749,"lon":-122.4194,"name":"San Francisco","region":"North America","slug":"san-francisco","status":"live","tz":"America/Los_Angeles"},"pride":{"2026":{"date":"2026-06-28","event_name":"56th Annual SF Pride Parade","source_url":"https://sfpride.org/parade/"},"2027":null},"venues":[{"address":"401 Castro St, San Francisco, CA 94114","category":"bar","hours":{"sun":["11:00","02:00"],"mon":["12:00","02:00"],"tue":["12:00","02:00"],"wed":["12:00","02:00"],"thu":["11:00","02:00"],"fri":["11:00","02:00"],"sat":["11:00","02:00"]},"hours_verified":true,"id":"san-francisco-twin-peaks-tavern","instagram":null,"lat":37.763076,"lon":-122.434955,"name":"Twin Peaks Tavern","neighborhood":"The Castro","review_features":["Historic gay bar operating since 1935","San Francisco Designated Landmark","Famous full-length corner windows"],"sources":[{"retrieved_at":"2026-10-06","tier":1,"url":"https://en.wikipedia.org/wiki/Twin_Peaks_Tavern"},{"retrieved_at":"2026-10-06","tier":0,"url":"https://aroundus.com/p/5508192-twin-peaks-tavern"},{"retrieved_at":"2026-10-05","tier":3,"url":"https://www.twinpeakstavern.com/"},{"retrieved_at":"2026-10-05","tier":0,"url":"https://www.chamberofcommerce.com/business-directory/california/san-francisco/gay-bar/2000303803-twin-peaks-tavern"}]},{"address":"4149 18th St, San Francisco, CA 94114","category":"bar","hours":{"sun":["12:00","02:00"],"mon":["14:00","02:00"],"tue":["14:00","02:00"],"wed":["14:00","02:00"],"thu":["14:00","02:00"],"fri":["14:00","02:00"],"sat":["12:00","02:00"]},"hours_verified":true,"id":"san-francisco-the-edge","instagram":null,"lat":null,"lon":null,"name":"The Edge","neighborhood":"The Castro","review_features":["Castro neighborhood bar for 35+ years","Pool table and jukebox"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"http://edgesf.com/"},{"retrieved_at":"2026-10-06","tier":0,"url":"https://www.gaypinkspots.com/listing/the-edge-4a43bd8a9f167.html"},{"retrieved_at":"2026-10-05","tier":0,"url":"https://www.top-rated.online/cities/San+Francisco/place/p/2333241/The+Edge"}]},{"address":"2247 Market St, San Francisco, CA 94114","category":"bar","hours":{"mon":["12:00","00:00"],"tue":["12:00","00:00"],"wed":["12:00","00:00"],"thu":["12:00","02:00"],"fri":["12:00","02:00"],"sat":["10:00","02:00"],"sun":["10:00","00:00"]},"hours_verified":true,"id":"san-francisco-hi-tops","instagram":null,"lat":null,"lon":null,"name":"Hi Tops","neighborhood":"The Castro","review_features":["Gay sports bar on Market Street","Big screens showing live sports"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"https://www.hitopsbar.com/"},{"retrieved_at":"2026-10-06","tier":0,"url":"https://www.gaypinkspots.com/listing/hi-tops-527abdd593967.html"},{"retrieved_at":"2026-10-05","tier":3,"url":"https://hitopsbar.com/san-francisco/"}]},{"address":"4121 18th St, San Francisco, CA 94114","category":"bar","hours":{"mon":["17:00","02:00"],"tue":["17:00","02:00"],"wed":["17:00","02:00"],"thu":["17:00","02:00"],"fri":["16:00","02:00"],"sat":["16:00","02:00"],"sun":["16:00","02:00"]},"hours_verified":true,"id":"san-francisco-badlands","instagram":null,"lat":37.76074,"lon":-122.435477,"name":"Badlands","neighborhood":"The Castro","review_features":["Dancing bar in the Castro","Opened 1975, reopened 2023"],"sources":[{"retrieved_at":"2026-10-06","tier":1,"url":"https://en.wikipedia.org/wiki/Badlands_(San_Francisco)"},{"retrieved_at":"2026-10-06","tier":0,"url":"https://www.gaypinkspots.com/listing/badlands.html"},{"retrieved_at":"2026-10-05","tier":3,"url":"https://www.instagram.com/badlandscastro/"},{"retrieved_at":"2026-10-05","tier":0,"url":"https://www.bars10.com/US/San-Francisco/158245524202434/Badlands-San-Francisco"}]},{"address":"3600 16th St, San Francisco, CA 94114","category":"bar","hours":{"sun":["13:00","00:00"],"mon":["15:30","02:00"],"tue":["15:30","00:00"],"wed":["15:30","00:00"],"thu":["15:30","02:00"],"fri":["15:30","02:00"],"sat":["12:00","02:00"]},"hours_verified":true,"id":"san-francisco-lookout","instagram":null,"lat":null,"lon":null,"name":"Lookout","neighborhood":"The Castro","review_features":["Gay bar in the Castro","At 16th Street and Market"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"http://www.lookoutsf.com/"},{"retrieved_at":"2026-10-06","tier":0,"url":"https://www.gaypinkspots.com/listing/lookout-4a43bd8ab58bc.html"},{"retrieved_at":"2026-10-05","tier":0,"url":"https://www.restaurantji.com/ca/san-francisco/lookout-/"}]},{"address":"398 12th St, San Francisco, CA 94103","category":"cruise","hours":{"fri":["14:00","02:00"],"mon":["18:00","00:00"],"sat":["14:00","02:00"],"sun":["13:00","00:00"],"thu":["18:00","00:00"],"wed":["18:00","00:00"]},"hours_verified":true,"id":"san-francisco-sf-eagle","instagram":null,"lat":37.77,"lon":-122.4134,"name":"SF Eagle","neighborhood":"SoMa","review_features":["Leather/Levi/fetish bar","San Francisco Landmark No. 295","Established 1981"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"http://sf-eagle.com/the-bar/"},{"retrieved_at":"2026-10-06","tier":1,"url":"https://en.wikipedia.org/wiki/San_Francisco_Eagle"}]}]}
+{
+  "meta": {
+    "country": "USA",
+    "gayborhood": "The Castro",
+    "last_updated": "2026-10-06",
+    "lat": 37.7749,
+    "lon": -122.4194,
+    "name": "San Francisco",
+    "region": "North America",
+    "slug": "san-francisco",
+    "status": "live",
+    "tz": "America/Los_Angeles"
+  },
+  "pride": {
+    "2026": {
+      "date": "2026-06-28",
+      "event_name": "56th Annual SF Pride Parade",
+      "source_url": "https://sfpride.org/parade/"
+    },
+    "2027": null
+  },
+  "venues": [
+    {
+      "address": "401 Castro St, San Francisco, CA 94114",
+      "category": "bar",
+      "hours": {
+        "sun": [
+          "11:00",
+          "02:00"
+        ],
+        "mon": [
+          "12:00",
+          "02:00"
+        ],
+        "tue": [
+          "12:00",
+          "02:00"
+        ],
+        "wed": [
+          "12:00",
+          "02:00"
+        ],
+        "thu": [
+          "11:00",
+          "02:00"
+        ],
+        "fri": [
+          "11:00",
+          "02:00"
+        ],
+        "sat": [
+          "11:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "san-francisco-twin-peaks-tavern",
+      "instagram": null,
+      "lat": 37.763076,
+      "lon": -122.434955,
+      "name": "Twin Peaks Tavern",
+      "neighborhood": "The Castro",
+      "review_features": [
+        "Historic gay bar operating since 1935",
+        "San Francisco Designated Landmark",
+        "Famous full-length corner windows"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 1,
+          "url": "https://en.wikipedia.org/wiki/Twin_Peaks_Tavern"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 0,
+          "url": "https://aroundus.com/p/5508192-twin-peaks-tavern"
+        },
+        {
+          "retrieved_at": "2026-10-05",
+          "tier": 3,
+          "url": "https://www.twinpeakstavern.com/"
+        },
+        {
+          "retrieved_at": "2026-10-05",
+          "tier": 0,
+          "url": "https://www.chamberofcommerce.com/business-directory/california/san-francisco/gay-bar/2000303803-twin-peaks-tavern"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "4149 18th St, San Francisco, CA 94114",
+      "category": "bar",
+      "hours": {
+        "sun": [
+          "12:00",
+          "02:00"
+        ],
+        "mon": [
+          "14:00",
+          "02:00"
+        ],
+        "tue": [
+          "14:00",
+          "02:00"
+        ],
+        "wed": [
+          "14:00",
+          "02:00"
+        ],
+        "thu": [
+          "14:00",
+          "02:00"
+        ],
+        "fri": [
+          "14:00",
+          "02:00"
+        ],
+        "sat": [
+          "12:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "san-francisco-the-edge",
+      "instagram": null,
+      "lat": null,
+      "lon": null,
+      "name": "The Edge",
+      "neighborhood": "The Castro",
+      "review_features": [
+        "Castro neighborhood bar for 35+ years",
+        "Pool table and jukebox"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "http://edgesf.com/"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 0,
+          "url": "https://www.gaypinkspots.com/listing/the-edge-4a43bd8a9f167.html"
+        },
+        {
+          "retrieved_at": "2026-10-05",
+          "tier": 0,
+          "url": "https://www.top-rated.online/cities/San+Francisco/place/p/2333241/The+Edge"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "2247 Market St, San Francisco, CA 94114",
+      "category": "bar",
+      "hours": {
+        "mon": [
+          "12:00",
+          "00:00"
+        ],
+        "tue": [
+          "12:00",
+          "00:00"
+        ],
+        "wed": [
+          "12:00",
+          "00:00"
+        ],
+        "thu": [
+          "12:00",
+          "02:00"
+        ],
+        "fri": [
+          "12:00",
+          "02:00"
+        ],
+        "sat": [
+          "10:00",
+          "02:00"
+        ],
+        "sun": [
+          "10:00",
+          "00:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "san-francisco-hi-tops",
+      "instagram": null,
+      "lat": null,
+      "lon": null,
+      "name": "Hi Tops",
+      "neighborhood": "The Castro",
+      "review_features": [
+        "Gay sports bar on Market Street",
+        "Big screens showing live sports"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "https://www.hitopsbar.com/"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 0,
+          "url": "https://www.gaypinkspots.com/listing/hi-tops-527abdd593967.html"
+        },
+        {
+          "retrieved_at": "2026-10-05",
+          "tier": 3,
+          "url": "https://hitopsbar.com/san-francisco/"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "4121 18th St, San Francisco, CA 94114",
+      "category": "bar",
+      "hours": {
+        "mon": [
+          "17:00",
+          "02:00"
+        ],
+        "tue": [
+          "17:00",
+          "02:00"
+        ],
+        "wed": [
+          "17:00",
+          "02:00"
+        ],
+        "thu": [
+          "17:00",
+          "02:00"
+        ],
+        "fri": [
+          "16:00",
+          "02:00"
+        ],
+        "sat": [
+          "16:00",
+          "02:00"
+        ],
+        "sun": [
+          "16:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "san-francisco-badlands",
+      "instagram": null,
+      "lat": 37.76074,
+      "lon": -122.435477,
+      "name": "Badlands",
+      "neighborhood": "The Castro",
+      "review_features": [
+        "Dancing bar in the Castro",
+        "Opened 1975, reopened 2023"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 1,
+          "url": "https://en.wikipedia.org/wiki/Badlands_(San_Francisco)"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 0,
+          "url": "https://www.gaypinkspots.com/listing/badlands.html"
+        },
+        {
+          "retrieved_at": "2026-10-05",
+          "tier": 3,
+          "url": "https://www.instagram.com/badlandscastro/"
+        },
+        {
+          "retrieved_at": "2026-10-05",
+          "tier": 0,
+          "url": "https://www.bars10.com/US/San-Francisco/158245524202434/Badlands-San-Francisco"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "3600 16th St, San Francisco, CA 94114",
+      "category": "bar",
+      "hours": {
+        "sun": [
+          "13:00",
+          "00:00"
+        ],
+        "mon": [
+          "15:30",
+          "02:00"
+        ],
+        "tue": [
+          "15:30",
+          "00:00"
+        ],
+        "wed": [
+          "15:30",
+          "00:00"
+        ],
+        "thu": [
+          "15:30",
+          "02:00"
+        ],
+        "fri": [
+          "15:30",
+          "02:00"
+        ],
+        "sat": [
+          "12:00",
+          "02:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "san-francisco-lookout",
+      "instagram": null,
+      "lat": null,
+      "lon": null,
+      "name": "Lookout",
+      "neighborhood": "The Castro",
+      "review_features": [
+        "Gay bar in the Castro",
+        "At 16th Street and Market"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "http://www.lookoutsf.com/"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 0,
+          "url": "https://www.gaypinkspots.com/listing/lookout-4a43bd8ab58bc.html"
+        },
+        {
+          "retrieved_at": "2026-10-05",
+          "tier": 0,
+          "url": "https://www.restaurantji.com/ca/san-francisco/lookout-/"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "398 12th St, San Francisco, CA 94103",
+      "category": "cruise",
+      "hours": {
+        "fri": [
+          "14:00",
+          "02:00"
+        ],
+        "mon": [
+          "18:00",
+          "00:00"
+        ],
+        "sat": [
+          "14:00",
+          "02:00"
+        ],
+        "sun": [
+          "13:00",
+          "00:00"
+        ],
+        "thu": [
+          "18:00",
+          "00:00"
+        ],
+        "wed": [
+          "18:00",
+          "00:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "san-francisco-sf-eagle",
+      "instagram": null,
+      "lat": 37.77,
+      "lon": -122.4134,
+      "name": "SF Eagle",
+      "neighborhood": "SoMa",
+      "review_features": [
+        "Leather/Levi/fetish bar",
+        "San Francisco Landmark No. 295",
+        "Established 1981"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "http://sf-eagle.com/the-bar/"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 1,
+          "url": "https://en.wikipedia.org/wiki/San_Francisco_Eagle"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "id": "san-francisco-steamworks-berkeley",
+      "name": "Steamworks Berkeley",
+      "category": "sauna",
+      "neighborhood": "West Berkeley",
+      "address": "2107 4th Street, Berkeley, CA 94710",
+      "lat": 37.8659136,
+      "lon": -122.2991364,
+      "hours": "24h",
+      "hours_verified": true,
+      "review_features": [
+        "Private men's gym, sauna, and bathhouse",
+        "Always open; 18 and over with valid ID",
+        "Membership required; lockers and rooms for rent",
+        "Whirlpool, showers, and eucalyptus steam room"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://www.steamworksbaths.com/berkeley",
+          "retrieved_at": "2026-10-06"
+        },
+        {
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/12832175701",
+          "retrieved_at": "2026-10-06"
+        }
+      ],
+      "events_url": "https://www.steamworksbaths.com/berkeley-events",
+      "live_counter": null
+    }
+  ]
+}
