@@ -11,18 +11,6 @@
     "status": "live",
     "tz": "Europe/Berlin"
   },
-  "pride": {
-    "2026": {
-      "date": "2026-07-25",
-      "event_name": "CSD Berlin",
-      "source_url": "https://csd-berlin.de/en/demo-route-2026"
-    },
-    "2027": {
-      "date": "2027-07-24",
-      "event_name": "CSD Berlin",
-      "source_url": "https://www.govserv.org/DE/Berlin/336189604596/CSD-Berlin---Berlin-Pride"
-    }
-  },
   "venues": [
     {
       "address": "Kleiststraße 35, 10787 Berlin",
@@ -506,6 +494,22 @@
         }
       ],
       "live_counter": null
+    }
+  ],
+  "events": [
+    {
+      "name": "CSD Berlin",
+      "type": "pride",
+      "start": "2026-07-25",
+      "end": "2026-07-25",
+      "source": "https://csd-berlin.de/en/demo-route-2026"
+    },
+    {
+      "name": "CSD Berlin",
+      "type": "pride",
+      "start": "2027-07-24",
+      "end": "2027-07-24",
+      "source": "https://www.govserv.org/DE/Berlin/336189604596/CSD-Berlin---Berlin-Pride"
     }
   ]
 }

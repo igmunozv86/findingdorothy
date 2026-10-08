@@ -309,12 +309,13 @@
       "live_counter": null
     }
   ],
-  "pride": {
-    "2026": {
-      "date": "2026-06-06",
-      "event_name": "Marcha do Orgulho LGBTI+ de Lisboa",
-      "source_url": "https://ilga-portugal.pt/centro-lgbti/programacao/marcha-do-orgulho-lgbti-de-lisboa-2026/"
-    },
-    "2027": null
-  }
+  "events": [
+    {
+      "name": "Marcha do Orgulho LGBTI+ de Lisboa",
+      "type": "pride",
+      "start": "2026-06-06",
+      "end": "2026-06-06",
+      "source": "https://ilga-portugal.pt/centro-lgbti/programacao/marcha-do-orgulho-lgbti-de-lisboa-2026/"
+    }
+  ]
 }

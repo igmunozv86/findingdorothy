@@ -49,12 +49,13 @@
       "live_counter": null
     }
   ],
-  "pride": {
-    "2026": {
-      "date": "2026-06-07",
-      "event_name": "Tokyo Pride 2026",
-      "source_url": "https://pride.tokyo/parade/"
-    },
-    "2027": null
-  }
+  "events": [
+    {
+      "name": "Tokyo Pride 2026",
+      "type": "pride",
+      "start": "2026-06-07",
+      "end": "2026-06-07",
+      "source": "https://pride.tokyo/parade/"
+    }
+  ]
 }

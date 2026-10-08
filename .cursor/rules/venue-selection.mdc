@@ -12,8 +12,8 @@ Cursor renders. Research runs as parallel workers under `.cursor/rules/city-rese
 - Automated checks: schema, enums, exact region strings, at least two sources with a url and retrieved_at. Source tiers are 0, 1, 2, or 3. Tier 4 is Nacho's QA, not a source. `hours_verified` is true only when a tier 3 source is present. Unknown hours are `"no recent data"`.
 - Two-tier confirmation of a name and address, and a thin city, are review flags. They are not a reason to invent a source.
 - Region is one of: North America, Europe, Latin America, Asia-Pacific, Middle East, Africa. Tel Aviv is Middle East.
-- Pride is one published date per year, or null. Do not copy last year forward.
+- Pride dates live on the city as `events`, not a yearly pride object. Each event is `{name, type, start, end, source}`. v1 type is `pride`. `start` and `end` are the full published range (`YYYY-MM-DD`); a single published date uses that date for both. `source` is the organizer page. Do not infer a range, do not copy last year forward, and do not invent an event. An empty `events` array is honest.
 - A layout change is one template edit. Adding a city is one JSON file.
 - When a published city is wrong, change the spec or the brief, then re-run that city's worker. Do not patch the venue by hand.
 - `tz` stays on the city file so the clock can show local time.
-- The only category names on the page are Dance and Bars, Saunas and Bathhouses, and Cruisy. Stored `category` stays `bar`, `club`, `sauna`, `cruise`, or `sex` and is mapped onto those three. Do not bring back Leather bars, Late-night clubs, Drag & cabaret, Drinks and Dance, Fun Fun, or any other taxonomy.
+- The category names on the page are Dance and drinks, Saunas, Cruisy, and Events. Events is a chip for dated events, not a venue category. It shows only when that city has an event today or over the coming Friday–Sunday, and it is hidden otherwise. Do not bring back Dance and Bars, Saunas and Bathhouses, Gay Events, Leather bars, Late-night clubs, Drag & cabaret, Drinks and Dance, Fun Fun, or any other taxonomy.

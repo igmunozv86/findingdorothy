@@ -11,14 +11,6 @@
     "status": "live",
     "tz": "Europe/Rome"
   },
-  "pride": {
-    "2026": {
-      "date": "2026-06-20",
-      "event_name": "Roma Pride",
-      "source_url": "https://quiikymagazine.com/en/pride-2026-in-italy/"
-    },
-    "2027": null
-  },
   "venues": [
     {
       "address": "Via di S. Giovanni in Laterano 8, 00184 Roma",
@@ -488,6 +480,15 @@
         }
       ],
       "live_counter": null
+    }
+  ],
+  "events": [
+    {
+      "name": "Roma Pride",
+      "type": "pride",
+      "start": "2026-06-20",
+      "end": "2026-06-20",
+      "source": "https://quiikymagazine.com/en/pride-2026-in-italy/"
     }
   ]
 }

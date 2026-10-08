@@ -4,6 +4,7 @@ build/
 .next/
 .env
 .env.local
+data/auth.json
 *.log
 .DS_Store
 coverage/

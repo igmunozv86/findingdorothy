@@ -44,7 +44,7 @@ A tourism page, a guide, or an open time with no close does not verify hours. Le
 
 `00:00` as an end means midnight. An end earlier than the start crosses midnight. A window that starts at `00:00` is stored as written.
 
-The only names shown are Dance and Bars, Saunas and Bathhouses, and Cruisy. Stored `category`: `bar` and `club` are Dance and Bars, `sauna` is Saunas and Bathhouses, `cruise` and `sex` are Cruisy.
+The only names shown are Dance and drinks, Saunas, and Cruisy. Stored `category`: `bar` and `club` are Dance and drinks, `sauna` is Saunas, `cruise` and `sex` are Cruisy.
 
 ## Pride date
 

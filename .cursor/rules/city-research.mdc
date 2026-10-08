@@ -45,14 +45,16 @@ below. Workers write to `data/staging/cities/<slug>.json` only — never to
    Verified format: `"24h"` or `{mon: ["10:00","02:00"], …}` in HH:MM.
 4. **Coordinates:** numbers only when confidently sourced (map/geocode for
    the street address). Otherwise BOTH `lat` and `lon` are null. Never guessed.
-5. **Categories.** The only names anyone sees are these three:
-   Dance and Bars, Saunas and Bathhouses, Cruisy. Do not add Leather bars,
+5. **Categories.** The names anyone sees are Dance and drinks, Saunas,
+   Cruisy, and Events. Events is not a venue category.
+   It is a chip for dated events, shown only when the city has an event
+   today or over the coming Friday–Sunday. Do not add Leather bars,
    Late-night clubs, Drag & cabaret, Drinks and Dance, Fun Fun, or any
    other taxonomy. A backroom stays in `review_features`, not a new group.
    The file still stores `category` as `bar` | `club` | `sauna` | `cruise` |
    `sex` so validation and the forecast keep working. That stored value is
-   not a label. Map it: `bar` and `club` → Dance and Bars, `sauna` →
-   Saunas and Bathhouses, `cruise` and `sex` → Cruisy.
+   not a label. Map it: `bar` and `club` → Dance and drinks, `sauna` →
+   Saunas, `cruise` and `sex` → Cruisy.
 6. **Fields:** `id` is `<slug>-<name-slug>`, unique. `review_features`: 2–4
    short factual strings. `instagram`: handle or null. No unknown fields —
    the validator rejects them. No phone numbers, ever.
@@ -61,15 +63,19 @@ below. Workers write to `data/staging/cities/<slug>.json` only — never to
    invent a calendar. `live_counter` is null, or the venue's own page when
    that page publishes a live headcount. Only Hotel Chilli in São Paulo has
    one: `https://hotelchilli.com.br/`. Do not invent a counter.
-7. **Pride:** `{"2026": {date, event_name, source_url} | null, "2027": …}`.
-   ONLY dates the organizer has actually published. Never infer from prior
-   years. Null is a valid, honest answer.
+7. **Events:** `events` is an array on the city. v1 entries are prides only:
+   `{name, type: "pride", start, end, source}`. Dates come from the
+   organizer's published page, and `source` is that page. Use the full
+   published range. If the organizer published one date, `start` and `end`
+   are that date. Never infer a range from a headline day or from last
+   year. Do not invent circuit, leather, or festival dates until a source
+   is in hand. An empty array is honest.
 8. **Meta:** `slug` (must match the filename), `name`, `country`,
    `region` (exact taxonomy string), `gayborhood` (string or null),
    city `lat`/`lon` (numbers), `status` (`seeded` for new cities),
    `last_updated` (YYYY-MM-DD), `tz` (IANA, from the reference table below).
-9. **Aim:** 6–8 venues per city covering Dance and Bars, Saunas and
-   Bathhouses, and Cruisy where they're genuinely part of the scene.
+9. **Aim:** 6–8 venues per city covering Dance and drinks, Saunas, and
+   Cruisy where they're genuinely part of the scene.
 
 ## Validation and merge (in this order, no skipping)
 

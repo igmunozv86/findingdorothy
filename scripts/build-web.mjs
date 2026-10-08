@@ -4,13 +4,28 @@
 // A city is one file in data/cities/<slug>.json. The template reads that file only.
 // A fresh live reading replaces the signal line with the count.
 
-import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { periodLabel, placeStatus, zonedNow } from '../packages/forecast/open.js';
 import { assembleForecast, dayScore, isShutdown, loadForecastInputs } from '../packages/forecast/assemble.js';
 import { freshOccupancy, signalMarkup } from '../packages/forecast/live.js';
 import { fetchWeather } from '../packages/forecast/weather.js';
 import { loadCities } from '../packages/cities/load.js';
 
+function publicAuthConfig() {
+  let file = {};
+  const path = new URL('../data/auth.json', import.meta.url);
+  if (existsSync(path)) {
+    try { file = JSON.parse(readFileSync(path, 'utf8')); } catch { file = {}; }
+  }
+  return {
+    url: process.env.SUPABASE_URL || file.url || '',
+    anon: process.env.SUPABASE_ANON_KEY || file.anon || '',
+    google: process.env.GOOGLE_CLIENT_ID || file.googleClientId || '',
+    apple: process.env.APPLE_CLIENT_ID || file.appleClientId || '',
+  };
+}
+
+const AUTH = publicAuthConfig();
 const CITIES = loadCities(new URL('../data/cities/', import.meta.url));
 const LIVE = CITIES.filter((city) => city.live);
 
@@ -19,14 +34,14 @@ function allVenues() {
 }
 
 const GROUPS = [
-  { id: 'dance', title: 'Dance and Bars', categories: ['bar', 'club'], icon: 'music' },
-  { id: 'sauna', title: 'Saunas and Bathhouses', categories: ['sauna'], icon: 'sauna' },
+  { id: 'dance', title: 'Dance and drinks', categories: ['bar', 'club'], icon: 'music' },
+  { id: 'sauna', title: 'Saunas', categories: ['sauna'], icon: 'sauna' },
   { id: 'fun', title: 'Cruisy', categories: ['sex', 'cruise'], icon: 'fire' },
 ];
 
 const SCENES = [
-  { id: 'dance', name: 'Dance and Bars', copy: 'Bars and clubs — which nights they peak, and how packed they get.' },
-  { id: 'sauna', name: 'Saunas and Bathhouses', copy: 'Hours, and when the steam is up.' },
+  { id: 'dance', name: 'Dance and drinks', copy: 'Bars and clubs — which nights they peak, and how packed they get.' },
+  { id: 'sauna', name: 'Saunas', copy: 'Hours, and when the steam is up.' },
   { id: 'fun', name: 'Cruisy', copy: 'Cruise bars and sex clubs, mapped honestly.' },
 ];
 
@@ -489,7 +504,7 @@ ${paths}
     <section class="block cities-page">
       <p class="back"><a href="#home">Home</a></p>
       <div class="cities-brand">
-        <img src="assets/icon-mark.jpg" alt="">
+        <img src="assets/icon-mark.png" alt="">
         <h1>Find the <span class="fun">City</span> ready for you</h1>
         <p class="subhead">Pick a region. The number indicates indexed cities.</p>
       </div>
@@ -582,21 +597,20 @@ function formatPrideRange(start, end) {
 function prideEvents() {
   const events = [];
   for (const city of CITIES) {
-    for (const [year, row] of Object.entries(city.pride || {})) {
-      if (row == null) continue;
+    for (const row of city.events || []) {
       let sourceName = 'Source';
       try {
-        sourceName = new URL(row.source_url).hostname.replace(/^www\./, '');
+        sourceName = new URL(row.source).hostname.replace(/^www\./, '');
       } catch {
         sourceName = 'Source';
       }
       events.push({
-        id: `${city.id}-${year}`,
-        name: row.event_name,
+        id: `${city.id}-${row.start}`,
+        name: row.name,
         city_id: city.id,
-        start: row.date,
-        end: row.date,
-        source_url: row.source_url,
+        start: row.start,
+        end: row.end,
+        source_url: row.source,
         source_name: sourceName,
       });
     }
@@ -611,7 +625,7 @@ function prideBanners(city) {
       const title = event.kind === 'pride-week' ? `Pride week in ${city.name}` : `Pride in ${city.name}`;
       const when = formatPrideRange(event.start, event.end);
       return `      <a class="pride-banner" href="#pride" hidden data-start="${event.start}" data-end="${event.end}">
-        <img src="assets/icon-mark.jpg" alt="">
+        <img src="assets/icon-mark.png" alt="">
         <span>
           <strong>${escapeHtml(title)}</strong>
           <span>${escapeHtml(when)} · ${escapeHtml(event.name)}</span>
@@ -644,33 +658,32 @@ function prideResultsHtml() {
         <ul class="pride-simple">
 ${rows}
         </ul>
-        <p class="pride-none" id="pride-none" hidden>Nothing coming up yet.</p>
+        <p class="pride-none" id="pride-none" hidden></p>
       </div>`;
 }
 
 function pridePageHtml() {
   return `  <main class="view" id="pride" hidden>
-    <section class="block pride-page">
-      <div class="hero">
-        <img class="hero-mark" src="assets/icon-mark.jpg" alt="">
-        <h1>Know where the <span class="fun">events</span> are going.</h1>
-        <p class="subhead">Search a city, a country, a year, or a month.</p>
-        <form class="area-search pride-search" role="search">
-          <input id="pride-search" type="search" placeholder="City, country, year, or month" autocomplete="off" enterkeyhint="search" aria-autocomplete="list" aria-controls="pride-suggest">
-          <button type="submit" aria-label="Search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16.5 20.5 21" stroke-linecap="round"/></svg>
-          </button>
-        </form>
-        <ul class="area-suggest" id="pride-suggest" hidden></ul>
+    <section class="hero tonight-hero pride-hero">
+      <img class="tonight-hero-photo" src="assets/calendar-hero.jpg" alt="">
+      <div class="tonight-hero-shade" aria-hidden="true"></div>
+      <div class="tonight-hero-inner">
+        <img class="hero-mark" src="assets/icon-mark.png" alt="">
+        <h1>Plan your vacations around<br><span class="fun">Fun Events</span></h1>
+        <p class="subhead">Check the gay calendar <svg class="pride-flag" viewBox="0 0 22 16" aria-hidden="true"><rect width="22" height="2.67" fill="#E40303"/><rect width="22" height="2.67" y="2.67" fill="#FF8C00"/><rect width="22" height="2.67" y="5.33" fill="#FFED00"/><rect width="22" height="2.67" y="8" fill="#008026"/><rect width="22" height="2.67" y="10.67" fill="#24408E"/><rect width="22" height="2.67" y="13.33" fill="#732982"/></svg></p>
       </div>
-${prideResultsHtml()}
+    </section>
+    <section class="block pride-page">
+      <div class="outlook" id="outlook">
+${calendarNav('outlook')}
+      </div>
     </section>
   </main>`;
 }
 
 const SCENE_GROUPS = [
-  { id: 'dance', name: 'Dance and Bars', categories: ['bar', 'club'] },
-  { id: 'sauna', name: 'Saunas and Bathhouses', categories: ['sauna'] },
+  { id: 'dance', name: 'Dance and drinks', categories: ['bar', 'club'] },
+  { id: 'sauna', name: 'Saunas', categories: ['sauna'] },
   { id: 'sexy', name: 'Cruisy', categories: ['cruise', 'sex'] },
 ];
 
@@ -681,7 +694,7 @@ function sceneGroup(category) {
 
 function sceneGroupName(category) {
   const match = SCENE_GROUPS.find((group) => group.categories.includes(category));
-  return match ? match.name : 'Dance and Bars';
+  return match ? match.name : 'Dance and drinks';
 }
 
 const NIGHT_HOURS = [18, 19, 20, 21, 22, 23, 0, 1, 2];
@@ -827,10 +840,13 @@ function buildTonight() {
         raining: Boolean(weatherByCity[city.name]?.raining),
         snowing: Boolean(weatherByCity[city.name]?.snowing),
       },
-      pride: Object.values(city.pride || {})
-        .filter((row) => row && row.date && row.event_name)
-        .map((row) => ({ name: row.event_name, date: row.date }))
-        .sort((a, b) => a.date.localeCompare(b.date)),
+      events: (city.events || []).map((event) => ({
+        name: event.name,
+        type: event.type,
+        start: event.start,
+        end: event.end,
+        source: event.source,
+      })),
       venues,
     };
   });
@@ -849,6 +865,154 @@ function tonightLine(venue, mode) {
 
 function busyNote() {
   return 'usual for this hour';
+}
+
+function whyStats() {
+  const venues = LIVE.flatMap((city) => city.venues);
+  const events = LIVE.flatMap((city) => city.events || []);
+  return {
+    cities: LIVE.length,
+    venues: venues.length,
+    verified: venues.filter((venue) => venue.hours_verified).length,
+    live: venues.filter((venue) => venue.live_counter).length,
+    events: events.length,
+  };
+}
+
+function whyProof() {
+  const city = tonightData.cities.find((item) => item.id === tonightData.defaultCity) || tonightData.cities[0];
+  const open = city.venues.filter((venue) => venue.open[city.hour]);
+  const pool = open.length ? open : city.venues;
+  const venue = pool.slice().sort((a, b) => b.curve[city.hour] - a.curve[city.hour])[0];
+  return { city, venue, open: open.includes(venue) };
+}
+
+function whyPageHtml() {
+  const stats = whyStats();
+  const proof = whyProof();
+  const { city, venue } = proof;
+  const percent = venue.curve[city.hour];
+  const chilli = tonightData.cities
+    .flatMap((item) => item.venues.map((row) => ({ city: item, venue: row })))
+    .find((row) => row.venue.live_counter || row.venue.id === 'sao-paulo-hotel-chilli');
+  const liveCount = chilli && chilli.venue.live && Number.isInteger(chilli.venue.live.count)
+    ? chilli.venue.live.count
+    : null;
+  const forecastLine = proof.open
+    ? `${escapeHtml(venue.name)} in ${escapeHtml(city.name)} is ${percent}% right now — usual for this hour, not a live count.`
+    : `${escapeHtml(venue.name)} in ${escapeHtml(city.name)} is closed this hour. The card says so. The forecast for the hour is ${percent}%.`;
+  const liveLine = liveCount == null
+    ? 'Hotel Chilli in São Paulo is the venue that publishes a headcount, on hotelchilli.com.br. The number shows on its card only while that reading is fresh.'
+    : `Hotel Chilli in São Paulo is publishing ${liveCount} inside right now, from hotelchilli.com.br. The number stays up only while that reading is fresh.`;
+  return `  <main class="view" id="why" hidden>
+    <section class="yd-hero">
+      <img class="yd-hero-photo" src="assets/why/hero-pride.jpg" alt="Crowd at a pride parade, rainbow flags raised">
+      <div class="yd-hero-shade" aria-hidden="true"></div>
+      <div class="yd-hero-inner">
+        <div>
+          <p class="eyebrow">Why FindingDorothy</p>
+          <h1>Stop guessing where the night is.</h1>
+          <p class="yd-sub">FindingDorothy ranks gay bars, clubs, saunas and parties for tonight, in ${stats.cities} cities, and shows a live headcount when a venue publishes one.</p>
+          <div class="yd-cta-pair">
+            <div class="yd-cta-row">
+              <a class="btn yd-go" href="#home">Start exploring</a>
+              <span class="yd-friction">Free forever for travelers</span>
+            </div>
+            <div class="yd-cta-row">
+              <a class="btn light" href="#venues">For venues</a>
+              <span class="yd-friction">Free pilot for launch venues</span>
+            </div>
+          </div>
+        </div>
+        <a class="yd-proof" href="#home">
+          <p class="yd-proof-kicker">${escapeHtml(city.flag)} ${escapeHtml(city.name)} · tonight</p>
+          <p class="yd-proof-name">${escapeHtml(venue.name)}</p>
+          <p class="yd-proof-meta">${escapeHtml(venue.cat)}${venue.area ? ` · ${escapeHtml(venue.area)}` : ''}</p>
+          <p class="yd-proof-score"><span>${percent}%</span> ${escapeHtml(busyNote())}</p>
+          <p class="yd-proof-line">${proof.open ? `Open now · peaks ~${peakClock(venue.peak)}` : escapeHtml(venue.hoursText)}</p>
+        </a>
+      </div>
+    </section>
+    <section class="yd-block yd-split" id="venues">
+      <figure>
+        <img src="assets/why/venues-floor.jpg" alt="People dancing on a packed club floor">
+      </figure>
+      <div>
+        <p class="eyebrow">For venues</p>
+        <h2>Your slowest Tuesday is invisible. We make it visible.</h2>
+        <p>${liveLine}</p>
+        <ul class="yd-points">
+          <li>${stats.live} live counter, shown with a Live badge and the venue’s own headcount.</li>
+          <li>${stats.verified} of ${stats.venues} venues have hours taken from the venue’s own site.</li>
+          <li>Travelers open a city and see tonight ranked before they go out.</li>
+        </ul>
+        <div class="yd-cta-row">
+          <a class="btn solid" href="#venues">Talk to us</a>
+          <span class="yd-friction">Free pilot for launch venues</span>
+        </div>
+      </div>
+    </section>
+    <section class="yd-block">
+      <p class="eyebrow">For travelers</p>
+      <h2>Land in a new city. Know where the night is.</h2>
+      <div class="yd-pillars">
+        <article>
+          <img src="assets/why/travelers-disco.jpg" alt="Friends together under disco lights">
+          <h3>Scene forecast</h3>
+          <p>${forecastLine}</p>
+        </article>
+        <article>
+          <img src="assets/why/travelers-drag.jpg" alt="Drag queen performing on stage">
+          <h3>Real reviews, cited</h3>
+          <p>Every venue carries at least two sources. ${stats.verified} have hours from the venue’s own site. We never hallucinate a busy night.</p>
+        </article>
+        <article>
+          <img src="assets/why/events-pride.jpg" alt="People marching in a pride parade">
+          <h3>Pride and events</h3>
+          <p>${stats.events} pride dates, each from the organizer’s page. The Fun Calendar shows the day, and an empty day stays empty.</p>
+        </article>
+      </div>
+      <div class="yd-cta-row">
+        <a class="btn solid" href="#home">Start exploring</a>
+        <span class="yd-friction">Free forever for travelers</span>
+      </div>
+    </section>
+    <section class="yd-numbers" aria-label="By the numbers">
+      <p><strong>${stats.cities}</strong> cities</p>
+      <p><strong>${stats.venues}</strong> venues</p>
+      <p><strong>${stats.verified}</strong> hours from the venue’s own site</p>
+      <p><strong>${stats.live}</strong> live counter</p>
+      <p><strong>${stats.events}</strong> pride dates</p>
+    </section>
+    <section class="yd-steps">
+      <img src="assets/why/steps-night.jpg" alt="">
+      <div class="yd-steps-shade" aria-hidden="true"></div>
+      <div class="yd-steps-inner">
+        <h2>How it works</h2>
+        <ol>
+          <li><span>1</span> Pick your city.</li>
+          <li><span>2</span> See tonight, ranked by the forecast.</li>
+          <li><span>3</span> Go where it’s actually on.</li>
+        </ol>
+      </div>
+    </section>
+    <section class="yd-trust">
+      <p>If we don’t have recent data, we say so. ${stats.venues - stats.verified} venues still say no recent data for hours. Verified hours, cited sources, and a live count only when the venue just published one.</p>
+    </section>
+    <section class="yd-final">
+      <h2>Stop guessing where the night is.</h2>
+      <div class="yd-cta-pair">
+        <div class="yd-cta-row">
+          <a class="btn solid" href="#home">Start exploring</a>
+          <span class="yd-friction">Free forever for travelers</span>
+        </div>
+        <div class="yd-cta-row">
+          <a class="btn ghost" href="#venues">For venues</a>
+          <span class="yd-friction">Free pilot for launch venues</span>
+        </div>
+      </div>
+    </section>
+  </main>`;
 }
 
 function liveLine(venue) {
@@ -915,31 +1079,19 @@ function prideCountdown(iso, today) {
   return `in ${weeks} weeks`;
 }
 
-function upcomingPride(city) {
-  const today = localDateKey(city.tz);
-  return (city.pride || [])
-    .filter((row) => row.date >= today)
-    .map((row) => ({
-      name: row.name,
-      when: formatPrideDay(row.date),
-      countdown: prideCountdown(row.date, today),
-    }));
-}
-
-const PRIDE_FLAG = '<svg class="pride-flag" viewBox="0 0 22 16" aria-hidden="true"><rect width="22" height="2.67" fill="#E40303"/><rect width="22" height="2.67" y="2.67" fill="#FF8C00"/><rect width="22" height="2.67" y="5.33" fill="#FFED00"/><rect width="22" height="2.67" y="8" fill="#008026"/><rect width="22" height="2.67" y="10.67" fill="#24408E"/><rect width="22" height="2.67" y="13.33" fill="#732982"/></svg>';
-
-function upcomingPrideHtml(city) {
-  const rows = upcomingPride(city);
-  if (!rows.length) return '    <section class="tonight-block pride-upcoming" id="upcoming-pride" hidden></section>';
-  const items = rows.map((row) => `      <article>
-        <p class="pride-what">${escapeHtml(row.name)}</p>
-        <p class="pride-when">${escapeHtml(row.when)}</p>
-        <p class="pride-count">${escapeHtml(row.countdown)}</p>
-      </article>`).join('\n');
-  return `    <section class="tonight-block pride-upcoming" id="upcoming-pride">
-      <h2>${PRIDE_FLAG} Upcoming Pride</h2>
-${items}
-    </section>`;
+function calendarNav(prefix) {
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    .map((name, index) => `<option value="${index + 1}">${name}</option>`)
+    .join('');
+  return `      <div class="cal-nav">
+        <button type="button" id="${prefix}-prev" aria-label="Previous month">‹</button>
+        <div class="cal-pick" id="${prefix}-label">
+          <select id="${prefix}-month" aria-label="Month">${months}</select>
+          <select id="${prefix}-year" aria-label="Year"></select>
+        </div>
+        <button type="button" id="${prefix}-next" aria-label="Next month">›</button>
+      </div>
+      <div id="${prefix}-body"></div>`;
 }
 
 function barWhen(timeZone) {
@@ -991,16 +1143,21 @@ function homeTonightHtml() {
   const closedVenues = city.venues
     .filter((venue) => inDance(venue) && !venue.open[city.hour])
     .sort((a, b) => a.name.localeCompare(b.name));
-  const chips = SCENE_GROUPS
+  const chips = `${SCENE_GROUPS
     .map((group) => `          <button type="button" class="vibe-chip" data-group="${group.id}" aria-pressed="${group.id === 'dance' ? 'true' : 'false'}">${escapeHtml(group.name)}</button>`)
-    .join('\n');
+    .join('\n')}
+          <button type="button" class="vibe-chip" data-group="events">Events</button>`;
   const weekendHidden = city.weekday === 5 || city.weekday === 6 ? ' hidden' : '';
   return `    <section class="hero tonight-hero">
-      <img class="hero-mark" src="assets/icon-mark.jpg" alt="">
-      <h1>Know where the <span class="fun">fun</span><br>is going.</h1>
-      <p class="subhead">Gay travel intel, powered by real data.</p>
-    </section>
+      <img class="tonight-hero-photo" src="assets/home-hero.jpg" alt="">
+      <div class="tonight-hero-shade" aria-hidden="true"></div>
+      <div class="tonight-hero-inner">
+        <img class="hero-mark" src="assets/icon-mark.png" alt="">
+        <h1>Know where the <span class="fun">fun</span><br>is going.</h1>
+        <p class="subhead">Gay travel intel, powered by real data.</p>
 ${nowLineHtml(city)}
+      </div>
+    </section>
     <div id="city-rails">
     <section class="tonight-block" id="tonight">
       <div class="tonight-head">
@@ -1021,11 +1178,18 @@ ${tonightRail(tonightVenues, city.hour, 'tonight')}
       </div>
 ${closedListHtml(closedVenues)}
     </section>
+    <section class="tonight-block" id="for-you" hidden>
+      <div class="tonight-head">
+        <h2>For You</h2>
+        <p class="rank-note">Tonight at your saved spots</p>
+      </div>
+      <div id="for-you-list"></div>
+    </section>
     <section class="tonight-block" id="weekend"${weekendHidden}>
       <div class="tonight-head">
         <h2>This weekend</h2>
         <p class="rank-note" id="weekend-dates">${escapeHtml(city.weekend)}</p>
-        <p class="rank-note">ranked by the weekend peak</p>
+        <p class="rank-note" id="weekend-peak">ranked by the weekend peak</p>
       </div>
       <div class="vibe-row" id="weekend-groups">
 ${chips}
@@ -1035,7 +1199,6 @@ ${tonightRail(weekendVenues, city.hour, 'weekend')}
       </div>
 ${closedListHtml(city.venues.filter((venue) => inDance(venue) && venue.weekend.percent === 0).sort((a, b) => a.name.localeCompare(b.name)), 'weekend-closed', 'Closed this weekend')}
     </section>
-${upcomingPrideHtml(city)}
     </div>
     <div class="sheet-back" id="sheet-back" hidden>
       <aside class="sheet" id="venue-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
@@ -1116,8 +1279,10 @@ const html = `<!DOCTYPE html>
       gap: 1.25rem;
       min-height: 68px;
       padding: 0.65rem 1.25rem;
-      background: #fff;
-      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, #ffc531, #ff7a18) bottom / 100% 4px no-repeat,
+        #fff;
+      border-bottom: 0;
     }
     .header-auth {
       display: flex;
@@ -2252,8 +2417,14 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       letter-spacing: 0;
       text-decoration: none;
     }
+    .foot-simple .photo-credits {
+      margin: 1.35rem 0 0;
+      color: #8d8d98;
+      font-size: 13px;
+      line-height: 1.45;
+    }
     .foot-simple .legal {
-      margin-top: 1.35rem;
+      margin-top: 0.35rem;
       padding-top: 0;
       border-top: 0;
       color: #c8c8d0;
@@ -2263,6 +2434,12 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       background: #111;
       color: #fff;
       scroll-margin-top: 120px;
+    }
+    .site-footer::after {
+      content: "";
+      display: block;
+      height: 4px;
+      background: linear-gradient(90deg, #ffc531, #ff7a18);
     }
     .foot-inner {
       width: min(1120px, calc(100% - 2.5rem));
@@ -2316,6 +2493,15 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       .header-auth { order: 2; margin-left: auto; gap: 0.3rem; }
       .nav-toggle { display: inline-block; order: 3; margin-left: 0.15rem; width: 36px; height: 36px; }
       .btn-login, .btn-signup { min-height: 30px; padding: 0.15rem 0.5rem; font-size: 12px; }
+      .profile-btn { width: 30px; height: 30px; }
+      .profile-btn svg { width: 16px; height: 16px; }
+      @media (max-width: 380px) {
+        .site-header { gap: 0.15rem; padding-left: 0.4rem; padding-right: 0.4rem; }
+        .header-auth { gap: 0.15rem; }
+        .btn-login, .btn-signup { padding: 0.1rem 0.3rem; font-size: 11px; }
+        .profile-btn { width: 26px; height: 26px; }
+        .nav-toggle { width: 28px; height: 28px; margin-left: 0; }
+      }
       .nav-panel {
         display: none;
         position: absolute;
@@ -2659,15 +2845,62 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       .sheet.is-full { width: min(560px, 100%); }
     }
     .tonight-hero, .tonight-block { width: min(1120px, calc(100% - 2.3rem)); margin: 0 auto; }
-    .tonight-hero { padding-top: 1.25rem; }
+    .tonight-hero {
+      position: relative;
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      padding: 0;
+      overflow: visible;
+      color: #111;
+    }
+    .tonight-hero-photo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 42%;
+    }
+    .tonight-hero-shade {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0) calc(100% - 210px), rgba(255, 255, 255, 0.55) calc(100% - 165px), rgba(255, 255, 255, 0.9) calc(100% - 115px), #fff calc(100% - 35px), #fff 100%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.68)),
+        rgba(255, 255, 255, 0.42);
+    }
+    .tonight-hero-inner {
+      position: relative;
+      width: min(1120px, calc(100% - 2.3rem));
+      margin: 0 auto;
+      padding: 2.4rem 0 1.5rem;
+    }
+    .tonight-hero h1 { color: #111; }
+    .tonight-hero .subhead { color: var(--muted); }
     .tonight-hero .hero-mark { width: 120px; height: 120px; }
+    .pride-hero .tonight-hero-photo { object-position: center 32%; }
+    .pride-hero .tonight-hero-inner { padding-bottom: 4.2rem; }
+    .pride-page.block { padding-top: 0.6rem; }
+    .pride-page .outlook { margin-top: 0.4rem; }
+    .pride-page .hero-mark { width: 120px; height: 120px; }
     @media (min-width: 760px) {
-      .tonight-hero .hero-mark { width: 156px; height: 156px; }
+      .tonight-hero .hero-mark,
+      .pride-page .hero-mark { width: 156px; height: 156px; }
+      .tonight-hero-inner { padding: 3.4rem 0 1.7rem; }
+      .pride-hero .tonight-hero-inner { padding-bottom: 5rem; }
     }
     .tonight-block { padding: var(--section) 0 0; }
     .pride-upcoming[hidden], #weekend[hidden] { display: none; }
     .pride-upcoming h2 { display: flex; align-items: center; gap: 0.55rem; margin: 0 0 0.65rem; font-size: 28px; font-weight: 800; }
-    .pride-flag { width: 26px; height: 18px; flex: none; border-radius: 2px; }
+    .subhead .pride-flag {
+      display: inline-block;
+      width: 22px;
+      height: 16px;
+      margin-left: 0.35rem;
+      vertical-align: -3px;
+      border-radius: 2px;
+    }
     .pride-upcoming article + article { margin-top: 0.85rem; }
     .pride-count { margin: 0.15rem 0 0; color: var(--muted); font-size: 14px; }
     #tonight, #weekend { scroll-margin-top: 120px; }
@@ -2712,6 +2945,64 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     .vibe-row { display: flex; gap: 0.45rem; overflow-x: auto; padding: 0.85rem 0 0.2rem; }
     .vibe-chip { flex: none; border-radius: 999px; padding: 0.4rem 0.8rem; }
     .vibe-chip[aria-pressed="true"] { background: #111; color: #fff; border-color: #111; }
+    .vibe-chip[hidden], #tonight-list[hidden], #weekend-list[hidden], #weekend-peak[hidden], #for-you[hidden] { display: none; }
+    .event-card { cursor: default; }
+    .event-card .pride-when, .event-card .pride-where, .event-card .pride-source { grid-column: 1 / -1; margin: 0; }
+    .event-busy {
+      grid-column: 2;
+      grid-row: 1;
+      margin: 0;
+      font-family: Poppins, sans-serif;
+      font-weight: 700;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .cal-nav { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.85rem; }
+    .cal-nav p { margin: 0; font-family: Poppins, sans-serif; font-weight: 700; font-size: 18px; }
+    .cal-pick { display: flex; align-items: center; gap: 0.45rem; }
+    .cal-pick select {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: #111;
+      font-family: Poppins, sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 0.4rem 0.75rem;
+      cursor: pointer;
+    }
+    .cal-nav button {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: #111;
+      font: inherit;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.55rem; margin-top: 1.35rem; }
+    .cal-dow { color: var(--muted); font-size: 12px; text-align: center; }
+    .cal-day {
+      min-height: 52px;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+    .cal-day.is-out { color: #b5b5be; }
+    .cal-day.has-event { box-shadow: inset 0 -3px 0 #ff7a18; }
+    .cal-day.is-on { background: #111; color: #fff; }
+    .cal-agenda { margin-top: 2.25rem; }
+    .cal-empty { margin: 0; color: var(--muted); }
+    #outlook-body > .cal-empty { margin-top: 2.25rem; }
+    .outlook { width: min(1120px, calc(100% - 2.3rem)); margin: 3.5rem auto 0; }
+    .event-card .tonight-name { display: flex; align-items: center; gap: 0.4rem; margin: 0; }
     .tonight-list { list-style: none; margin: 0.75rem 0 0; padding: 0; display: grid; gap: 0; }
     .tonight-row {
       display: grid;
@@ -2769,6 +3060,7 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     }
     .tonight-meta, .tonight-when { grid-column: 1 / -1; color: var(--muted); font-size: 14px; }
     .tonight-empty { color: var(--muted); }
+    .tonight-empty a { color: #ff7a18; font-weight: 600; }
     .closed-block { margin-top: 1.35rem; }
     .closed-block[hidden] { display: none; }
     .closed-label { margin: 0; color: var(--muted); font-size: 14px; font-weight: 500; }
@@ -2793,8 +3085,9 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     .show-more summary { cursor: pointer; font-weight: 500; }
     .now-bar {
       position: relative;
-      width: min(560px, calc(100% - 2.3rem));
-      margin: 1.35rem auto 1.5rem;
+      z-index: 5;
+      width: min(560px, 100%);
+      margin: 1.35rem auto 0;
     }
     #now-line {
       width: 100%;
@@ -2804,10 +3097,11 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       justify-content: center;
       gap: 0.75rem;
       padding: 1.05rem 1.5rem;
-      border: 1px solid var(--line);
+      border: 0;
       border-radius: 999px;
       background: #fff;
-      color: inherit;
+      box-shadow: 0 10px 28px rgba(17, 17, 17, 0.28);
+      color: #111;
       font: inherit;
       cursor: pointer;
     }
@@ -2829,7 +3123,7 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     }
     .now-search { width: 24px; height: 24px; }
     @media (max-width: 759px) {
-      .now-bar { width: calc(100% - 1.5rem); margin-top: 1rem; }
+      .now-bar { width: 100%; margin-top: 1.1rem; }
       #now-line { gap: 0.55rem; padding: 0.9rem 1.05rem; }
       #now-line .now-place { font-size: 18px; }
       .now-flag { font-size: 22px; }
@@ -2860,15 +3154,32 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     .city-picker ul { list-style: none; margin: 0.5rem 0 0; padding: 0; max-height: 280px; overflow: auto; }
     .city-picker li button {
       display: flex;
+      align-items: baseline;
       justify-content: space-between;
+      gap: 1rem;
       width: 100%;
-      padding: 0.55rem 0.2rem;
+      padding: 0.65rem 0.35rem;
       border: 0;
+      border-bottom: 1px solid var(--line);
       background: transparent;
       font: inherit;
       text-align: left;
       cursor: pointer;
     }
+    .city-picker .picker-city {
+      min-width: 0;
+      overflow: hidden;
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .city-picker .picker-country {
+      flex: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 400;
+    }
+    .city-picker li:last-child button { border-bottom: 0; }
     .city-picker .picker-empty { margin: 0.7rem 0.2rem 0.2rem; color: var(--muted); font-size: 14px; }
     .sheet-back {
       position: fixed;
@@ -2916,6 +3227,146 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     }
     .sheet-save svg { width: 22px; height: 22px; fill: none; stroke: currentColor; }
     .sheet-save.is-on svg { fill: currentColor; stroke: none; }
+    .profile-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: 1px solid #111;
+      border-radius: 999px;
+      background: #fff;
+      color: #111;
+      cursor: pointer;
+    }
+    .profile-btn svg { width: 18px; height: 18px; display: block; }
+    .auth-skel {
+      display: inline-block;
+      width: 64px;
+      height: 32px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #f3f3f6 0%, #fff 50%, #f3f3f6 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.1s ease-in-out infinite;
+    }
+    .auth-skel.is-wide { width: 118px; }
+    .auth-skel[hidden] { display: none; }
+    @keyframes shimmer {
+      from { background-position: 100% 0; }
+      to { background-position: -100% 0; }
+    }
+    .account-back {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(17, 17, 17, 0.28);
+      opacity: 0;
+      transition: opacity 200ms linear;
+    }
+    .account-back.is-on { opacity: 1; }
+    .account-back[hidden] { display: none; }
+    .account-sheet {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      border-radius: 18px 18px 0 0;
+      background: #fff;
+      overflow: auto;
+      transform: translateY(110%);
+      transition: transform 280ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .account-back.is-on .account-sheet { transform: none; }
+    .account-body { padding: 0 1.15rem 1.5rem; transition: opacity 180ms ease; }
+    .account-body.is-out { opacity: 0; }
+    .account-body h3 { margin: 0 0 0.35rem; font-size: 28px; }
+    .account-menu { list-style: none; margin: 0.4rem 0 0; padding: 0; }
+    .account-menu button {
+      display: block;
+      width: 100%;
+      padding: 0.9rem 0;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-size: 16px;
+      text-align: left;
+      cursor: pointer;
+    }
+    .auth-google, .auth-apple, .auth-send, .account-body .btn-login, .account-body .btn-signup {
+      display: flex;
+      width: 100%;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.55rem;
+      border-radius: 999px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .auth-google, .account-body .btn-login {
+      border: 1px solid #111;
+      background: #fff;
+      color: #111;
+    }
+    .auth-apple, .auth-send, .account-body .btn-signup {
+      border: 0;
+      background: #111;
+      color: #fff;
+    }
+    .auth-send { background: #ff7a18; color: #111; }
+    .account-field, .sheet-body textarea, .account-body textarea, .account-body select {
+      display: block;
+      width: 100%;
+      margin-top: 0.7rem;
+      padding: 0.75rem 0.85rem;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      color: inherit;
+      font: inherit;
+    }
+    .account-body textarea, .sheet-body textarea { min-height: 88px; resize: vertical; }
+    .auth-note, .auth-error, .account-empty { margin: 0.75rem 0 0; color: var(--muted); font-size: 14px; }
+    .auth-error { color: #111; }
+    .auth-prompt { margin: 0 0 0.8rem; font-weight: 600; }
+    .account-check { display: flex; gap: 0.55rem; align-items: flex-start; margin-top: 0.7rem; font-size: 14px; }
+    .google-slot { display: flex; justify-content: center; min-height: 44px; margin-top: 0.55rem; }
+    .google-slot:empty { display: none; }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 1.25rem;
+      z-index: 70;
+      transform: translateX(-50%);
+      margin: 0;
+      padding: 0.7rem 1rem;
+      border-radius: 999px;
+      background: #111;
+      color: #fff;
+      font-size: 14px;
+    }
+    .toast[hidden] { display: none; }
+    @media (min-width: 760px) {
+      .account-sheet {
+        top: 50%;
+        right: auto;
+        bottom: auto;
+        left: 50%;
+        width: min(420px, calc(100% - 2rem));
+        max-height: min(680px, 86vh);
+        border-radius: 18px;
+        transform: translate(-50%, -46%);
+      }
+      .account-back.is-on .account-sheet { transform: translate(-50%, -50%); }
+      .account-sheet .sheet-handle { display: none; }
+    }
     .curve, .week-curve { width: 100%; height: 112px; margin-top: 0.35rem; }
     .verified { color: #1f7a43; font-size: 13px; font-weight: 500; }
     @media (min-width: 760px) {
@@ -2963,6 +3414,181 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
         transition: none !important;
       }
     }
+    #why { background: #fff; }
+    #venues { scroll-margin-top: 96px; }
+    .yd-hero {
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      min-height: 92svh;
+      overflow: hidden;
+      color: #fff;
+    }
+    .yd-hero-photo, .yd-steps > img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .yd-hero-shade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(17, 17, 17, 0.28), rgba(17, 17, 17, 0.86));
+    }
+    .yd-steps-shade {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(#ffc531, #ff7a18) top / 100% 4px no-repeat,
+        linear-gradient(180deg, rgba(17, 17, 17, 0.28), rgba(17, 17, 17, 0.86));
+    }
+    .yd-hero-inner, .yd-steps-inner, .yd-block, .yd-trust, .yd-final, .yd-numbers {
+      width: min(1120px, calc(100% - 2.3rem));
+      margin: 0 auto;
+    }
+    .yd-hero-inner {
+      position: relative;
+      display: grid;
+      gap: 1.6rem;
+      padding: 3.2rem 0 2.4rem;
+    }
+    .yd-hero .eyebrow, .yd-steps .eyebrow { color: #ffd9a8; }
+    .yd-hero h1, .yd-block h2, .yd-steps h2, .yd-final h2 {
+      margin: 0.35rem 0 0;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+    }
+    .yd-hero h1 { max-width: 11em; font-size: 42px; }
+    .yd-sub, .yd-block p, .yd-trust p, .yd-pillar p, .yd-friction {
+      color: #d7d7de;
+      font-size: 17px;
+      line-height: 1.5;
+    }
+    .yd-sub { max-width: 38rem; margin: 1rem 0 0; }
+    .yd-cta-pair { display: grid; gap: 0.85rem; margin-top: 1.4rem; }
+    .yd-cta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.7rem; }
+    .yd-friction { margin: 0; color: #c8c8d0; font-size: 14px; }
+    .yd-hero .yd-friction { color: #efe7dc; }
+    .btn.yd-go {
+      border: 0;
+      background: linear-gradient(90deg, #ffc531, #ff7a18);
+      color: #111;
+      font-weight: 700;
+    }
+    .yd-proof {
+      display: block;
+      padding: 1rem 1.05rem 1.05rem;
+      border-radius: 16px;
+      background: #fff;
+      color: #111;
+      text-decoration: none;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+    }
+    .yd-proof-kicker, .yd-proof-meta, .yd-proof-line { margin: 0; color: #6b6b76; font-size: 14px; }
+    .yd-proof-name {
+      margin: 0.3rem 0 0;
+      font-family: Poppins, sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .yd-proof-meta { margin-top: 0.15rem; }
+    .yd-proof-score {
+      display: flex;
+      align-items: baseline;
+      gap: 0.45rem;
+      margin: 0.8rem 0 0;
+      color: #6b6b76;
+      font-size: 14px;
+    }
+    .yd-proof-score span {
+      font-family: Poppins, sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(90deg, #ffc531, #ff7a18);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .yd-proof-line { margin-top: 0.35rem; }
+    .yd-block { padding: 4.2rem 0 0; }
+    .yd-block h2, .yd-final h2 { max-width: 16em; font-size: 36px; color: #111; }
+    .yd-block p { margin: 0.9rem 0 0; color: #3a3a44; }
+    .yd-split { display: grid; gap: 1.4rem; align-items: center; }
+    .yd-split figure { margin: 0; }
+    .yd-split img, .yd-pillars img {
+      display: block;
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      border-radius: 18px;
+    }
+    .yd-points { margin: 1rem 0 0; padding: 0; list-style: none; }
+    .yd-points li {
+      margin-top: 0.55rem;
+      padding-left: 0.9rem;
+      border-left: 3px solid #ff7a18;
+      color: #111;
+      font-size: 16px;
+      line-height: 1.4;
+    }
+    .yd-block .yd-cta-row { margin-top: 1.3rem; }
+    .yd-block .yd-friction, .yd-final .yd-friction { color: #6b6b76; }
+    .yd-pillars { display: grid; gap: 1.3rem; margin-top: 1.5rem; }
+    .yd-pillars h3 { margin: 0.8rem 0 0; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+    .yd-numbers {
+      display: grid;
+      gap: 1rem;
+      margin-top: 4.2rem;
+      padding: 1.6rem 0;
+      border-top: 1px solid #ececf1;
+      border-bottom: 1px solid #ececf1;
+    }
+    .yd-numbers p { margin: 0; color: #6b6b76; font-size: 15px; }
+    .yd-numbers strong {
+      display: block;
+      color: #111;
+      font-family: Poppins, sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .yd-steps {
+      position: relative;
+      margin-top: 4.2rem;
+      overflow: hidden;
+      color: #fff;
+    }
+    .yd-steps-inner { position: relative; padding: 3.4rem 0; }
+    .yd-steps h2 { color: #fff; font-size: 36px; }
+    .yd-steps ol { margin: 1.2rem 0 0; padding: 0; list-style: none; display: grid; gap: 0.8rem; }
+    .yd-steps li { display: flex; align-items: baseline; gap: 0.7rem; font-size: 18px; }
+    .yd-steps li span {
+      font-family: Poppins, sans-serif;
+      font-weight: 800;
+      background: linear-gradient(90deg, #ffc531, #ff7a18);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .yd-trust { padding: 2.2rem 0 0; }
+    .yd-trust p { margin: 0; color: #3a3a44; font-size: 17px; line-height: 1.5; }
+    .yd-final { padding: 3.2rem 0 4.5rem; }
+    @media (min-width: 760px) {
+      .yd-hero { min-height: calc(100svh - 76px); }
+      .yd-hero-inner { grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.75fr); align-items: end; padding-top: 5rem; }
+      .yd-hero h1 { font-size: 64px; }
+      .yd-split { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 2.4rem; }
+      .yd-split img { height: 360px; }
+      .yd-pillars { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.1rem; }
+      .yd-numbers { grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 2rem 0; }
+      .yd-steps ol { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .yd-block h2, .yd-steps h2, .yd-final h2 { font-size: 48px; }
+    }
   </style>
 </head>
 <body>
@@ -2973,9 +3599,14 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       <a class="logo" href="#home" aria-label="FindingDorothy">
         <img src="assets/logo-v4-warm.jpg" alt="FindingDorothy">
       </a>
-      <div class="header-auth">
-        <button type="button" class="btn-login">Login</button>
-        <button type="button" class="btn-signup">Sign up for free</button>
+      <div class="header-auth" id="header-auth">
+        <button type="button" class="profile-btn" id="profile-btn" aria-label="Account">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 19.2c1.4-3 3.8-4.4 7-4.4s5.6 1.4 7 4.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <span class="auth-skel" id="auth-skel" hidden></span>
+        <span class="auth-skel is-wide" id="auth-skel-wide" hidden></span>
+        <button type="button" class="btn-login" id="login-btn">Login</button>
+        <button type="button" class="btn-signup" id="signup-btn">Sign up for free</button>
       </div>
       <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -2992,36 +3623,7 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
   <main class="view" id="home">
 ${homeTonightHtml()}
   </main>
-  <main class="view" id="why" hidden>
-    <section class="why-hero block">
-      <p class="back"><a href="#home">Home</a></p>
-      <p class="eyebrow">Why FindingDorothy</p>
-      <h1>You're in a new city. It's Saturday night. Where's the <span class="fun">night</span> going?</h1>
-      <p class="why-lead">Google reviews are stale, straight, and silent on the only question that matters: is it popping tonight? The gay guides list venues — they don't tell you when to go.</p>
-    </section>
-    <section class="block">
-      <div class="why-grid">
-        <article>
-          <p class="why-num">01</p>
-          <h3>Real reviews, weighted by recency, cited by source.</h3>
-          <p>We read what people actually said, weight recent nights over old ones, and show our sources. Every claim on this site can be traced. We never hallucinate a busy Saturday.</p>
-        </article>
-        <article>
-          <p class="why-num">02</p>
-          <h3>A forecast, not a directory.</h3>
-          <p>Our Scene Forecast turns evidence into a simple answer: how busy is this place likely to be right now. Quiet or packed — so you don't waste the night guessing.</p>
-          <div class="why-meter" role="img" aria-label="From quiet to packed"><span></span></div>
-          <div class="why-meter-scale"><span>Quiet</span><span>Packed</span></div>
-        </article>
-        <article>
-          <p class="why-num">03</p>
-          <h3>Honest when the data is thin.</h3>
-          <p>If we don't have recent signal, we say "no recent data." A confident lie sends you to an empty bar. We'd rather tell the truth.</p>
-          <p class="why-truth">no recent data</p>
-        </article>
-      </div>
-    </section>
-  </main>
+${whyPageHtml()}
 ${pridePageHtml()}
   <footer class="site-footer">
     <div class="foot-simple">
@@ -3032,12 +3634,20 @@ ${pridePageHtml()}
         <a href="#home">Home</a>
         <a href="#pride">Fun Calendar</a>
         <a href="#why">Why FindingDorothy</a>
-        <a href="#login">Login</a>
-        <a href="#signup">Sign up for free</a>
+        <a href="#login" id="foot-login">Login</a>
+        <a href="#signup" id="foot-signup">Sign up for free</a>
       </nav>
+      <p class="photo-credits">Photos: Dibakar Roy, Yura Forrat, Anastasiya Badun, cottonbro studio, Phat Doan, Pexels.</p>
       <p class="legal">© 2026 FindingDorothy</p>
     </div>
   </footer>
+  <div class="account-back" id="account-back" hidden>
+    <div class="account-sheet" id="account-sheet" role="dialog" aria-modal="true" aria-label="Account">
+      <button type="button" class="sheet-handle" id="account-handle" aria-label="Drag to close"></button>
+      <div class="account-body" id="account-body"></div>
+    </div>
+  </div>
+  <p class="toast" id="toast" hidden role="status"></p>
   <script>
     const cities = ${cityLookup};
     const tonight = ${JSON.stringify(tonightData)};
@@ -3045,6 +3655,7 @@ ${pridePageHtml()}
     const continentNames = ${continentNames};
     const rainIcon = ${JSON.stringify(RAIN_ICON)};
     const snowIcon = ${JSON.stringify(SNOW_ICON)};
+    const authConfig = ${JSON.stringify(AUTH)};
     const header = document.querySelector('.site-header');
     const toggle = document.querySelector('.nav-toggle');
     const appLink = document.getElementById('app-link');
@@ -3076,36 +3687,55 @@ ${pridePageHtml()}
     });
     header.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
 
-    function settleHome(event) {
-      event.preventDefault();
-      closeMenu();
+    function playView(id, anchor) {
       const shown = document.querySelector('main.view:not([hidden])');
+      const same = shown && shown.id === id;
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const already = shown && shown.id === 'home' && window.scrollY < 2;
-      const reveal = () => {
+      const atTop = window.scrollY < 2;
+      const finish = () => {
         document.querySelectorAll('main.view').forEach((view) => {
-          view.hidden = view.id !== 'home';
+          view.hidden = view.id !== id;
           view.classList.remove('is-leaving', 'is-entering');
         });
+        if (anchor) {
+          requestAnimationFrame(() => {
+            document.getElementById(anchor)?.scrollIntoView({ behavior: 'auto', block: 'start' });
+          });
+          return;
+        }
         window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-        if (location.hash) history.pushState(null, '', location.pathname + location.search);
       };
-      if (reduce || already) {
-        reveal();
+      if (!viewReady || reduce || (same && (anchor || atTop))) {
+        finish();
         return;
       }
-      shown.classList.add('is-leaving');
+      if (shown) shown.classList.add('is-leaving');
       window.setTimeout(() => {
-        reveal();
-        const home = document.getElementById('home');
-        home.classList.add('is-entering');
+        finish();
+        const next = document.getElementById(id);
+        if (!next) return;
+        next.classList.add('is-entering');
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => home.classList.remove('is-entering'));
+          requestAnimationFrame(() => next.classList.remove('is-entering'));
         });
       }, 220);
     }
-    document.querySelectorAll('a.logo, a.foot-brand, a[href="#home"]').forEach((link) => {
-      link.addEventListener('click', settleHome);
+
+    function settleView(id, event) {
+      if (event) event.preventDefault();
+      closeMenu();
+      if (id === 'home') {
+        if (location.hash) history.pushState(null, '', location.pathname + location.search);
+      } else if (location.hash !== '#' + id) {
+        history.pushState(null, '', '#' + id);
+      }
+      playView(id, null);
+    }
+    document.querySelectorAll('a.logo, a.foot-brand, a[href="#home"], a[href="#pride"], a[href="#why"]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        const id = (link.getAttribute('href') || '#home').slice(1) || 'home';
+        settleView(id, event);
+      });
     });
 
     function paintClock() {
@@ -3246,6 +3876,14 @@ ${pridePageHtml()}
       } else if (raw === 'cities' || raw === 'more-cities') {
         history.replaceState(null, '', location.pathname + location.search);
         current = 'home';
+      } else if (raw === 'pride' || raw.indexOf('pride/') === 0) {
+        current = 'pride';
+        const day = raw.slice(6);
+        if (/^\\d{4}-\\d{2}-\\d{2}$/.test(day)) {
+          outlookCal.key = day.slice(0, 7);
+          outlookCal.day = day;
+          paintOutlook();
+        }
       } else if (raw && raw !== 'home') {
         const node = document.getElementById(raw);
         const view = node && node.closest ? node.closest('main.view') : null;
@@ -3259,19 +3897,7 @@ ${pridePageHtml()}
     }
 
     function revealView(id, anchor) {
-      const shown = document.querySelector('main.view:not([hidden])');
-      const same = shown && shown.id === id;
-      document.querySelectorAll('main.view').forEach((view) => {
-        view.hidden = view.id !== id;
-      });
-      if (same && !anchor) return;
-      if (anchor) {
-        requestAnimationFrame(() => {
-          document.getElementById(anchor)?.scrollIntoView({ behavior: 'auto', block: 'start' });
-        });
-        return;
-      }
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      playView(id, anchor);
     }
 
     function distanceKm(a, b) {
@@ -3595,7 +4221,7 @@ ${pridePageHtml()}
         if (parsed.year && monthName) return 'Nothing published for ' + monthName + ' ' + parsed.year + ' yet.';
         if (parsed.year) return 'Nothing published for ' + parsed.year + ' yet.';
         if (monthName) return 'Nothing published for ' + monthName + ' yet.';
-        return 'Nothing coming up yet.';
+        return '';
       }
       function applyPrideQuery() {
         const today = prideToday().iso;
@@ -3615,8 +4241,14 @@ ${pridePageHtml()}
           item.hidden = !show;
           if (show) any = true;
         });
-        prideNone.hidden = any;
-        if (!any) prideNone.textContent = prideEmptyText(open ? {} : parsed);
+        prideNone.hidden = true;
+        if (!any) {
+          const text = prideEmptyText(open ? {} : parsed);
+          if (text) {
+            prideNone.hidden = false;
+            prideNone.textContent = text;
+          }
+        }
       }
       function prideSuggestions(raw) {
         const query = foldName(raw.trim());
@@ -3757,8 +4389,8 @@ ${pridePageHtml()}
     }
 
     const GROUPS = [
-      { id: 'dance', name: 'Dance and Bars' },
-      { id: 'sauna', name: 'Saunas and Bathhouses' },
+      { id: 'dance', name: 'Dance and drinks' },
+      { id: 'sauna', name: 'Saunas' },
       { id: 'sexy', name: 'Cruisy' },
     ];
     const WEEK_DOW = [1, 2, 3, 4, 5, 6, 0];
@@ -3801,8 +4433,8 @@ ${pridePageHtml()}
     }
 
     function savedIds() {
-      try { return JSON.parse(localStorage.getItem('fd-saved') || '[]'); }
-      catch (err) { return []; }
+      if (account.user) return account.venues.slice();
+      return [];
     }
 
     function busyNote() {
@@ -3868,6 +4500,7 @@ ${pridePageHtml()}
     }
 
     function fillRail(node, venues, lineFor, showAll) {
+      node.hidden = false;
       node.replaceChildren();
       if (!venues.length) {
         const empty = document.createElement('p');
@@ -3912,7 +4545,17 @@ ${pridePageHtml()}
     function renderPicker() {
       const list = document.getElementById('city-picker-list');
       const query = foldName(document.getElementById('city-picker-search').value.trim());
-      const ranked = tonight.cities.slice().sort((a, b) => a.name.localeCompare(b.name, 'en'));
+      const ranked = tonight.cities.slice().sort((a, b) => {
+        const ap = a.id === account.profile.homeCity || account.cities.indexOf(a.id) !== -1;
+        const bp = b.id === account.profile.homeCity || account.cities.indexOf(b.id) !== -1;
+        if (ap !== bp) return ap ? -1 : 1;
+        if (ap && bp) {
+          if (a.id === account.profile.homeCity) return -1;
+          if (b.id === account.profile.homeCity) return 1;
+          return account.cities.indexOf(a.id) - account.cities.indexOf(b.id);
+        }
+        return a.name.localeCompare(b.name, 'en');
+      });
       list.replaceChildren();
       let shown = 0;
       ranked.forEach((city) => {
@@ -3921,10 +4564,13 @@ ${pridePageHtml()}
         const item = document.createElement('li');
         const button = document.createElement('button');
         button.type = 'button';
-        button.textContent = city.name;
+        const name = document.createElement('span');
+        name.className = 'picker-city';
+        name.textContent = city.name;
         const place = document.createElement('span');
+        place.className = 'picker-country';
         place.textContent = city.country;
-        button.append(place);
+        button.append(name, place);
         button.addEventListener('click', () => chooseCity(city.id, true));
         item.append(button);
         list.append(item);
@@ -4018,35 +4664,6 @@ ${pridePageHtml()}
       return 'in ' + weeks + ' weeks';
     }
 
-    function paintPride(city) {
-      const block = document.getElementById('upcoming-pride');
-      const today = cityToday(city.tz);
-      const rows = (city.pride || []).filter((row) => row.date >= today);
-      block.replaceChildren();
-      if (!rows.length) {
-        block.hidden = true;
-        return;
-      }
-      const title = document.createElement('h2');
-      title.innerHTML = '<svg class="pride-flag" viewBox="0 0 22 16" aria-hidden="true"><rect width="22" height="2.67" fill="#E40303"/><rect width="22" height="2.67" y="2.67" fill="#FF8C00"/><rect width="22" height="2.67" y="5.33" fill="#FFED00"/><rect width="22" height="2.67" y="8" fill="#008026"/><rect width="22" height="2.67" y="10.67" fill="#24408E"/><rect width="22" height="2.67" y="13.33" fill="#732982"/></svg> Upcoming Pride';
-      block.append(title);
-      rows.forEach((row) => {
-        const article = document.createElement('article');
-        const name = document.createElement('p');
-        name.className = 'pride-what';
-        name.textContent = row.name;
-        const when = document.createElement('p');
-        when.className = 'pride-when';
-        when.textContent = prideWhen(row.date);
-        const count = document.createElement('p');
-        count.className = 'pride-count';
-        count.textContent = prideCountdown(row.date, today);
-        article.append(name, when, count);
-        block.append(article);
-      });
-      block.hidden = false;
-    }
-
     function paintGroups(node, active) {
       node.querySelectorAll('[data-group]').forEach((button) => {
         button.setAttribute('aria-pressed', button.getAttribute('data-group') === active ? 'true' : 'false');
@@ -4091,37 +4708,295 @@ ${pridePageHtml()}
       return !group || venue.vibes.indexOf(group) !== -1;
     }
 
+    function paintEventChips() {
+      document.querySelectorAll('[data-group="events"]').forEach((button) => {
+        button.hidden = false;
+      });
+    }
+
+    function eventCard(event, today) {
+      const card = document.createElement('article');
+      card.className = 'tonight-row event-card';
+      const name = document.createElement('p');
+      name.className = 'tonight-name';
+      if (event.flag) {
+        const flag = document.createElement('span');
+        flag.className = 'flag';
+        flag.setAttribute('aria-hidden', 'true');
+        flag.textContent = event.flag;
+        name.append(flag, document.createTextNode(event.name));
+      } else name.textContent = event.name;
+      const when = document.createElement('p');
+      when.className = 'pride-when';
+      when.textContent = event.start === event.end ? prideWhen(event.start) : prideWhen(event.start) + ' – ' + prideWhen(event.end);
+      card.append(name, when);
+      if (event.city) {
+        const where = document.createElement('p');
+        where.className = 'pride-where';
+        where.textContent = event.city;
+        card.append(where);
+      }
+      if (event.start <= today && event.end >= today) {
+        const busy = document.createElement('p');
+        busy.className = 'event-busy';
+        busy.textContent = 'Busy';
+        card.append(busy);
+      }
+      if (event.source) {
+        const link = document.createElement('a');
+        link.className = 'pride-source';
+        link.href = event.source;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        try { link.textContent = new URL(event.source).hostname.replace(/^www\\./, ''); }
+        catch (err) { link.textContent = 'Source'; }
+        card.append(link);
+      }
+      return card;
+    }
+
+    function eventDateLabel(iso) {
+      const parts = iso.split('-');
+      return Number(parts[2]) + ' ' + CAL_MONTHS[Number(parts[1]) - 1] + ' ' + parts[0];
+    }
+
+    function nextEventOutside(events, start, end, today) {
+      return events
+        .filter((event) => event.end >= today && !overlaps(event, start, end))
+        .sort((a, b) => a.start.localeCompare(b.start) || a.name.localeCompare(b.name))[0];
+    }
+
+    function fillEvents(node, events, cityEvents, today, windowStart, windowEnd) {
+      node.replaceChildren();
+      if (!events.length) {
+        node.hidden = false;
+        const note = document.createElement('p');
+        note.className = 'tonight-empty';
+        const next = nextEventOutside(cityEvents, windowStart, windowEnd, today);
+        if (!next) note.textContent = 'No events at this time.';
+        else {
+          note.append(document.createTextNode('No events at this time — the next one is in '));
+          const link = document.createElement('a');
+          link.href = '#pride/' + next.start;
+          link.textContent = eventDateLabel(next.start);
+          note.append(link, document.createTextNode('.'));
+        }
+        node.append(note);
+        return;
+      }
+      node.hidden = false;
+      const list = document.createElement('ol');
+      list.className = 'tonight-list';
+      events.forEach((event) => {
+        const item = document.createElement('li');
+        item.append(eventCard(event, today));
+        list.append(item);
+      });
+      node.append(list);
+    }
+
+    const CAL_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const CAL_DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const outlookCal = { key: '', day: '' };
+
+    function addIso(iso, days) {
+      const parts = iso.split('-');
+      const date = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]) + days));
+      return date.toISOString().slice(0, 10);
+    }
+
+    function shiftMonth(key, delta) {
+      const parts = key.split('-');
+      const date = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1 + delta, 1));
+      return date.getUTCFullYear() + '-' + String(date.getUTCMonth() + 1).padStart(2, '0');
+    }
+
+    function daysBetween(fromIso, toIso) {
+      return Math.round((Date.parse(toIso + 'T00:00:00Z') - Date.parse(fromIso + 'T00:00:00Z')) / 86400000);
+    }
+
+    function weekendWindow(timeZone) {
+      const today = cityToday(timeZone);
+      const parts = today.split('-');
+      const dow = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]))).getUTCDay();
+      const fridayOffset = dow === 0 ? -2 : dow === 6 ? -1 : dow === 5 ? 0 : 5 - dow;
+      const fri = addIso(today, fridayOffset);
+      return { today: today, fri: fri, sun: addIso(fri, 2) };
+    }
+
+    function overlaps(event, start, end) {
+      return event.start <= end && event.end >= start;
+    }
+
+    function withCity(city) {
+      return (city.events || []).map((event) => ({
+        name: event.name,
+        type: event.type,
+        start: event.start,
+        end: event.end,
+        source: event.source,
+        city: city.name,
+        flag: city.flag,
+      }));
+    }
+
+    function everyEvent() {
+      const rows = [];
+      tonight.cities.forEach((city) => rows.push.apply(rows, withCity(city)));
+      return rows;
+    }
+
+    function localIso() {
+      const date = new Date();
+      return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+    }
+
+    function paintCalendar(body, label, state, pool, today, lookup) {
+      const nextPool = lookup || pool;
+      if (!state.key) state.key = today.slice(0, 7);
+      const parts = state.key.split('-');
+      const year = Number(parts[0]);
+      const month = Number(parts[1]);
+      const monthSelect = label.querySelector('[aria-label="Month"]');
+      const yearSelect = label.querySelector('[aria-label="Year"]');
+      if (monthSelect && yearSelect) {
+        const years = new Set([Number(today.slice(0, 4)), Number(today.slice(0, 4)) + 1, year]);
+        pool.forEach((event) => {
+          years.add(Number(event.start.slice(0, 4)));
+          years.add(Number(event.end.slice(0, 4)));
+        });
+        const listed = [...yearSelect.options].map((option) => option.value).join(',');
+        const next = [...years].sort((a, b) => a - b);
+        if (listed !== next.join(',')) {
+          yearSelect.replaceChildren();
+          next.forEach((item) => {
+            const option = document.createElement('option');
+            option.value = String(item);
+            option.textContent = String(item);
+            yearSelect.append(option);
+          });
+        }
+        monthSelect.value = String(month);
+        yearSelect.value = String(year);
+      } else label.textContent = CAL_MONTHS[month - 1] + ' ' + year;
+      body.replaceChildren();
+      const first = state.key + '-01';
+      const lastDate = new Date(Date.UTC(year, month, 0));
+      const last = lastDate.toISOString().slice(0, 10);
+      const inMonth = pool.filter((event) => overlaps(event, first, last));
+      const grid = document.createElement('div');
+      grid.className = 'cal-grid';
+      CAL_DOW.forEach((name) => {
+        const cell = document.createElement('div');
+        cell.className = 'cal-dow';
+        cell.textContent = name;
+        grid.append(cell);
+      });
+      const startDow = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
+      const daysInMonth = lastDate.getUTCDate();
+      const total = Math.ceil((startDow + daysInMonth) / 7) * 7;
+      for (let index = 0; index < total; index += 1) {
+        const dayNum = index - startDow + 1;
+        const date = new Date(Date.UTC(year, month - 1, dayNum));
+        const iso = date.toISOString().slice(0, 10);
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'cal-day';
+        button.setAttribute('data-cal-day', iso);
+        button.textContent = String(date.getUTCDate());
+        if (dayNum < 1 || dayNum > daysInMonth) button.classList.add('is-out');
+        else if (pool.some((event) => overlaps(event, iso, iso))) button.classList.add('has-event');
+        if (state.day === iso) button.classList.add('is-on');
+        button.setAttribute('aria-pressed', state.day === iso ? 'true' : 'false');
+        grid.append(button);
+      }
+      body.append(grid);
+      if (!inMonth.length) {
+        const next = nextPool.filter((event) => event.start > last).sort((a, b) => a.start.localeCompare(b.start) || a.name.localeCompare(b.name))[0];
+        const note = document.createElement('p');
+        note.className = 'cal-empty';
+        note.textContent = next
+          ? 'No events this month — the next one is ' + next.name + ' in ' + next.city + ' on ' + eventDateLabel(next.start) + '.'
+          : 'No events this month.';
+        body.append(note);
+        return;
+      }
+      if (!state.day) return;
+      const agenda = document.createElement('div');
+      agenda.className = 'cal-agenda';
+      const hits = pool.filter((event) => overlaps(event, state.day, state.day)).sort((a, b) => a.name.localeCompare(b.name));
+      if (!hits.length) {
+        const next = nextPool.filter((event) => event.start > state.day).sort((a, b) => a.start.localeCompare(b.start))[0];
+        const note = document.createElement('p');
+        note.className = 'cal-empty';
+        note.textContent = next
+          ? 'No events this day — the next one is ' + next.name + ' in ' + next.city + ' on ' + eventDateLabel(next.start) + '.'
+          : 'No events this day.';
+        agenda.append(note);
+      } else hits.forEach((event) => agenda.append(eventCard(event, today)));
+      body.append(agenda);
+    }
+
+    function paintOutlook() {
+      paintCalendar(
+        document.getElementById('outlook-body'),
+        document.getElementById('outlook-label'),
+        outlookCal,
+        everyEvent(),
+        localIso(),
+      );
+    }
+
     function paintLists() {
       const city = homeCity();
       const hour = activeHour(city);
       const clock = cityClock(city.tz);
+      const span = weekendWindow(city.tz);
       const weekend = document.getElementById('weekend');
       weekend.hidden = clock.weekday === 5 || clock.weekday === 6;
+      paintEventChips(city);
       paintGroups(document.getElementById('vibe-row'), nowGroup);
       paintGroups(document.getElementById('weekend-groups'), weekendGroup);
-      const nowShown = city.venues.filter((venue) => inGroup(venue, nowGroup));
-      const weekendShown = city.venues.filter((venue) => inGroup(venue, weekendGroup));
-      fillRail(document.getElementById('tonight-list'), nowShown.filter((venue) => venue.open[hour]).sort((a, b) => b.curve[hour] - a.curve[hour]), (venue) => ({
-        percent: venue.curve[hour],
-        note: busyNote(venue),
-        line: venue.unsure
-          ? 'Hours not confirmed · peaks ~' + peakText(venue.peak)
-          : 'Open now · peaks ~' + peakText(venue.peak),
-      }), true);
-      paintClosedList(document.getElementById('closed-list'), nowShown.filter((venue) => !venue.open[hour]).sort((a, b) => a.name.localeCompare(b.name)), 'Closed');
-      fillRail(document.getElementById('weekend-list'), weekendShown.filter((venue) => venue.weekend.percent > 0).sort((a, b) => b.weekend.percent - a.weekend.percent), (venue) => ({
-        percent: venue.weekend.percent,
-        note: 'weekend peak',
-        line: 'Peaks ~' + peakText(venue.weekend.hour),
-      }));
-      paintClosedList(document.getElementById('weekend-closed'), weekendShown.filter((venue) => venue.weekend.percent === 0).sort((a, b) => a.name.localeCompare(b.name)), 'Closed this weekend');
+      document.getElementById('weekend-peak').hidden = weekendGroup === 'events';
+      const events = withCity(city).sort((a, b) => a.start.localeCompare(b.start) || a.name.localeCompare(b.name));
+      const cards = events.map((event) => ({ name: event.name, start: event.start, end: event.end, source: event.source }));
+      const tonightEvents = cards.filter((event) => overlaps(event, span.today, span.today));
+      const weekendEvents = cards.filter((event) => overlaps(event, span.fri, span.sun));
+      if (nowGroup === 'events') {
+        fillEvents(document.getElementById('tonight-list'), tonightEvents, cards, span.today, span.today, span.today);
+        paintClosedList(document.getElementById('closed-list'), [], 'Closed');
+      } else {
+        const nowShown = city.venues.filter((venue) => inGroup(venue, nowGroup));
+        fillRail(document.getElementById('tonight-list'), nowShown.filter((venue) => venue.open[hour]).sort((a, b) => b.curve[hour] - a.curve[hour]), (venue) => ({
+          percent: venue.curve[hour],
+          note: busyNote(venue),
+          line: venue.unsure
+            ? 'Hours not confirmed · peaks ~' + peakText(venue.peak)
+            : 'Open now · peaks ~' + peakText(venue.peak),
+        }), true);
+        paintClosedList(document.getElementById('closed-list'), nowShown.filter((venue) => !venue.open[hour]).sort((a, b) => a.name.localeCompare(b.name)), 'Closed');
+      }
+      if (weekendGroup === 'events') {
+        fillEvents(document.getElementById('weekend-list'), weekendEvents, cards, span.today, span.fri, span.sun);
+        paintClosedList(document.getElementById('weekend-closed'), [], 'Closed this weekend');
+      } else {
+        const weekendShown = city.venues.filter((venue) => inGroup(venue, weekendGroup));
+        fillRail(document.getElementById('weekend-list'), weekendShown.filter((venue) => venue.weekend.percent > 0).sort((a, b) => b.weekend.percent - a.weekend.percent), (venue) => ({
+          percent: venue.weekend.percent,
+          note: 'weekend peak',
+          line: 'Peaks ~' + peakText(venue.weekend.hour),
+        }));
+        paintClosedList(document.getElementById('weekend-closed'), weekendShown.filter((venue) => venue.weekend.percent === 0).sort((a, b) => a.name.localeCompare(b.name)), 'Closed this weekend');
+      }
       document.getElementById('weekend-dates').textContent = city.weekend;
     }
 
     function paintHome() {
-      paintNow(homeCity());
-      paintPride(homeCity());
+      const city = homeCity();
+      paintNow(city);
       paintLists();
+      paintForYou();
+      paintOutlook();
       if (!document.getElementById('city-picker').hidden) renderPicker();
     }
 
@@ -4224,10 +5099,14 @@ ${pridePageHtml()}
       save.setAttribute('aria-label', saved ? 'Saved' : 'Save');
       save.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7-4.4-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 3.3c0 4.8-7 9.2-7 9.2z"/></svg>';
       save.addEventListener('click', () => {
-        const ids = savedIds().filter((item) => item !== venue.id);
-        const on = save.classList.toggle('is-on');
-        if (on) ids.push(venue.id);
-        try { localStorage.setItem('fd-saved', JSON.stringify(ids)); } catch (err) {}
+        if (!account.user) {
+          pendingSave = { kind: 'venue', id: venue.id };
+          openAccount('auth', 'in');
+          return;
+        }
+        toggleVenue(venue.id);
+        const on = account.venues.indexOf(venue.id) !== -1;
+        save.classList.toggle('is-on', on);
         save.setAttribute('aria-label', on ? 'Saved' : 'Save');
       });
       const title = document.createElement('h3');
@@ -4288,6 +5167,26 @@ ${pridePageHtml()}
           list.append(item);
         });
         body.append(label, list);
+      }
+      if (account.user) {
+        const reviewLabel = document.createElement('p');
+        reviewLabel.className = 'rank-note';
+        reviewLabel.textContent = 'Your review';
+        const reviewBox = document.createElement('textarea');
+        reviewBox.maxLength = 500;
+        const mine = account.reviews.filter((review) => review.venueId === venue.id);
+        if (mine.length) reviewBox.value = mine[0].body;
+        const reviewSave = document.createElement('button');
+        reviewSave.type = 'button';
+        reviewSave.className = 'btn-login';
+        reviewSave.textContent = 'Save review';
+        reviewSave.addEventListener('click', () => saveReview(venue.id, reviewBox.value));
+        const visit = document.createElement('button');
+        visit.type = 'button';
+        visit.className = 'btn-signup';
+        visit.textContent = 'Log a visit';
+        visit.addEventListener('click', () => logVisit(venue.id));
+        body.append(reviewLabel, reviewBox, reviewSave, visit);
       }
       if (venue.addr) {
         const query = encodeURIComponent(venue.name + ' ' + venue.addr);
@@ -4355,6 +5254,7 @@ ${pridePageHtml()}
     }
 
     document.getElementById('tonight-list').addEventListener('click', onVenueClick);
+    document.getElementById('for-you-list').addEventListener('click', onVenueClick);
     document.getElementById('closed-list').addEventListener('click', onVenueClick);
     document.getElementById('weekend-list').addEventListener('click', onVenueClick);
     document.getElementById('weekend-closed').addEventListener('click', onVenueClick);
@@ -4396,6 +5296,7 @@ ${pridePageHtml()}
       if (event.key !== 'Escape') return;
       closeSheet();
       closePicker();
+      closeAccount();
     });
     const sheetHandle = document.getElementById('sheet-handle');
     let dragY = 0;
@@ -4409,6 +5310,32 @@ ${pridePageHtml()}
       else if (dy < -36) document.getElementById('venue-sheet').classList.add('is-full');
     });
 
+    function stepCalendar(state, delta, paint) {
+      if (!state.key) state.key = localIso().slice(0, 7);
+      state.key = shiftMonth(state.key, delta);
+      state.day = '';
+      paint();
+    }
+    document.getElementById('outlook-prev').addEventListener('click', () => stepCalendar(outlookCal, -1, paintOutlook));
+    document.getElementById('outlook-next').addEventListener('click', () => stepCalendar(outlookCal, 1, paintOutlook));
+    function jumpOutlook() {
+      const month = String(document.getElementById('outlook-month').value).padStart(2, '0');
+      const year = document.getElementById('outlook-year').value;
+      if (!year) return;
+      outlookCal.key = year + '-' + month;
+      outlookCal.day = '';
+      paintOutlook();
+    }
+    document.getElementById('outlook-month').addEventListener('change', jumpOutlook);
+    document.getElementById('outlook-year').addEventListener('change', jumpOutlook);
+    document.getElementById('outlook').addEventListener('click', (event) => {
+      const day = event.target.closest('[data-cal-day]');
+      if (!day) return;
+      outlookCal.day = day.getAttribute('data-cal-day');
+      paintOutlook();
+    });
+
+    /* ACCOUNT */
     renderHome(false);
     let railsEntered = false;
     const riseObserver = new IntersectionObserver((entries) => {
@@ -4451,6 +5378,7 @@ ${pridePageHtml()}
 `;
 
 const outPath = new URL('../apps/web/index.html', import.meta.url);
-writeFileSync(outPath, html);
+const accountClient = readFileSync(new URL('./account-client.js', import.meta.url), 'utf8');
+writeFileSync(outPath, html.replace('/* ACCOUNT */', accountClient));
 const liveVenues = allVenues().filter((venue) => LIVE.some((city) => city.name === venue.city)).length;
 console.log(`Wrote ${outPath.pathname} (${CITIES.length} cities, ${LIVE.length} live, ${liveVenues} venues on live pages)`);

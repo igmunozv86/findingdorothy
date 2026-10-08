@@ -35,7 +35,7 @@ export function loadCities(directory) {
       last_updated: raw.meta.last_updated,
       venue_count: venues.length,
       verified_pct: venues.length ? Math.round((verified / venues.length) * 1000) / 10 : 0,
-      pride: raw.pride,
+      events: Array.isArray(raw.events) ? raw.events : [],
       venues: venues.map((venue) => ({ ...venue, city: raw.meta.name })),
     });
   }

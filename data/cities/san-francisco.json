@@ -11,14 +11,6 @@
     "status": "live",
     "tz": "America/Los_Angeles"
   },
-  "pride": {
-    "2026": {
-      "date": "2026-06-28",
-      "event_name": "56th Annual SF Pride Parade",
-      "source_url": "https://sfpride.org/parade/"
-    },
-    "2027": null
-  },
   "venues": [
     {
       "address": "401 Castro St, San Francisco, CA 94114",
@@ -432,6 +424,15 @@
       ],
       "events_url": "https://www.steamworksbaths.com/berkeley-events",
       "live_counter": null
+    }
+  ],
+  "events": [
+    {
+      "name": "56th Annual SF Pride Parade",
+      "type": "pride",
+      "start": "2026-06-28",
+      "end": "2026-06-28",
+      "source": "https://sfpride.org/parade/"
     }
   ]
 }

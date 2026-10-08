@@ -12,7 +12,6 @@ const CLOCK = /^([01]\d|2[0-3]):[0-5]\d$/;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const TZ = /^[A-Za-z0-9_+-]+(?:\/[A-Za-z0-9_+-]+)+$/;
 const VENUE_KEYS = ['id', 'name', 'category', 'neighborhood', 'address', 'lat', 'lon', 'hours', 'hours_verified', 'review_features', 'instagram', 'sources', 'events_url', 'live_counter'];
-const PRIDE_YEARS = ['2026', '2027'];
 
 export { REGIONS, CATEGORIES };
 
@@ -23,7 +22,7 @@ export function validateCity(city, filename) {
     return [`${slug}: city file must be an object`];
   }
   for (const key of Object.keys(city)) {
-    if (key !== 'meta' && key !== 'venues' && key !== 'pride') {
+    if (key !== 'meta' && key !== 'venues' && key !== 'events') {
       errors.push(`${slug}: unknown field ${key}`);
     }
   }
@@ -51,7 +50,7 @@ export function validateCity(city, filename) {
     for (const venue of city.venues) errors.push(...validateVenue(slug, venue, seen));
   }
 
-  errors.push(...validatePride(slug, city.pride));
+  errors.push(...validateEvents(slug, city.events));
   return errors;
 }
 
@@ -163,26 +162,32 @@ export function reviewFlags(city) {
   return flags;
 }
 
-function validatePride(slug, pride) {
-  if (!pride || typeof pride !== 'object' || Array.isArray(pride)) return [`${slug}: pride block is required`];
+const EVENT_TYPES = ['pride'];
+const EVENT_KEYS = ['name', 'type', 'start', 'end', 'source'];
+
+function validateEvents(slug, events) {
+  if (!Array.isArray(events)) return [`${slug}: events must be an array`];
   const errors = [];
-  for (const key of Object.keys(pride)) {
-    if (!PRIDE_YEARS.includes(key)) errors.push(`${slug}: pride year ${key} is not 2026 or 2027`);
-  }
-  for (const year of PRIDE_YEARS) {
-    if (!(year in pride)) errors.push(`${slug}: pride.${year} is required, or null`);
-    const row = pride[year];
-    if (row == null) continue;
-    if (!row || typeof row !== 'object') {
-      errors.push(`${slug}: pride.${year} must be an object or null`);
-      continue;
+  events.forEach((event, index) => {
+    const label = `${slug}: events[${index}]`;
+    if (!event || typeof event !== 'object' || Array.isArray(event)) {
+      errors.push(`${label} must be an object`);
+      return;
     }
-    if (!ISO_DATE.test(row.date || '')) errors.push(`${slug}: pride.${year}.date must be YYYY-MM-DD`);
-    if (!row.event_name || typeof row.event_name !== 'string') errors.push(`${slug}: pride.${year}.event_name is required`);
-    if (typeof row.source_url !== 'string' || !/^https?:\/\//.test(row.source_url)) {
-      errors.push(`${slug}: pride.${year}.source_url must be http(s)`);
+    for (const key of Object.keys(event)) {
+      if (!EVENT_KEYS.includes(key)) errors.push(`${label}: unknown field ${key}`);
     }
-  }
+    if (!event.name || typeof event.name !== 'string') errors.push(`${label}: name is required`);
+    if (!EVENT_TYPES.includes(event.type)) errors.push(`${label}: type must be pride`);
+    if (!ISO_DATE.test(event.start || '')) errors.push(`${label}: start must be YYYY-MM-DD`);
+    if (!ISO_DATE.test(event.end || '')) errors.push(`${label}: end must be YYYY-MM-DD`);
+    if (ISO_DATE.test(event.start || '') && ISO_DATE.test(event.end || '') && event.end < event.start) {
+      errors.push(`${label}: end is before start`);
+    }
+    if (typeof event.source !== 'string' || !/^https?:\/\//.test(event.source)) {
+      errors.push(`${label}: source must be the organizer http(s) page`);
+    }
+  });
   return errors;
 }
 

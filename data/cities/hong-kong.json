@@ -124,12 +124,13 @@
       "live_counter": null
     }
   ],
-  "pride": {
-    "2026": {
-      "date": "2026-11-14",
-      "event_name": "Hong Kong Pride Event 2026",
-      "source_url": "https://hkpride.net/en/"
-    },
-    "2027": null
-  }
+  "events": [
+    {
+      "name": "Hong Kong Pride Event 2026",
+      "type": "pride",
+      "start": "2026-11-14",
+      "end": "2026-11-14",
+      "source": "https://hkpride.net/en/"
+    }
+  ]
 }
