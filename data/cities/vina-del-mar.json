@@ -7,7 +7,7 @@
     "gayborhood": null,
     "lat": -33.03515,
     "lon": -71.58572,
-    "status": "seeded",
+    "status": "live",
     "last_updated": "2026-10-08",
     "tz": "America/Santiago"
   },
@@ -20,7 +20,13 @@
       "address": "Plaza Aníbal Pinto 1178, Valparaíso, Chile",
       "lat": -33.0430046,
       "lon": -71.6248859,
-      "hours": "no recent data",
+      "hours": {
+        "tue": ["21:00"],
+        "wed": ["21:00"],
+        "thu": ["21:00"],
+        "fri": ["21:00"],
+        "sat": ["21:00"]
+      },
       "hours_verified": false,
       "review_features": [
         "Disco with a terrace and two dance floors",
@@ -51,12 +57,30 @@
       "lat": -33.0238458,
       "lon": -71.5497413,
       "hours": {
-        "tue": ["16:00", "21:30"],
-        "wed": ["16:00", "21:30"],
-        "thu": ["16:00", "21:30"],
-        "fri": ["16:00", "21:30"],
-        "sat": ["16:00", "21:30"],
-        "sun": ["16:00", "21:30"]
+        "tue": [
+          "16:00",
+          "21:30"
+        ],
+        "wed": [
+          "16:00",
+          "21:30"
+        ],
+        "thu": [
+          "16:00",
+          "21:30"
+        ],
+        "fri": [
+          "16:00",
+          "21:30"
+        ],
+        "sat": [
+          "16:00",
+          "21:30"
+        ],
+        "sun": [
+          "16:00",
+          "21:30"
+        ]
       },
       "hours_verified": true,
       "review_features": [
@@ -89,13 +113,34 @@
       "lat": -33.0465265,
       "lon": -71.6049556,
       "hours": {
-        "mon": ["15:00", "22:00"],
-        "tue": ["15:00", "22:00"],
-        "wed": ["15:00", "22:00"],
-        "thu": ["15:00", "22:00"],
-        "fri": ["15:00", "22:00"],
-        "sat": ["15:00", "22:00"],
-        "sun": ["15:00", "22:00"]
+        "mon": [
+          "15:00",
+          "22:00"
+        ],
+        "tue": [
+          "15:00",
+          "22:00"
+        ],
+        "wed": [
+          "15:00",
+          "22:00"
+        ],
+        "thu": [
+          "15:00",
+          "22:00"
+        ],
+        "fri": [
+          "15:00",
+          "22:00"
+        ],
+        "sat": [
+          "15:00",
+          "22:00"
+        ],
+        "sun": [
+          "15:00",
+          "22:00"
+        ]
       },
       "hours_verified": true,
       "review_features": [
@@ -118,6 +163,64 @@
         }
       ],
       "events_url": "https://www.estaciondelgato.club/event",
+      "live_counter": null
+    },
+    {
+      "id": "vina-del-mar-pagano",
+      "name": "Pagano",
+      "category": "club",
+      "neighborhood": "Avenida Errázuriz, Valparaíso",
+      "address": "Avenida Errázuriz 1852, Valparaíso, Chile",
+      "lat": -33.0437221,
+      "lon": -71.6172914,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "LGBT nightclub on Avenida Errázuriz",
+        "At number 1852 in Valparaíso"
+      ],
+      "instagram": "paganoindustry",
+      "sources": [
+        {
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/way/442525438",
+          "retrieved_at": "2026-10-08"
+        },
+        {
+          "tier": 1,
+          "url": "https://www.wikidata.org/wiki/Q140739409",
+          "retrieved_at": "2026-10-08"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "id": "vina-del-mar-club-divino",
+      "name": "Club Divino",
+      "category": "club",
+      "neighborhood": "Reñaca Alto, Viña del Mar",
+      "address": "Camino Internacional 537, Reñaca Alto, Viña del Mar, Chile",
+      "lat": -32.9722541,
+      "lon": -71.5010141,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Nightclub in Reñaca Alto",
+        "Camino Internacional 537"
+      ],
+      "instagram": "clubdivino",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "http://www.clubdivino.cl/divinovina/ubicacion_vina.html",
+          "retrieved_at": "2026-10-08"
+        },
+        {
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/way/105825387",
+          "retrieved_at": "2026-10-08"
+        }
+      ],
       "live_counter": null
     }
   ],

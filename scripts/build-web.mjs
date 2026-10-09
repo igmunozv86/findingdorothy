@@ -1141,7 +1141,6 @@ function homeTonightHtml() {
     .filter((venue) => inDance(venue) && !venue.open[city.hour])
     .sort((a, b) => a.name.localeCompare(b.name));
   const chips = vibeChips(city);
-  const weekendHidden = city.weekday === 5 || city.weekday === 6 ? ' hidden' : '';
   return `    <section class="hero tonight-hero">
       <img class="tonight-hero-photo" src="assets/home-hero.jpg" alt="">
       <div class="tonight-hero-shade" aria-hidden="true"></div>
@@ -1185,7 +1184,7 @@ ${closedListHtml(closedVenues)}
       </div>
       <div id="for-you-list"></div>
     </section>
-    <section class="tonight-block" id="weekend"${weekendHidden}>
+    <section class="tonight-block" id="weekend">
       <div class="tonight-head">
         <h2>This weekend</h2>
         <p class="rank-note" id="weekend-dates">${escapeHtml(city.weekend)}</p>
@@ -2417,14 +2416,9 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       letter-spacing: 0;
       text-decoration: none;
     }
-    .foot-simple .photo-credits {
-      margin: 1.35rem 0 0;
-      color: #8d8d98;
-      font-size: 13px;
-      line-height: 1.45;
-    }
+    .foot-simple .photo-credits { font-size: 11px; color: #83838e; }
     .foot-simple .legal {
-      margin-top: 0.35rem;
+      margin-top: 1.5rem;
       padding-top: 0;
       border-top: 0;
       color: #c8c8d0;
@@ -3799,8 +3793,7 @@ ${pridePageHtml()}
         <a href="#why">Why FindingDorothy</a>
         <a href="#join" id="foot-join">Join us</a>
       </nav>
-      <p class="photo-credits">Photos: Dibakar Roy, Yura Forrat, Anastasiya Badun, cottonbro studio, Phat Doan, Pexels.</p>
-      <p class="legal">© 2026 FindingDorothy</p>
+      <p class="legal">© 2026 FindingDorothy <span aria-hidden="true">·</span> <span class="photo-credits">Photos: Dibakar Roy, Yura Forrat, Anastasiya Badun, cottonbro studio, Phat Doan, Pexels</span></p>
     </div>
   </footer>
   <div class="account-back" id="account-back" hidden>
@@ -5247,10 +5240,7 @@ ${pridePageHtml()}
     function paintLists() {
       const city = homeCity();
       const hour = activeHour(city);
-      const clock = cityClock(city.tz);
       const span = weekendWindow(city.tz);
-      const weekend = document.getElementById('weekend');
-      weekend.hidden = clock.weekday === 5 || clock.weekday === 6;
       paintEventChips(city);
       paintGroups(document.getElementById('vibe-row'), nowGroup);
       paintGroups(document.getElementById('weekend-groups'), weekendGroup);

@@ -174,14 +174,22 @@ Pleasuredrome, and keep the venues already in the live file unless a source
 shows one has closed. Do not invent a venue to clear the floor.
 
 QA 2026-10-08 — Viña del Mar / Valparaíso. Nacho confirms Pagano and Club
-Divino are open. Tier 4 is not a source. Keep Máscara, Templo Spa, and
-Estación del Gato. Include Pagano (Avenida Errázuriz 1852, Valparaíso) and
-Club Divino (Camino Internacional 537, Reñaca Alto, Viña del Mar). Do not
-drop either because an earlier pass could not load a website, or because the
-OSM building at that number was unnamed. Confirm each name and address in two
-tiers, and take hours from the venue's own site, Instagram, or Facebook. If
-only an open time is published, store that open time and keep
-`hours_verified` false. Do not invent a close. Stored category is `club`.
+Divino are open, and both must be in the city file. Keep Máscara, Templo Spa,
+and Estación del Gato. Pagano is the nightclub at Avenida Errázuriz 1852,
+Valparaíso (OpenStreetMap way 442525438, Wikidata Q140739409). Club Divino is
+Camino Internacional 537, Reñaca Alto, Viña del Mar (its own site
+http://www.clubdivino.cl/divinovina/ubicacion_vina.html; the OSM building at
+that number is way 105825387). Do not drop either on a later pass. Hours stay
+`"no recent data"` until the venue's own site, Instagram, or Facebook states
+an open time or a full open and close. Do not invent a close. Stored category
+is `club`.
+
+QA 2026-10-08 — Viña del Mar, Máscara. The card said hours were not
+confirmed while the notes already said Tuesday–Saturday from 21:00. Store
+those days as `["21:00"]` and keep `hours_verified` false. mascara.cl did not
+load, and the venue's Instagram and Facebook pages are login-walled. Directory
+listings disagree on the close (04:00, 04:30, 05:00) and on which days, so do
+not invent a close.
 
 QA 2026-10-08 — Santiago, Dionisio Divas. The card said Tuesday–Sunday from
 23:00. The venue's own Facebook page (https://www.facebook.com/dionisiodivaspub)
