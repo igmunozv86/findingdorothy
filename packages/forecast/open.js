@@ -78,6 +78,15 @@ export function placeStatus(hours, when) {
   }
 
   const today = windowFor(schedule[DAY_KEYS[when.weekday]]);
+  if (today && today.openEnded && when.minutes >= today.start) {
+    return {
+      open: true,
+      text: `Open now · from ${formatClock(today.start)}`,
+      patternDay: when.weekday,
+      minutesLeft: null,
+      phase: clockPhase(when.hour, null),
+    };
+  }
   if (today && coversToday(today, when.minutes)) {
     const endAbs = today.overnight ? today.end + 24 * 60 : today.end;
     const minutesLeft = endAbs - when.minutes;
@@ -131,10 +140,13 @@ function coversToday(win, minutes) {
 }
 
 function windowFor(span) {
-  if (!Array.isArray(span) || span.length < 2) return null;
+  if (!Array.isArray(span) || !span.length) return null;
   const start = clockMinutes(span[0]);
+  if (span.length < 2 || span[1] == null || span[1] === '') {
+    return { start, end: null, overnight: false, openEnded: true };
+  }
   const end = span[1] === '00:00' ? 24 * 60 : clockMinutes(span[1]);
-  return { start, end, overnight: end <= start };
+  return { start, end, overnight: end <= start, openEnded: false };
 }
 
 function clockMinutes(value) {

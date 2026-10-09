@@ -1154,12 +1154,18 @@ ${nowLineHtml(city)}
     </section>
     <div id="city-rails">
     <section class="tonight-block" id="tonight">
-      <p class="now-facts rank-note" id="now-facts" data-weather data-lat="${city.lat}" data-lon="${city.lon}">
-        <span class="now-day" data-day>${escapeHtml(barWhen(city.tz).dayName)}</span>
-        <span class="now-date" data-date>${escapeHtml(barWhen(city.tz).shortDate)}</span>
-        <span class="now-time" data-clock data-tz="${escapeHtml(city.tz)}">${escapeHtml(zonedNow(new Date(), city.tz).timeLabel)}</span>
-        <span class="now-temp" data-temp>${escapeHtml(city.weather.temp)}</span>
-        ${skyMark(city)}
+      <p class="now-facts" id="now-facts" data-weather data-lat="${city.lat}" data-lon="${city.lon}">
+        <span class="now-facts-text">
+          <span class="now-facts-when">
+            <span class="now-day" data-day>${escapeHtml(barWhen(city.tz).dayName)}</span>
+            <span class="now-date" data-date>${escapeHtml(barWhen(city.tz).shortDate)}</span>
+            <span class="now-time" data-clock data-tz="${escapeHtml(city.tz)}">${escapeHtml(zonedNow(new Date(), city.tz).timeLabel)}</span>
+          </span>
+          <span class="now-facts-wxrow">
+            <span class="now-temp" data-temp>${escapeHtml(city.weather.temp)}</span>
+            ${skyMark(city)}
+          </span>
+        </span>
       </p>
       <div class="tonight-head">
         <h2 id="tonight-title">Right now</h2>
@@ -1210,7 +1216,7 @@ const html = `<!DOCTYPE html>
   <title>FindingDorothy — Know where the night is going</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Poppins:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: light;
@@ -2909,31 +2915,54 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     .now-facts {
       display: flex;
       justify-content: center;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.3rem 0.45rem;
-      margin: 0.15rem 0 0.85rem;
+      margin: 0.35rem 0 2.5rem;
       text-align: center;
+    }
+    .now-facts-text {
+      display: inline-flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 0.45rem 0.6rem;
+      width: max-content;
+      max-width: 100%;
+      padding-bottom: 0.55rem;
+      border-bottom: 1px solid #c5c5ce;
+    }
+    .now-facts-when,
+    .now-facts-wxrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem 0.6rem;
     }
     .now-facts .now-day,
     .now-facts .now-date,
     .now-facts .now-time,
     .now-facts .now-temp {
-      font-family: Inter, sans-serif;
-      font-size: 14px;
+      font-family: Poppins, sans-serif;
+      font-size: 15px;
       font-weight: 400;
-      letter-spacing: 0;
+      font-synthesis: none;
+      letter-spacing: -0.02em;
       color: var(--muted);
+      text-shadow: 0 1px 1px rgba(17, 17, 17, 0.22);
     }
     .now-facts .wx {
       display: inline-flex;
-      width: 1.15rem;
-      height: 1.15rem;
+      width: 16px;
+      height: 16px;
     }
     .now-facts .wx[hidden] { display: none; }
     .now-facts .wx.is-rain { color: #2f6fed; }
     .now-facts .wx.is-snow { color: #6aa7e8; }
     .now-facts .wx svg { width: 100%; height: 100%; display: block; }
+    @media (min-width: 760px) {
+      .now-facts .now-day,
+      .now-facts .now-date,
+      .now-facts .now-time,
+      .now-facts .now-temp { font-size: 18px; }
+      .now-facts .wx { width: 18px; height: 18px; }
+    }
     .rank-note { margin: 0; color: var(--muted); font-size: 14px; }
     .vibe-chip {
       border: 1px solid var(--line);
@@ -3143,6 +3172,7 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       .now-flag { font-size: 22px; }
       .now-search { width: 20px; height: 20px; }
       #tonight.tonight-block { padding-top: 0.85rem; }
+      .now-facts-text { flex-direction: column; align-items: center; gap: 0.15rem; }
     }
     .city-picker {
       position: absolute;
@@ -4563,10 +4593,13 @@ ${pridePageHtml()}
         return hour12 + ':' + mm + ' ' + suffix;
       }
       function windowFor(span) {
-        if (!span || span.length < 2) return null;
+        if (!span || !span.length) return null;
         const start = clockMinutes(span[0]);
+        if (span.length < 2 || span[1] == null || span[1] === '') {
+          return { start: start, end: null, overnight: false, openEnded: true };
+        }
         const end = span[1] === '00:00' ? 1440 : clockMinutes(span[1]);
-        return { start: start, end: end, overnight: end <= start };
+        return { start: start, end: end, overnight: end <= start, openEnded: false };
       }
       function coversToday(win, now) {
         if (win.overnight) return now >= win.start;
@@ -4576,6 +4609,7 @@ ${pridePageHtml()}
       const spill = windowFor(hours[keys[yesterday]]);
       if (spill && spill.overnight && minutes < spill.end) return 'Open now · Closes at ' + formatClock(spill.end);
       const todayWin = windowFor(hours[keys[weekday]]);
+      if (todayWin && todayWin.openEnded && minutes >= todayWin.start) return 'Open now · from ' + formatClock(todayWin.start);
       if (todayWin && coversToday(todayWin, minutes)) return 'Open now · Closes at ' + formatClock(todayWin.end);
       if (todayWin && minutes < todayWin.start) return 'Closed now · Opens at ' + formatClock(todayWin.start);
       for (let step = 1; step <= 7; step += 1) {

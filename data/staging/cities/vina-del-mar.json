@@ -1,0 +1,125 @@
+{
+  "meta": {
+    "slug": "vina-del-mar",
+    "name": "Viña del Mar / Valparaíso",
+    "country": "Chile",
+    "region": "Latin America",
+    "gayborhood": null,
+    "lat": -33.03515,
+    "lon": -71.58572,
+    "status": "seeded",
+    "last_updated": "2026-10-08",
+    "tz": "America/Santiago"
+  },
+  "venues": [
+    {
+      "id": "vina-del-mar-mascara",
+      "name": "Máscara",
+      "category": "club",
+      "neighborhood": "Plaza Aníbal Pinto, Valparaíso",
+      "address": "Plaza Aníbal Pinto 1178, Valparaíso, Chile",
+      "lat": -33.0430046,
+      "lon": -71.6248859,
+      "hours": "no recent data",
+      "hours_verified": false,
+      "review_features": [
+        "Disco with a terrace and two dance floors",
+        "Open Tuesday–Saturday from 21:00",
+        "On Plaza Aníbal Pinto since 2002"
+      ],
+      "instagram": "mascara_valparaiso",
+      "sources": [
+        {
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/3624138668",
+          "retrieved_at": "2026-10-08"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.instagram.com/mascara_valparaiso/",
+          "retrieved_at": "2026-10-08"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "id": "vina-del-mar-templo-spa",
+      "name": "Templo Spa",
+      "category": "sauna",
+      "neighborhood": "Población Vergara, Viña del Mar",
+      "address": "Calle La Marina 822, Viña del Mar, Chile",
+      "lat": -33.0238458,
+      "lon": -71.5497413,
+      "hours": {
+        "tue": ["16:00", "21:30"],
+        "wed": ["16:00", "21:30"],
+        "thu": ["16:00", "21:30"],
+        "fri": ["16:00", "21:30"],
+        "sat": ["16:00", "21:30"],
+        "sun": ["16:00", "21:30"]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Men-only gay sauna",
+        "Steam room, dry sauna, and a maze",
+        "Private rooms and a cinema area",
+        "Towel, lock, and sandals included"
+      ],
+      "instagram": "templospachile",
+      "sources": [
+        {
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/14086692233",
+          "retrieved_at": "2026-10-08"
+        },
+        {
+          "tier": 3,
+          "url": "https://templospa.cl/",
+          "retrieved_at": "2026-10-08"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "id": "vina-del-mar-estacion-del-gato",
+      "name": "Estación del Gato",
+      "category": "sauna",
+      "neighborhood": "Cerro Barón, Valparaíso",
+      "address": "12 de Febrero 345, Valparaíso, Chile",
+      "lat": -33.0465265,
+      "lon": -71.6049556,
+      "hours": {
+        "mon": ["15:00", "22:00"],
+        "tue": ["15:00", "22:00"],
+        "wed": ["15:00", "22:00"],
+        "thu": ["15:00", "22:00"],
+        "fri": ["15:00", "22:00"],
+        "sat": ["15:00", "22:00"],
+        "sun": ["15:00", "22:00"]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Men-only spa, 18 and over",
+        "Steam room, dark rooms, and a maze",
+        "Rooftop shower",
+        "Locker, towel, and sandals included"
+      ],
+      "instagram": "estacion.delgato",
+      "sources": [
+        {
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/14086692232",
+          "retrieved_at": "2026-10-08"
+        },
+        {
+          "tier": 3,
+          "url": "https://www.estaciondelgato.club/",
+          "retrieved_at": "2026-10-08"
+        }
+      ],
+      "events_url": "https://www.estaciondelgato.club/event",
+      "live_counter": null
+    }
+  ],
+  "events": []
+}

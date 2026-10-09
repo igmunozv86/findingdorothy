@@ -1,0 +1,218 @@
+{
+  "slug": "vina-del-mar",
+  "retrieved_at": "2026-10-08",
+  "categories": [
+    {
+      "category": "bar",
+      "queries": [
+        "gay bar Valparaíso",
+        "gay bar Viña del Mar discoteca LGBT",
+        "Éxodo Restobar Valparaíso Errázuriz"
+      ],
+      "sources_checked": [
+        "https://www.mogastrobar.cl/",
+        "https://www.instagram.com/mo_gastrobar/",
+        "https://nomadicboys.com/gay-guide-valparaiso/",
+        "https://valpoturistico.cl/exodo-restobar/",
+        "https://queresto.com/Exodo",
+        "https://horario.ninja/05902264/Liquidlicious"
+      ],
+      "candidates": [
+        {
+          "name": "Mo Gastrobar",
+          "kept": false,
+          "reason": "Own site states MO GASTROBAR at 2 Norte 165, Viña del Mar, and the Instagram bio calls it an LGBTQ+ bar in Viña, but the street number is not on that bio, and OpenStreetMap and Wikidata have no venue by this name"
+        },
+        {
+          "name": "Éxodo",
+          "kept": false,
+          "reason": "A directory places a restobar at Errázuriz 1852; no own website was readable and OpenStreetMap has no separate Éxodo object"
+        },
+        {
+          "name": "Cassot",
+          "kept": false,
+          "reason": "OpenStreetMap pub at Ecuador 110; a travel guide calls it gay-friendly, not a gay bar, and no own page was found confirming it as one"
+        },
+        {
+          "name": "Liquidlicious",
+          "kept": false,
+          "reason": "A listing describes a Saturday gay night at Liquid House; no own page confirmed the name and address in a second tier"
+        }
+      ]
+    },
+    {
+      "category": "club",
+      "queries": [
+        "discoteca gay Valparaíso",
+        "Pagano discoteca Valparaíso Errázuriz",
+        "Club Divino Viña del Mar Camino Internacional",
+        "Overpass name Pagano and Divino Valparaíso Viña del Mar",
+        "Wikidata Pagano discoteca LGBT Valparaíso",
+        "Wikidata Club Divino Viña del Mar"
+      ],
+      "sources_checked": [
+        "https://www.openstreetmap.org/way/442525438",
+        "https://www.instagram.com/paganoindustry/",
+        "https://www.instagram.com/mundopagano/",
+        "https://www.instagram.com/mascara_valparaiso/",
+        "http://www.clubdivino.cl/divinovina/ubicacion_vina.html",
+        "http://www.clubdivino.cl/divinovina/clubdivino_vina.html",
+        "https://nomadicboys.com/gay-guide-valparaiso/",
+        "https://www.openstreetmap.org/node/3624138668",
+        "http://www.paganoindustry.cl/",
+        "http://www.paganoindustry.cl/pagano/",
+        "https://web.archive.org/web/20191119131229/http://paganoindustry.cl/?tmpl=comingsoon",
+        "https://web.archive.org/web/20161026050558/http://www.paganoindustry.cl/cgi-sys/suspendedpage.cgi",
+        "https://www.facebook.com/91906556510",
+        "https://www.wikidata.org/wiki/Q140739409",
+        "http://www.clubdivino.cl/divinovina/contacto_vina.html",
+        "http://www.clubdivino.cl/divinovina/inicio_vina.html",
+        "http://www.clubdivino.cl/divinovina/eventos_vina.html",
+        "http://www.clubdivino.cl/divinovina/valores_vina.html",
+        "https://www.openstreetmap.org/way/105825387",
+        "https://www.instagram.com/clubdivino/",
+        "https://www.instagram.com/clubdivinovina/",
+        "https://www.facebook.com/Club-DIVINO-Vina-del-Mar-Chile-212998898710500/",
+        "https://www.facebook.com/212998898710500",
+        "https://www.facebook.com/clubdivino",
+        "https://www.google.com/maps/search/Pagano+Err%C3%A1zuriz+1852+Valpara%C3%ADso",
+        "https://www.google.com/maps/search/Club+Divino+Vi%C3%B1a+del+Mar/@-32.971587,-71.501255,17z"
+      ],
+      "candidates": [
+        {
+          "name": "Pagano",
+          "kept": false,
+          "reason": "OpenStreetMap way 442525438 names the nightclub at Avenida Errázuriz 1852. paganoindustry.cl does not resolve, and the Wayback copies are a coming-soon page and a suspended page with no address. Public Instagram @paganoindustry and @mundopagano show no bio. Facebook 91906556510 did not load a public address. Wikidata Q140739409 names Pagano as a discoteca LGBT in Chile at matching coordinates and states no street address. Google Maps repeats the same name and address, which is tier 0 again, so it is not a second tier."
+        },
+        {
+          "name": "Máscara",
+          "kept": true,
+          "reason": "Name and Plaza Aníbal Pinto 1178 confirmed on OpenStreetMap and on the venue's own Instagram"
+        },
+        {
+          "name": "Club Divino",
+          "kept": false,
+          "reason": "Own site states Club Divino at Camino Internacional 537, Reñaca Alto, Viña del Mar. OSM way 105825387 has address P537, Camino Internacional, Viña del Mar, and no name. Overpass has no object named Club Divino. Wikidata has no entry. Public Instagram @clubdivino and @clubdivinovina and Facebook pages 212998898710500 and clubdivino do not show the address. Google Maps lists Club D, not Club Divino, at Cam. Internacional 537. The own site publishes no weekly open and close."
+        },
+        {
+          "name": "Club Delirio",
+          "kept": false,
+          "reason": "A travel guide gives Av. Chacabuco 2124; no OSM object and no own site were found"
+        },
+        {
+          "name": "Morgana",
+          "kept": false,
+          "reason": "A travel guide says the gay bar closed in February 2024; not confirmed open"
+        }
+      ]
+    },
+    {
+      "category": "sauna",
+      "queries": [
+        "gay sauna Viña del Mar",
+        "sauna gay Valparaíso",
+        "Sauna Puerto Valparaíso dirección"
+      ],
+      "sources_checked": [
+        "https://templospa.cl/",
+        "https://templospa.cl/ubicacion/",
+        "https://templospa.cl/about-us/",
+        "https://www.estaciondelgato.club/",
+        "https://www.openstreetmap.org/node/14086692233",
+        "https://www.openstreetmap.org/node/14086692232",
+        "https://www.gayout.com/south-america/chile/valparaiso/saunas/sauna-puerto-valparaiso",
+        "https://www.gayout.com/south-america/chile/valparaiso/saunas/templo-spa-vi-a-del-mar",
+        "https://hotelpuertonatura.com/"
+      ],
+      "candidates": [
+        {
+          "name": "Templo Spa",
+          "kept": true,
+          "reason": "Name and Calle La Marina 822 confirmed on the venue's own site and on OpenStreetMap"
+        },
+        {
+          "name": "Estación del Gato",
+          "kept": true,
+          "reason": "Name and 12 de Febrero 345 confirmed on the venue's own site and on OpenStreetMap"
+        },
+        {
+          "name": "Sauna Puerto",
+          "kept": false,
+          "reason": "GayOut describes a small sauna in central Valparaíso with no street address and no own website"
+        },
+        {
+          "name": "Puerto Natura",
+          "kept": false,
+          "reason": "Hotel spa at Héctor Calvo 850, Cerro Bellavista, not a gay sauna"
+        }
+      ]
+    },
+    {
+      "category": "cruise",
+      "queries": [
+        "Viña del Mar cruise bar",
+        "dark room cuarto oscuro Valparaíso gay",
+        "solo hombres sauna bar Valparaíso Viña del Mar"
+      ],
+      "sources_checked": [
+        "https://templospa.cl/servicios/",
+        "https://www.estaciondelgato.club/",
+        "https://esp.menspaces.com/sauna-gay-chile/valparaiso-i1/",
+        "https://www.gayout.com/south-america/chile/valparaiso/saunas/sauna-puerto-valparaiso"
+      ],
+      "candidates": [
+        {
+          "name": "Estación del Gato",
+          "kept": false,
+          "reason": "Own site describes dark rooms and a maze inside a men-only sauna, so it is kept as a sauna rather than a cruise bar"
+        },
+        {
+          "name": "Templo Spa",
+          "kept": false,
+          "reason": "Own site describes a maze and private rooms inside a men-only sauna, so it is kept as a sauna rather than a cruise bar"
+        }
+      ]
+    },
+    {
+      "category": "sex",
+      "queries": [
+        "sex club Valparaíso",
+        "club sexual Viña del Mar",
+        "dark room gay Viña del Mar sex club"
+      ],
+      "sources_checked": [
+        "https://esp.menspaces.com/sauna-gay-chile/valparaiso-i1/",
+        "https://chilepymes.com/info/darksmart-spa-ED0ED931D841379F",
+        "https://templospa.cl/",
+        "https://www.estaciondelgato.club/"
+      ],
+      "candidates": [
+        {
+          "name": "Darksmart Spa",
+          "kept": false,
+          "reason": "A company registry lists a restaurant-classified firm at Borgoño 14650; no own venue page and no second-tier name and address"
+        }
+      ]
+    }
+  ],
+  "anchors": [
+    {
+      "name": "Pagano",
+      "decision": "ruled_out",
+      "reason": "OpenStreetMap names Pagano at Avenida Errázuriz 1852. The own site does not resolve, public Instagram and Facebook do not show that street, and Wikidata Q140739409 states the name and coordinates without the street address.",
+      "source": "https://www.wikidata.org/wiki/Q140739409"
+    },
+    {
+      "name": "Máscara",
+      "decision": "included",
+      "reason": "Named with Plaza Aníbal Pinto 1178 on the venue's own Instagram and on OpenStreetMap",
+      "source": "https://www.instagram.com/mascara_valparaiso/"
+    },
+    {
+      "name": "Club Divino",
+      "decision": "ruled_out",
+      "reason": "Own site gives Camino Internacional 537, Reñaca Alto. OSM way 105825387 has that address and no name, and the public Instagram and Facebook pages do not state the name with the address.",
+      "source": "https://www.openstreetmap.org/way/105825387"
+    }
+  ]
+}

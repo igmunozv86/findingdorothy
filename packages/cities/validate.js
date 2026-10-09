@@ -110,12 +110,10 @@ function validateVenue(slug, venue, seen) {
 }
 
 function validateHours(label, hours, verified) {
-  if (!verified) {
-    return hours === 'no recent data' ? [] : [`${label}: unknown hours must be "no recent data"`];
-  }
-  if (hours === '24h') return [];
-  if (!hours || hours === 'no recent data' || typeof hours !== 'object' || Array.isArray(hours)) {
-    return [`${label}: verified hours need a 24h flag or a day window`];
+  if (hours === 'no recent data') return verified ? [`${label}: verified hours need a 24h flag or a day window`] : [];
+  if (hours === '24h') return verified ? [] : [`${label}: 24h hours must be verified`];
+  if (!hours || typeof hours !== 'object' || Array.isArray(hours)) {
+    return [`${label}: hours must be "no recent data", "24h", or a day window`];
   }
   const errors = [];
   const keys = Object.keys(hours);
@@ -123,9 +121,10 @@ function validateHours(label, hours, verified) {
   for (const key of keys) {
     if (!DAYS.includes(key)) errors.push(`${label}: bad day ${key}`);
     const span = hours[key];
-    if (!Array.isArray(span) || span.length !== 2 || !CLOCK.test(span[0]) || !CLOCK.test(span[1])) {
-      errors.push(`${label}: ${key} needs an open and a close as HH:MM`);
-    }
+    const openOnly = Array.isArray(span) && span.length === 1 && CLOCK.test(span[0]);
+    const full = Array.isArray(span) && span.length === 2 && CLOCK.test(span[0]) && CLOCK.test(span[1]);
+    if (verified && !full) errors.push(`${label}: ${key} needs an open and a close as HH:MM`);
+    else if (!verified && !openOnly && !full) errors.push(`${label}: ${key} needs an open time, or an open and a close, as HH:MM`);
   }
   return errors;
 }

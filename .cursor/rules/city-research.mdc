@@ -173,12 +173,24 @@ the anchor check. Re-run Tokyo. Re-run London's saunas, including
 Pleasuredrome, and keep the venues already in the live file unless a source
 shows one has closed. Do not invent a venue to clear the floor.
 
+QA 2026-10-08 — Viña del Mar / Valparaíso. Nacho confirms Pagano and Club
+Divino are open. Tier 4 is not a source. Keep Máscara, Templo Spa, and
+Estación del Gato. Include Pagano (Avenida Errázuriz 1852, Valparaíso) and
+Club Divino (Camino Internacional 537, Reñaca Alto, Viña del Mar). Do not
+drop either because an earlier pass could not load a website, or because the
+OSM building at that number was unnamed. Confirm each name and address in two
+tiers, and take hours from the venue's own site, Instagram, or Facebook. If
+only an open time is published, store that open time and keep
+`hours_verified` false. Do not invent a close. Stored category is `club`.
+
 QA 2026-10-08 — Santiago, Dionisio Divas. The card said Tuesday–Sunday from
 23:00. The venue's own Facebook page (https://www.facebook.com/dionisiodivaspub)
 says Wednesday–Sunday, open 21:00, show 23:00, humor, drinks, air-conditioned.
-No close time is published, so hours stay `"no recent data"` and
-`hours_verified` stays false. Do not invent a close. A venue's own Facebook
-page is tier 3, same manual rule as Instagram.
+No close time is published. Store the open days as `["21:00"]` only
+(Wednesday–Sunday), keep `hours_verified` false, and do not write
+`"no recent data"` when the open time is published. The status line must use
+that open time. Do not invent a close. A venue's own Facebook page is tier 3,
+same manual rule as Instagram.
 
 ## Hours backfill pass
 
