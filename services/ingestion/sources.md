@@ -177,10 +177,9 @@ Aspects the table allows: `cleanliness`, `safety`, `crowd`, `facilities`, `staff
 
 ## Pride calendar
 
-- File: `data/pride-events.json`. The Pride Calendar page reads this file. `calendar_events` in `infra/schema.sql` is the same shape.
-- A row needs the organizer's own page, or the city's official tourism page when that page states the dates. A guide, a news article, or last year's pattern is not a date.
-- Required: `start`, `end`, `source_url`, `source_name`, `retrieved_at`. A one-day march sets `end` equal to `start`.
-- Kinds: `pride-week`, `parade`, `festival`. A march inside a published week uses `parent_id` and its own source.
+- Dates live on each city file in `data/cities/<slug>.json`, in that city's `events` array: `{name, type: "pride", start, end, source}`. `source` is the organizer page. The calendar reads those arrays. There is no `data/pride-events.json` and no `data/cities.json` index.
+- A row needs the organizer's own page. A guide, a news article, or last year's pattern is not a date.
+- A one-day march sets `end` equal to `start`.
 - Do not fill next year from a sentence like "the last weekend in June" or "the Sunday after Corpus Christi". Wait until that year's date is written on the page.
 - A side party mentioned only as "see Instagram" is not added.
 

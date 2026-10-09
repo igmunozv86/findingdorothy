@@ -39,18 +39,13 @@ into staging.
    QA — it is not a source.
 3. **Hours — always check the venue's own website first.** The venue's own
    website is the #1 source for hours and the worker MUST fetch it (plain
-   page read) and extract open/close times. `hours_verified: true` ONLY when
-   the venue's own site, own Instagram, or own Facebook page states a full
-   open AND close.
-   Use `"no recent data"` ONLY when the venue's own site has no hours AND no
-   other reliable source states them — never as a lazy default. The
-   MANUAL_ONLY restriction applies to Instagram and Facebook (no public API,
-   often login-walled: never log in, never scrape, use only what's publicly
-   visible), NOT to venue websites, which workers always read.
+   page read) and extract open/close times. Hours follow the Hours rules
+   section. The MANUAL_ONLY restriction applies to Instagram and Facebook
+   (no public API, often login-walled: never log in, never scrape, use only
+   what's publicly visible), NOT to venue websites, which workers always read.
    Whenever hours are verified, add the source they came from to the
    venue's `sources` array as an extra source (if not already listed) —
    every hours claim must be traceable to a cited tier-3 source.
-   Verified format: `"24h"` or `{mon: ["10:00","02:00"], …}` in HH:MM.
 4. **Coordinates:** numbers only when confidently sourced (map/geocode for
    the street address). Otherwise BOTH `lat` and `lon` are null. Never guessed.
 5. **Categories.** The names anyone sees are Dance and drinks, Saunas,
@@ -140,6 +135,12 @@ needs `source`. No unknown fields.
    floor, so a city already published under that floor stays up until its
    worker replaces it.
 
+The page payload keeps a 24-value `curve` and a 24-bool `open` array on
+every venue, baked at build time. `paintLists()` and `paintClock()` re-index
+those arrays by the live hour in the city's timezone. Those arrays are
+load-bearing for the tonight rail. Do not strip them or slim them out of the
+payload.
+
 ## Learning loop (the rule that prevents repeat mistakes)
 
 When Nacho spots a mistake, the fix goes INTO THIS BRIEF (or the spec),
@@ -179,26 +180,41 @@ and Estación del Gato. Pagano is the nightclub at Avenida Errázuriz 1852,
 Valparaíso (OpenStreetMap way 442525438, Wikidata Q140739409). Club Divino is
 Camino Internacional 537, Reñaca Alto, Viña del Mar (its own site
 http://www.clubdivino.cl/divinovina/ubicacion_vina.html; the OSM building at
-that number is way 105825387). Do not drop either on a later pass. Hours stay
-`"no recent data"` until the venue's own site, Instagram, or Facebook states
-an open time or a full open and close. Do not invent a close. Stored category
-is `club`.
+that number is way 105825387). Do not drop either on a later pass. Stored
+category is `club`.
 
-QA 2026-10-08 — Viña del Mar, Máscara. The card said hours were not
-confirmed while the notes already said Tuesday–Saturday from 21:00. Store
-those days as `["21:00"]` and keep `hours_verified` false. mascara.cl did not
-load, and the venue's Instagram and Facebook pages are login-walled. Directory
-listings disagree on the close (04:00, 04:30, 05:00) and on which days, so do
-not invent a close.
+## Hours rules
 
-QA 2026-10-08 — Santiago, Dionisio Divas. The card said Tuesday–Sunday from
-23:00. The venue's own Facebook page (https://www.facebook.com/dionisiodivaspub)
-says Wednesday–Sunday, open 21:00, show 23:00, humor, drinks, air-conditioned.
-No close time is published. Store the open days as `["21:00"]` only
-(Wednesday–Sunday), keep `hours_verified` false, and do not write
-`"no recent data"` when the open time is published. The status line must use
-that open time. Do not invent a close. A venue's own Facebook page is tier 3,
-same manual rule as Instagram.
+Non-negotiable. Hours have exactly three states.
+
+1. **Full open and close, tier 3.** The venue's own website, own Instagram,
+   or own Facebook page states a full open AND close. Set `hours` to `"24h"`
+   or `{tue: ["21:00","04:00"], …}` in HH:MM, and `hours_verified: true`.
+   The tier-3 page is in `sources`.
+2. **Open time only.** An open time is published and there is no trustworthy
+   close. Store `["HH:MM"]` for each open day and keep `hours_verified`
+   false. Never invent a close to complete the pair. Evidence: directory
+   listings disagreed on the close, and the correct output was open-only.
+3. **`"no recent data"`.** Use this only after the three-source exhaustion
+   in the backfill section is logged: which of the venue's own site
+   (homepage, contact, visit, and hours pages), public Instagram or Facebook,
+   and the Google listing were checked, per venue. If any open time is
+   published, it is not `"no recent data"`. Evidence: a venue's own page
+   published an open time and the file still said `"no recent data"`.
+
+When sources disagree on the close, output open-only. Never pick one
+directory listing over another.
+
+Open time is when the doors unlock. A published show, DJ set, or drag start
+is not hours unless the source explicitly says doors or open at that time.
+Evidence: a page said open 21:00 and show 23:00, and the card used 23:00.
+
+Day ranges are expanded, not dropped. "Tuesday–Saturday" is `tue` through
+`sat`. Every day the source names is a key in the JSON.
+
+The card copy has to be derivable from the JSON. Open-only hours never
+produce a "Closes at" line. `"no recent data"` stays an honest
+"Hours not confirmed".
 
 ## Hours backfill pass
 

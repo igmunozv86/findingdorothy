@@ -10,7 +10,7 @@ import { assembleForecast, dayScore, isShutdown, loadForecastInputs } from '../p
 import { freshOccupancy, signalMarkup } from '../packages/forecast/live.js';
 import { fetchWeather } from '../packages/forecast/weather.js';
 import { loadCities } from '../packages/cities/load.js';
-import { CONDITIONAL_GROUPS, FLAGS, GROUPS, groupForCategory } from '../packages/cities/taxonomy.js';
+import { CONDITIONAL_GROUPS, FLAGS, GROUPS, bandLabel, groupForCategory } from '../packages/cities/taxonomy.js';
 
 function publicAuthConfig() {
   let file = {};
@@ -139,6 +139,9 @@ ${hours}
 }
 
 function loadLiveByVenue(nowMs) {
+  // data/live-occupancy.json is the snapshot this build reads.
+  // services/ingestion/poll-chilli.mjs writes that snapshot (latest reading per venue)
+  // and appends every reading to data/live-occupancy.jsonl. The build does not read the log.
   try {
     const raw = JSON.parse(readFileSync(new URL('../data/live-occupancy.json', import.meta.url), 'utf8'));
     const rows = Array.isArray(raw) ? raw : Object.values(raw);
@@ -582,9 +585,9 @@ function prideEvents() {
 
 function prideBanners(city) {
   return prideEvents()
-    .filter((event) => event.city_id === city.id && !event.parent_id)
+    .filter((event) => event.city_id === city.id)
     .map((event) => {
-      const title = event.kind === 'pride-week' ? `Pride week in ${city.name}` : `Pride in ${city.name}`;
+      const title = `Pride in ${city.name}`;
       const when = formatPrideRange(event.start, event.end);
       return `      <a class="pride-banner" href="#pride" hidden data-start="${event.start}" data-end="${event.end}">
         <img src="assets/icon-mark.png" alt="">
@@ -594,34 +597,6 @@ function prideBanners(city) {
         </span>
       </a>`;
     }).join('\n');
-}
-
-function prideListItem(event) {
-  const city = CITIES.find((item) => item.id === event.city_id);
-  const place = event.place ? ` · ${escapeHtml(event.place)}` : '';
-  const where = city.live
-    ? `<a href="#city/${escapeHtml(city.id)}">${escapeHtml(city.name)}, ${escapeHtml(city.country)}</a>`
-    : `${escapeHtml(city.name)}, ${escapeHtml(city.country)}`;
-  return `            <li data-city="${escapeHtml(event.city_id)}" data-start="${event.start}" data-end="${event.end}">
-              <p class="pride-when">${escapeHtml(formatPrideRange(event.start, event.end))}</p>
-              <p class="pride-what">${escapeHtml(event.name)}</p>
-              <p class="pride-where">${flagHtml(city.country)} ${where}${place}</p>
-              <a class="pride-source" href="${escapeHtml(event.source_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(event.source_name)}</a>
-            </li>`;
-}
-
-function prideResultsHtml() {
-  const rows = prideEvents()
-    .slice()
-    .sort((a, b) => a.start.localeCompare(b.start) || a.name.localeCompare(b.name))
-    .map((event) => prideListItem(event))
-    .join('\n');
-  return `      <div class="pride-cal" id="pride-results">
-        <ul class="pride-simple">
-${rows}
-        </ul>
-        <p class="pride-none" id="pride-none" hidden></p>
-      </div>`;
 }
 
 function pridePageHtml() {
@@ -845,12 +820,6 @@ function buildTonight() {
 }
 
 const tonightData = buildTonight();
-
-function bandLabel(percent) {
-  if (percent >= 75) return 'Very busy';
-  if (percent >= 51) return 'Busy';
-  return 'Not busy';
-}
 
 function mergedStatus(hoursText, peak) {
   if (!hoursText || hoursText === 'Hours not confirmed') return `Hours not confirmed · ${peak}`;
@@ -4657,11 +4626,7 @@ ${pridePageHtml()}
       return [];
     }
 
-    function bandLabel(percent) {
-      if (percent >= 75) return 'Very busy';
-      if (percent >= 51) return 'Busy';
-      return 'Not busy';
-    }
+    ${bandLabel.toString()}
 
     function cardStatus(venue, mode) {
       const peak = 'peaks ~' + peakText(mode === 'weekend' ? venue.weekend.hour : venue.peak);
@@ -4753,11 +4718,11 @@ ${pridePageHtml()}
       parent.append(line);
     }
 
-    function railItem(venue, percent, line, note) {
+    function railItem(venue, percent, line, note, allowCheckin) {
       const item = document.createElement('li');
       const row = rowButton(venue, percent, line, note);
       const openNow = Boolean(venue.open[activeHour(homeCity())]);
-      if (!openNow) {
+      if (!allowCheckin || !openNow) {
         item.append(row);
         return item;
       }
@@ -4786,7 +4751,7 @@ ${pridePageHtml()}
       return item;
     }
 
-    function fillRail(node, venues, lineFor, showAll) {
+    function fillRail(node, venues, lineFor, showAll, allowCheckin) {
       node.hidden = false;
       node.replaceChildren();
       if (!venues.length) {
@@ -4801,7 +4766,7 @@ ${pridePageHtml()}
       const visible = showAll ? venues : venues.slice(0, 8);
       visible.forEach((venue) => {
         const lined = lineFor(venue);
-        list.append(railItem(venue, lined.percent, lined.line, lined.note));
+        list.append(railItem(venue, lined.percent, lined.line, lined.note, allowCheckin));
       });
       node.append(list);
       if (showAll || venues.length <= 8) return;
@@ -4817,7 +4782,7 @@ ${pridePageHtml()}
       rest.className = 'tonight-list';
       venues.slice(8).forEach((venue) => {
         const lined = lineFor(venue);
-        rest.append(railItem(venue, lined.percent, lined.line, lined.note));
+        rest.append(railItem(venue, lined.percent, lined.line, lined.note, allowCheckin));
       });
       inner.append(rest);
       clip.append(inner);
@@ -5258,7 +5223,7 @@ ${pridePageHtml()}
           percent: venue.curve[hour],
           note: bandLabel(venue.curve[hour]),
           line: cardStatus(venue, 'tonight'),
-        }), true);
+        }), true, true);
         paintClosedList(document.getElementById('closed-list'), nowShown.filter((venue) => !venue.open[hour]).sort((a, b) => a.name.localeCompare(b.name)), 'Closed');
       }
       if (weekendGroup === 'events') {
@@ -5270,7 +5235,7 @@ ${pridePageHtml()}
           percent: venue.weekend.percent,
           note: bandLabel(venue.weekend.percent),
           line: cardStatus(venue, 'weekend'),
-        }));
+        }), false, false);
         paintClosedList(document.getElementById('weekend-closed'), weekendShown.filter((venue) => venue.weekend.percent === 0).sort((a, b) => a.name.localeCompare(b.name)), 'Closed this weekend');
       }
       document.getElementById('weekend-dates').textContent = city.weekend;

@@ -65,3 +65,11 @@ export const FLAGS = {
 export function groupForCategory(category) {
   return GROUPS.find((group) => group.categories.includes(category)) || GROUPS[0];
 }
+
+// Locked busyness bands. The build and the page both use this function.
+// Do not copy the thresholds anywhere else.
+export function bandLabel(percent) {
+  if (percent >= 75) return 'Very busy';
+  if (percent >= 51) return 'Busy';
+  return 'Not busy';
+}

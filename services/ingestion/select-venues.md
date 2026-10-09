@@ -48,7 +48,7 @@ The only names shown are Dance and drinks, Saunas, Cruisy, and Events. Events is
 
 ## Events
 
-Pride dates live on the city as `events`: `{name, type: "pride", start, end, source}`. `source` is the organizer page. A one-day event sets `end` equal to `start`. Do not copy last year's dates forward. An empty array is honest.
+Pride dates live on the city as `events`: `{name, type: "pride", start, end, source}`. `source` is the organizer page. The page reads these per-city arrays in `data/cities/`. There is no `data/pride-events.json`. A one-day event sets `end` equal to `start`. Do not copy last year's dates forward. An empty array is honest.
 
 ## Ids
 
