@@ -16,8 +16,14 @@ alwaysApply: true
 
 When Nacho says "research these cities", spawn one worker agent per city (or
 per small batch). All workers run in parallel and follow the per-city brief
-below. Workers write to `data/staging/cities/<slug>.json` only — never to
-`data/cities/`, never to `apps/web/index.html`.
+below. Workers write two files and nothing else:
+
+- `data/staging/cities/<slug>.json`
+- `data/staging/reports/<slug>.json`
+
+Never write `data/cities/`. Never write `apps/web/index.html`. Staging is the
+inbox. It is empty when no city is in flight. Do not copy production cities
+into staging.
 
 ## Per-city worker brief
 
@@ -27,17 +33,19 @@ below. Workers write to `data/staging/cities/<slug>.json` only — never to
 2. **Sources (every venue needs ≥ 2):** each source is
    `{tier, url, retrieved_at}`. Tiers: 0 = Overpass/OSM (addresses, coords),
    1 = Wikidata (stable facts), 2 = keyed APIs (only when keys exist),
-   3 = MANUAL ONLY — the venue's own website or own Instagram
-   (bio/highlights/posts via the checklist, never scraped). Tier 4 is Nacho's
+   3 = MANUAL ONLY — the venue's own website, own Instagram, or own Facebook
+   page (bio/highlights/posts via the checklist, never scraped). A Facebook
+   page counts only when it is the venue's own page. Tier 4 is Nacho's
    QA — it is not a source.
 3. **Hours — always check the venue's own website first.** The venue's own
    website is the #1 source for hours and the worker MUST fetch it (plain
    page read) and extract open/close times. `hours_verified: true` ONLY when
-   the venue's own site or own Instagram states a full open AND close.
+   the venue's own site, own Instagram, or own Facebook page states a full
+   open AND close.
    Use `"no recent data"` ONLY when the venue's own site has no hours AND no
    other reliable source states them — never as a lazy default. The
-   MANUAL_ONLY restriction applies to Instagram (no public API, often
-   login-walled: never log in, never scrape, use only what's publicly
+   MANUAL_ONLY restriction applies to Instagram and Facebook (no public API,
+   often login-walled: never log in, never scrape, use only what's publicly
    visible), NOT to venue websites, which workers always read.
    Whenever hours are verified, add the source they came from to the
    venue's `sources` array as an extra source (if not already listed) —
@@ -74,19 +82,63 @@ below. Workers write to `data/staging/cities/<slug>.json` only — never to
    `region` (exact taxonomy string), `gayborhood` (string or null),
    city `lat`/`lon` (numbers), `status` (`seeded` for new cities),
    `last_updated` (YYYY-MM-DD), `tz` (IANA, from the reference table below).
-9. **Aim:** 6–8 venues per city covering Dance and drinks, Saunas, and
-   Cruisy where they're genuinely part of the scene.
+9. **Minimum, then aim.** Fewer than 5 venues fails validation and must not
+   merge. Aim for 6–8 covering Dance and drinks, Saunas, and Cruisy where
+   they're genuinely part of the scene. Do not invent a venue to clear the
+   floor. If a category truly has nothing verifiable, the report says so.
+10. **Category audit.** For each stored category (`bar`, `club`, `sauna`,
+    `cruise`, `sex`) run dedicated discovery queries, for example
+    `gay sauna {city}`, `bathhouse {city}`, `{city} cruise bar`. Record every
+    query, every page opened, and every candidate kept or dropped with a
+    reason. "I searched and found nothing" is the queries plus the pages, not
+    a sentence. The validator rejects a city whose report is missing.
+11. **Anchor check.** Name the 2 or 3 venues a local guide would list first.
+    Each is `included` (and present in the file) or `ruled_out` with a reason
+    and a source url (closed, unverifiable, out of scope). This checks
+    omission. It does not waive the two-source rule.
+
+The report at `data/staging/reports/<slug>.json` is:
+
+```json
+{
+  "slug": "london",
+  "retrieved_at": "YYYY-MM-DD",
+  "categories": [
+    {
+      "category": "sauna",
+      "queries": ["gay sauna London", "bathhouse London"],
+      "sources_checked": ["https://example.com/"],
+      "candidates": [
+        { "name": "Pleasuredrome", "kept": true, "reason": "name and address confirmed in two tiers" }
+      ]
+    }
+  ],
+  "anchors": [
+    { "name": "Pleasuredrome", "decision": "included", "reason": "named by the venue's own site", "source": "https://example.com/" }
+  ]
+}
+```
+
+One audit object per stored category, each with at least one query and one
+page opened. Candidates may be empty. Anchors are 2 or 3. A ruled-out anchor
+needs `source`. No unknown fields.
 
 ## Validation and merge (in this order, no skipping)
 
-1. `node scripts/select-venues.mjs` — validates every staging file. Fix all
-   failures. Review flags (thin results, single-tier confirmation) are
-   warnings: investigate, don't invent.
+1. `node scripts/select-venues.mjs` — validates every staging file against
+   the schema, the 5-venue floor, and the research report. One city:
+   `node scripts/select-venues.mjs tokyo.json`. Fix all failures. Review
+   flags (thin category mix, single-tier confirmation, under half the venues
+   with verified hours) are warnings printed before merge: investigate,
+   don't invent. The hours flag means run the backfill pass before merge.
 2. `node scripts/merge-cities.mjs` — copies only passing files to
-   `data/cities/`, prints a diff per file. Failing files stay in staging.
+   `data/cities/`, prints a diff per file, then deletes that city and its
+   report from staging. Failing files stay in staging.
 3. `node scripts/build-web.mjs` — rebuilds the page from `data/cities/`
    ONLY. Run it only when production holds exactly the cities you want
-   published.
+   published. The build checks the schema. It does not apply the 5-venue
+   floor, so a city already published under that floor stays up until its
+   worker replaces it.
 
 ## Learning loop (the rule that prevents repeat mistakes)
 
@@ -114,21 +166,35 @@ venue's own site. Drop anything you cannot verify. Keep the venues already
 in the live file, including Boiler, unless a source shows it has closed.
 Stored category is `sauna`. Tier 4 is not a source.
 
+QA 2026-10-08 — Tokyo shipped with one venue and unverified hours. London
+shipped with one sauna, and Pleasuredrome was missing. A city under 5 venues
+now fails the merge gate. Every research run writes the category audit and
+the anchor check. Re-run Tokyo. Re-run London's saunas, including
+Pleasuredrome, and keep the venues already in the live file unless a source
+shows one has closed. Do not invent a venue to clear the floor.
+
+QA 2026-10-08 — Santiago, Dionisio Divas. The card said Tuesday–Sunday from
+23:00. The venue's own Facebook page (https://www.facebook.com/dionisiodivaspub)
+says Wednesday–Sunday, open 21:00, show 23:00, humor, drinks, air-conditioned.
+No close time is published, so hours stay `"no recent data"` and
+`hours_verified` stays false. Do not invent a close. A venue's own Facebook
+page is tier 3, same manual rule as Instagram.
+
 ## Hours backfill pass
 
 Run this when too many venues sit at `"no recent data"` for hours. It is a
 separate operation from city research and can run while other work continues.
 
 1. For every venue with `hours == "no recent data"`: fetch the venue's own
-   website (plain page read — always allowed; MANUAL_ONLY is Instagram-only)
-   and extract open/close times.
+   website (plain page read — always allowed; MANUAL_ONLY is Instagram and
+   Facebook only) and extract open/close times.
 2. Full open AND close found → set `hours` (`"24h"` or
    `{mon: ["10:00","02:00"], …}` HH:MM), `hours_verified: true`, and add the
    site as a `{tier: 3, url, retrieved_at}` source if not already listed.
 3. Genuinely no hours anywhere → leave `"no recent data"`, but only after
    exhausting all three: (a) the venue's own website thoroughly (homepage,
    contact/visit/hours pages — not a glance), (b) the venue's public
-   Instagram bio/highlights/posts, (c) the Google business listing. The
+   Instagram or Facebook bio/highlights/posts, (c) the Google business listing. The
    report must say which of the three were checked per venue. Never invent
    hours, never touch other fields, keep ≥ 2 sources per venue.
 4. Re-run `node scripts/select-venues.mjs` after every file; fix failures.

@@ -7,6 +7,7 @@
       reviews: [],
       alerts: [],
       visits: [],
+      checkins: [],
     };
     let pendingSave = null;
     let authClient = null;
@@ -16,7 +17,14 @@
     let authMode = 'in';
     let toastTimer = 0;
     let googleReady = false;
+    let authStatus = null;
     const loadedScripts = {};
+    const VIBES = ['young crowd', 'dancing', 'cruisy', 'chill', 'drag show tonight'];
+    const REASONS = {
+      checkin: 'Check in',
+      favorite: 'Save to favorites',
+      review: 'Leave a review',
+    };
 
     function loadScript(src) {
       if (loadedScripts[src]) return loadedScripts[src];
@@ -38,10 +46,14 @@
       toastTimer = window.setTimeout(() => { node.hidden = true; }, 2400);
     }
 
-    function welcome() {
+    function welcome(session) {
       if (welcomed) return;
       welcomed = true;
-      toast('Welcome back.');
+      const user = session && session.user;
+      const created = user ? Date.parse(user.created_at) : 0;
+      const signed = user ? Date.parse(user.last_sign_in_at) : 0;
+      const fresh = created && signed && Math.abs(signed - created) < 20000;
+      toast(fresh ? "Welcome — you're in." : 'Welcome back.');
       closeAccount();
     }
 
@@ -53,6 +65,7 @@
       account.reviews = [];
       account.alerts = [];
       account.visits = [];
+      account.checkins = [];
     }
 
     function venueRecord(id) {
@@ -81,8 +94,8 @@
       section.hidden = false;
       fillRail(document.getElementById('for-you-list'), venues, (venue) => ({
         percent: venue.curve[hour],
-        note: busyNote(venue),
-        line: venue.unsure ? 'Hours not confirmed · peaks ~' + peakText(venue.peak) : 'Open now · peaks ~' + peakText(venue.peak),
+        note: bandLabel(venue.curve[hour]),
+        line: cardStatus(venue, 'tonight'),
       }), true);
     }
 
@@ -91,10 +104,9 @@
       const logged = Boolean(account.user);
       document.getElementById('auth-skel').hidden = !pending;
       document.getElementById('auth-skel-wide').hidden = !pending;
-      document.getElementById('login-btn').hidden = pending || logged;
-      document.getElementById('signup-btn').hidden = pending || logged;
-      document.getElementById('foot-login').hidden = logged;
-      document.getElementById('foot-signup').hidden = logged;
+      document.getElementById('profile-btn').hidden = pending || !logged;
+      document.getElementById('join-btn').hidden = pending || logged;
+      document.getElementById('foot-join').hidden = logged;
       paintForYou();
       const picker = document.getElementById('city-picker');
       if (picker && !picker.hidden) renderPicker();
@@ -103,7 +115,7 @@
     }
 
     function setAuthError(text) {
-      const node = document.querySelector('#account-body .auth-error');
+      const node = authStatus || document.querySelector('#account-body .auth-error');
       if (!node) {
         if (text) toast(text);
         return;
@@ -181,10 +193,7 @@
       title.textContent = account.user ? 'Account' : 'Account';
       body.append(title);
       if (!account.user) {
-        body.append(menuList([
-          { label: 'Sign in', onClick: () => showAccount('auth', 'in') },
-          { label: 'Create account', onClick: () => showAccount('auth', 'up') },
-        ]));
+        paintAuth(body, sheet);
         return;
       }
       const who = document.createElement('p');
@@ -202,14 +211,14 @@
     }
 
     function paintAuth(body, sheet) {
-      sheet.setAttribute('aria-label', authMode === 'up' ? 'Create account' : 'Sign in');
+      sheet.setAttribute('aria-label', 'Join us');
       const title = document.createElement('h3');
-      title.textContent = authMode === 'up' ? 'Create account' : 'Sign in';
+      title.textContent = 'Join us';
       body.append(title);
       if (pendingSave) {
         const prompt = document.createElement('p');
         prompt.className = 'auth-prompt';
-        prompt.textContent = pendingSave.kind === 'city' ? 'Save this city → sign in' : 'Save this venue → sign in';
+        prompt.textContent = pendingSave.kind === 'city' ? 'Save this city' : 'Save this venue';
         body.append(prompt);
       }
       const slot = document.createElement('div');
@@ -241,8 +250,9 @@
       send.addEventListener('click', () => sendMagicLink(email.value));
       const note = document.createElement('p');
       note.className = 'auth-note';
-      note.textContent = 'We store your sign-in, saved places, and reviews. A handle is enough, and a real name is never required. Apple can hide your email.';
+      note.textContent = "No password needed — one link works whether you're new or back.";
       body.append(slot, google, apple, email, send, status, note);
+      authStatus = status;
       mountGoogle(slot, google);
       window.setTimeout(() => email.focus(), 0);
     }
@@ -370,10 +380,30 @@
         name.textContent = record ? record.venue.name : review.venueId;
         const when = document.createElement('p');
         when.className = 'auth-note';
-        when.textContent = review.at ? review.at.slice(0, 10) : '';
-        const copy = document.createElement('p');
-        copy.textContent = review.body;
-        block.append(name, when, copy);
+        when.textContent = reviewWhen(review.at);
+        block.append(name, when);
+        if (Number.isFinite(review.busyness)) {
+          const busy = document.createElement('p');
+          busy.textContent = 'How busy: ' + review.busyness;
+          block.append(busy);
+        }
+        if (review.tags && review.tags.length) {
+          const tags = document.createElement('p');
+          tags.textContent = review.tags.join(', ');
+          block.append(tags);
+        }
+        const note = review.note || review.body || '';
+        if (note) {
+          const copy = document.createElement('p');
+          copy.textContent = note;
+          block.append(copy);
+        }
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'text-action';
+        remove.textContent = 'Delete';
+        remove.addEventListener('click', () => deleteReview(review));
+        block.append(remove);
         body.append(block);
       });
     }
@@ -403,7 +433,7 @@
       const title = document.createElement('h3');
       title.textContent = 'Delete Account';
       const copy = document.createElement('p');
-      copy.textContent = 'Delete your account and everything saved with it?';
+      copy.textContent = 'Delete Account and everything saved with it?';
       const status = document.createElement('p');
       status.className = 'auth-error';
       status.hidden = true;
@@ -461,7 +491,274 @@
       if (on) account.venues.push(id);
       else account.venues.splice(index, 1);
       syncFavorite('venue', id, on);
+      paintHearts();
       paintAccountChrome();
+    }
+
+    function paintHearts() {
+      document.querySelectorAll('.sheet-actions [data-action="favorite"]').forEach((button) => {
+        const on = account.venues.indexOf(button.getAttribute('data-save')) !== -1;
+        button.classList.toggle('is-on', on);
+        button.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    }
+
+    function paintCheckinButtons() {
+      document.querySelectorAll('.check-in[data-checkin]').forEach((button) => {
+        const on = account.checkins.some((row) => row.venueId === button.getAttribute('data-checkin'));
+        button.classList.toggle('is-on', on);
+        button.textContent = on ? 'Checked in' : (button.closest('.sheet-actions') ? 'Check-in' : 'Check in');
+      });
+    }
+
+    function rememberIntent(intent) {
+      try { localStorage.setItem('fd-intent', JSON.stringify(intent)); } catch (err) { void err; }
+    }
+
+    function readIntent() {
+      try { return JSON.parse(localStorage.getItem('fd-intent') || 'null'); } catch (err) { return null; }
+    }
+
+    function clearIntent() {
+      try { localStorage.removeItem('fd-intent'); } catch (err) { void err; }
+    }
+
+    function requireLogin(host, kind, venueId) {
+      if (account.user) return true;
+      document.querySelectorAll('.inline-auth').forEach((node) => {
+        if (node !== host) {
+          node.hidden = true;
+          node.replaceChildren();
+        }
+      });
+      rememberIntent({ kind: kind, venueId: venueId, at: Date.now() });
+      paintSignIn(host, REASONS[kind] || 'Check in');
+      return false;
+    }
+
+    function paintSignIn(host, reason) {
+      host.replaceChildren();
+      host.hidden = false;
+      const line = document.createElement('p');
+      line.className = 'inline-reason';
+      line.textContent = reason;
+      const slot = document.createElement('div');
+      slot.className = 'google-slot';
+      const google = document.createElement('button');
+      google.type = 'button';
+      google.className = 'auth-google';
+      google.textContent = 'Continue with Google';
+      google.addEventListener('click', continueGoogle);
+      const apple = document.createElement('button');
+      apple.type = 'button';
+      apple.className = 'auth-apple';
+      apple.textContent = 'Sign in with Apple';
+      apple.addEventListener('click', continueApple);
+      const email = document.createElement('input');
+      email.type = 'email';
+      email.className = 'account-field';
+      email.placeholder = 'Email';
+      email.autocomplete = 'email';
+      email.setAttribute('inputmode', 'email');
+      const send = document.createElement('button');
+      send.type = 'button';
+      send.className = 'auth-send';
+      send.textContent = 'Email me a link';
+      const note = document.createElement('p');
+      note.className = 'inline-note';
+      note.textContent = "No password needed — one link works whether you're new or back.";
+      const status = document.createElement('p');
+      status.className = 'auth-error';
+      status.hidden = true;
+      authStatus = status;
+      const divider = document.createElement('p');
+      divider.className = 'auth-or';
+      divider.textContent = 'or';
+      send.addEventListener('click', () => sendMagicLink(email.value, host));
+      host.append(line, email, send, note, divider, slot, google, apple, status);
+      mountGoogle(slot, google, true);
+      window.setTimeout(() => email.focus(), 0);
+    }
+
+    function showCheckEmail(host) {
+      const intent = readIntent();
+      const kind = intent && intent.kind;
+      host.replaceChildren();
+      const line = document.createElement('p');
+      line.className = 'check-mail';
+      line.textContent = kind === 'favorite'
+        ? "Check your email — one tap and it's saved."
+        : kind === 'review'
+          ? "Check your email — one tap and you can leave your review."
+          : "Check your email — one tap and you're checked in.";
+      host.append(line);
+      host.hidden = false;
+    }
+
+    function venuePoint(id) {
+      const record = venueRecord(id);
+      if (!record) return null;
+      if (typeof record.venue.lat === 'number' && typeof record.venue.lon === 'number') {
+        return { lat: record.venue.lat, lon: record.venue.lon };
+      }
+      if (typeof record.city.lat === 'number' && typeof record.city.lon === 'number') {
+        return { lat: record.city.lat, lon: record.city.lon };
+      }
+      return null;
+    }
+
+    function checkIn(venueId) {
+      if (!account.user) return false;
+      const now = Date.now();
+      const here = venuePoint(venueId);
+      for (let i = 0; i < account.checkins.length; i += 1) {
+        const prior = account.checkins[i];
+        if (prior.venueId === venueId) continue;
+        const there = venuePoint(prior.venueId);
+        if (!here || !there) continue;
+        const km = distanceKm(here, there);
+        const hours = (now - Date.parse(prior.at)) / 3600000;
+        if (km > 30 && hours >= 0 && km / Math.max(hours, 1 / 60) > 900) {
+          toast('That check-in is too far from your last one.');
+          return false;
+        }
+      }
+      const at = new Date().toISOString();
+      const existing = account.checkins.find((row) => row.venueId === venueId);
+      const previous = existing ? existing.at : '';
+      if (existing) existing.at = at;
+      else account.checkins.unshift({ venueId: venueId, at: at });
+      paintCheckinButtons();
+      toast('Checked in.');
+      if (authClient) {
+        authClient.rpc('check_in', {
+          p_venue: venueId,
+          p_lat: here ? here.lat : null,
+          p_lon: here ? here.lon : null,
+        }).then(({ error }) => {
+          if (!error) return;
+          if (previous) existing.at = previous;
+          else account.checkins = account.checkins.filter((row) => !(row.venueId === venueId && row.at === at));
+          paintCheckinButtons();
+          toast(error.message && error.message.indexOf('too far') !== -1 ? 'That check-in is too far from your last one.' : error.message);
+        });
+      }
+      return true;
+    }
+
+    function showReviewForm(host, venueId) {
+      host.replaceChildren();
+      host.hidden = false;
+      const form = document.createElement('form');
+      form.className = 'review-form';
+      const busyLabel = document.createElement('p');
+      busyLabel.className = 'inline-reason';
+      busyLabel.textContent = 'How busy was it?';
+      const busy = document.createElement('div');
+      busy.className = 'busy-row';
+      const empty = document.createElement('span');
+      empty.textContent = 'Empty';
+      const slider = document.createElement('input');
+      slider.type = 'range';
+      slider.min = '0';
+      slider.max = '100';
+      slider.value = '50';
+      slider.setAttribute('aria-label', 'How busy was it?');
+      const packed = document.createElement('span');
+      packed.textContent = 'Packed';
+      busy.append(empty, slider, packed);
+      const vibeLabel = document.createElement('p');
+      vibeLabel.className = 'rank-note';
+      vibeLabel.textContent = 'Vibe';
+      const picks = document.createElement('div');
+      picks.className = 'vibe-pick';
+      const chosen = [];
+      VIBES.forEach((tag) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = tag;
+        button.addEventListener('click', () => {
+          const index = chosen.indexOf(tag);
+          if (index === -1) chosen.push(tag);
+          else chosen.splice(index, 1);
+          button.classList.toggle('is-on', index === -1);
+        });
+        picks.append(button);
+      });
+      const note = document.createElement('textarea');
+      note.className = 'account-field';
+      note.maxLength = 500;
+      note.placeholder = 'All details welcome';
+      const send = document.createElement('button');
+      send.type = 'submit';
+      send.className = 'auth-send';
+      send.textContent = 'Submit review';
+      form.append(busyLabel, busy, vibeLabel, picks, note, send);
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        saveSignalReview(venueId, {
+          busyness: Number(slider.value),
+          tags: chosen.slice(),
+          note: note.value.trim(),
+        });
+        host.hidden = true;
+        host.replaceChildren();
+      });
+      host.append(form);
+    }
+
+    function reviewWhen(iso) {
+      const date = new Date(iso);
+      if (Number.isNaN(date.getTime())) return '';
+      return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      });
+    }
+
+    function saveSignalReview(venueId, input) {
+      if (!account.user) return;
+      const review = {
+        id: null,
+        venueId: venueId,
+        at: new Date().toISOString(),
+        busyness: input.busyness,
+        tags: input.tags,
+        note: input.note,
+      };
+      account.reviews.unshift(review);
+      toast('Review saved.');
+      if (!authClient) return;
+      authClient.from('reviews').insert({
+        user_id: account.user.id,
+        venue_id: venueId,
+        busyness: input.busyness,
+        vibe_tags: input.tags,
+        note: input.note || null,
+      }).select('id, created_at').single().then(({ data, error }) => {
+        if (error) {
+          account.reviews = account.reviews.filter((item) => item !== review);
+          toast(error.message);
+          return;
+        }
+        if (data) {
+          review.id = data.id;
+          review.at = data.created_at;
+        }
+      });
+    }
+
+    function deleteReview(review) {
+      account.reviews = account.reviews.filter((item) => item !== review);
+      if (authClient && account.user && review.id) {
+        authClient.from('reviews').delete().eq('id', review.id).eq('user_id', account.user.id).then(({ error }) => {
+          if (error) toast(error.message);
+        });
+      }
+      paintAccountPanel();
     }
 
     function saveCity(id) {
@@ -558,6 +855,7 @@
       const finish = () => {
         clearLocal();
         pendingSave = null;
+        clearIntent();
         closeAccount();
         paintAccountChrome();
         paintHome();
@@ -601,17 +899,34 @@
     }
 
     function applyPending() {
-      if (!pendingSave || !account.user) return;
-      if (pendingSave.kind === 'city') {
-        if (account.cities.indexOf(pendingSave.id) === -1) {
-          account.cities.push(pendingSave.id);
-          syncFavorite('city', pendingSave.id, true);
+      if (pendingSave && account.user) {
+        if (pendingSave.kind === 'city') {
+          if (account.cities.indexOf(pendingSave.id) === -1) {
+            account.cities.push(pendingSave.id);
+            syncFavorite('city', pendingSave.id, true);
+          }
+        } else if (account.venues.indexOf(pendingSave.id) === -1) {
+          account.venues.push(pendingSave.id);
+          syncFavorite('venue', pendingSave.id, true);
         }
-      } else if (account.venues.indexOf(pendingSave.id) === -1) {
-        account.venues.push(pendingSave.id);
-        syncFavorite('venue', pendingSave.id, true);
+        pendingSave = null;
       }
-      pendingSave = null;
+      const intent = readIntent();
+      if (!intent || !account.user) return;
+      if (!intent.at || Date.now() - intent.at > 30 * 60 * 1000) {
+        clearIntent();
+        return;
+      }
+      clearIntent();
+      if (intent.kind === 'checkin') checkIn(intent.venueId);
+      if (intent.kind === 'favorite' && account.venues.indexOf(intent.venueId) === -1) {
+        toggleVenue(intent.venueId);
+      }
+      if (intent.kind === 'review') {
+        openSheet(intent.venueId, '');
+        const gate = document.getElementById('sheet-gate');
+        if (gate) showReviewForm(gate, intent.venueId);
+      }
     }
 
     function pullAccount() {
@@ -619,17 +934,31 @@
       return Promise.all([
         authClient.from('profiles').select('handle, home_city').eq('user_id', uid).maybeSingle(),
         authClient.from('favorites').select('kind, ref, created_at').eq('user_id', uid).order('created_at'),
-        authClient.from('reviews').select('venue_id, body, created_at').eq('user_id', uid).order('created_at', { ascending: false }),
+        authClient.from('reviews').select('id, venue_id, body, busyness, vibe_tags, note, created_at').eq('user_id', uid).order('created_at', { ascending: false }),
         authClient.from('alert_prefs').select('scope, ref, enabled').eq('user_id', uid),
         authClient.from('reward_visits').select('venue_id, visited_on, points').eq('user_id', uid).order('visited_on', { ascending: false }),
+        authClient.from('checkins').select('venue_id, created_at').eq('user_id', uid).order('created_at', { ascending: false }),
       ]).then((rows) => {
         const profile = rows[0].data;
         if (profile) account.profile = { handle: profile.handle || '', homeCity: profile.home_city || '' };
         account.venues = (rows[1].data || []).filter((row) => row.kind === 'venue').map((row) => row.ref);
         account.cities = (rows[1].data || []).filter((row) => row.kind === 'city').map((row) => row.ref);
-        account.reviews = (rows[2].data || []).map((row) => ({ venueId: row.venue_id, body: row.body, at: row.created_at }));
+        if (!rows[2].error) {
+          account.reviews = (rows[2].data || []).map((row) => ({
+            id: row.id,
+            venueId: row.venue_id,
+            body: row.body || '',
+            busyness: row.busyness,
+            tags: row.vibe_tags || [],
+            note: row.note || '',
+            at: row.created_at,
+          }));
+        }
         account.alerts = (rows[3].data || []).filter((row) => row.enabled).map((row) => ({ scope: row.scope, ref: row.ref }));
         account.visits = (rows[4].data || []).map((row) => ({ venueId: row.venue_id, on: row.visited_on, points: row.points }));
+        if (!rows[5].error) {
+          account.checkins = (rows[5].data || []).map((row) => ({ venueId: row.venue_id, at: row.created_at }));
+        }
       }).catch(() => {});
     }
 
@@ -675,7 +1004,7 @@
       googleReady = true;
     }
 
-    function mountGoogle(slot, fallback) {
+    function mountGoogle(slot, fallback, quiet) {
       if (!authConfig.google || !window.google || !google.accounts) return;
       ensureGoogle();
       google.accounts.id.renderButton(slot, {
@@ -687,23 +1016,23 @@
         width: 320,
       });
       if (slot.childNodes.length) fallback.hidden = true;
-      google.accounts.id.prompt();
+      if (!quiet) google.accounts.id.prompt();
     }
 
     function continueGoogle() {
       if (!authClient || !authConfig.google) {
-        setAuthError('Google sign-in is not connected on this copy.');
+        setAuthError('Google is not connected on this copy.');
         return;
       }
       loadScript('https://accounts.google.com/gsi/client').then(() => {
         ensureGoogle();
         google.accounts.id.prompt();
-      }).catch(() => setAuthError('Google sign-in did not finish.'));
+      }).catch(() => setAuthError('Google did not finish.'));
     }
 
     function continueApple() {
       if (!authClient || !authConfig.apple) {
-        setAuthError('Apple sign-in is not connected on this copy.');
+        setAuthError('Apple is not connected on this copy.');
         return;
       }
       Promise.all([
@@ -732,18 +1061,18 @@
       }).catch((err) => {
         signing = false;
         if (err && err.error === 'popup_closed_by_user') return;
-        setAuthError('Apple sign-in did not finish.');
+        setAuthError('Apple did not finish.');
       });
     }
 
-    function sendMagicLink(value) {
+    function sendMagicLink(value, host) {
       const email = value.trim();
       if (email.indexOf('@') < 1) {
         setAuthError('Enter the email for the link.');
         return;
       }
       if (!authClient) {
-        setAuthError('Email sign-in is not connected on this copy.');
+        setAuthError('Email is not connected on this copy.');
         return;
       }
       signing = true;
@@ -756,7 +1085,8 @@
           setAuthError(error.message);
           return;
         }
-        setAuthError('Check your email for a sign-in link.');
+        if (host) showCheckEmail(host);
+        else setAuthError('Check your email — one tap and you are in.');
       });
     }
 
@@ -764,19 +1094,14 @@
       paintAccountChrome();
       const buttons = [
         ['profile-btn', () => openAccount('menu')],
-        ['login-btn', () => openAccount('auth', 'in')],
-        ['signup-btn', () => openAccount('auth', 'up')],
+        ['join-btn', () => openAccount('auth')],
       ];
       buttons.forEach((pair) => {
         document.getElementById(pair[0]).addEventListener('click', pair[1]);
       });
-      document.getElementById('foot-login').addEventListener('click', (event) => {
+      document.getElementById('foot-join').addEventListener('click', (event) => {
         event.preventDefault();
-        openAccount('auth', 'in');
-      });
-      document.getElementById('foot-signup').addEventListener('click', (event) => {
-        event.preventDefault();
-        openAccount('auth', 'up');
+        openAccount('auth');
       });
       document.getElementById('account-back').addEventListener('click', (event) => {
         if (event.target.id === 'account-back') closeAccount();
@@ -808,7 +1133,7 @@
           }
           if (event === 'SIGNED_IN' && session && signing) {
             signing = false;
-            applySession(session).then(welcome);
+            applySession(session).then(() => welcome(session));
           }
         });
         if (authConfig.google) {

@@ -1,8 +1,8 @@
 # Select venues for a city
 
-Use this whenever a city is added or its venue list changes. Do not ask for the rules again. Run `node scripts/select-venues.mjs` before `node scripts/build-web.mjs`.
+Use this with `.cursor/rules/city-research.mdc`. That brief is the contract. Run `node scripts/select-venues.mjs` before `node scripts/merge-cities.mjs`.
 
-The city `name` in `data/cities.json` is the only value allowed in `venue.city`. Set `live` to true only after this pass. Card rules, sections, hours, and ranking already apply to every live city.
+The city file is `data/cities/<slug>.json` after a passing merge. There is no `data/cities.json` index. `id` is `<slug>-<name-slug>`.
 
 ## Scan
 
@@ -38,22 +38,18 @@ Coordinates come from Nominatim for that street address, one request at a time, 
 
 ## Hours
 
-`hours_verified` is true only when the venue's own site or official Instagram states a full open and a full close for each open day. Store that window. `source_url` is required in that case.
+`hours_verified` is true only when the venue's own site, official Instagram, or own Facebook page states a full open and a full close for each open day. Store that window. `source_url` is required in that case.
 
-A tourism page, a guide, or an open time with no close does not verify hours. Leave `hours` null and explain the gap in `hours_note`. Do not store `{}`.
+A tourism page, a guide, or an open time with no close does not verify hours. Set `hours` to `"no recent data"` and `hours_verified` to false. Do not store `{}` or a phone number.
 
 `00:00` as an end means midnight. An end earlier than the start crosses midnight. A window that starts at `00:00` is stored as written.
 
-The only names shown are Dance and drinks, Saunas, and Cruisy. Stored `category`: `bar` and `club` are Dance and drinks, `sauna` is Saunas, `cruise` and `sex` are Cruisy.
+The only names shown are Dance and drinks, Saunas, Cruisy, and Events. Events is the dated-events chip, not a stored category. Stored `category`: `bar` and `club` are Dance and drinks, `sauna` is Saunas, `cruise` and `sex` are Cruisy.
 
-## Pride date
+## Events
 
-Adding a city includes its pride date. Read the organizer's own page, or the city's official tourism page when that page states the dates. Write the row in `data/pride-events.json`. `city_id` matches the city `id`. Required fields are `start`, `end`, `source_url`, `source_name`, and `retrieved_at`. A one-day march sets `end` equal to `start`. A march inside a published week is a second row with `parent_id` and its own source.
-
-If that year's date is not on the page, add no row. Do not copy last year's dates forward from a habit such as "the last weekend in June."
-
-The city page uses the same frame for every live city, and it shows the pride notice only while those dates are underway. The Pride Calendar lists the row under that year and month. Search on that page is by city and by year.
+Pride dates live on the city as `events`: `{name, type: "pride", start, end, source}`. `source` is the organizer page. A one-day event sets `end` equal to `start`. Do not copy last year's dates forward. An empty array is honest.
 
 ## Ids
 
-`id` is `{city-id}-{short-name}` and must be unique. `city-id` is the `id` in `data/cities.json`, such as `mad-delirio`.
+`id` is `<slug>-<name-slug>` and must be unique. The slug is `meta.slug` and the filename.

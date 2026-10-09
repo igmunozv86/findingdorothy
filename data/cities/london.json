@@ -1,1 +1,854 @@
-{"meta":{"country":"UK","gayborhood":"Soho / Vauxhall","last_updated":"2026-10-06","lat":51.5074,"lon":-0.1278,"name":"London","region":"Europe","slug":"london","status":"live","tz":"Europe/London"},"venues":[{"address":"The Arches, 9 Villiers Street, London WC2N 6NG","category":"club","hours":{"sun":["22:00","04:00"],"mon":["22:00","04:00"],"tue":["22:00","04:00"],"wed":["22:00","04:00"],"thu":["22:00","04:00"],"fri":["22:00","05:00"],"sat":["22:00","05:00"]},"hours_verified":true,"id":"london-heaven","instagram":null,"lat":51.50803,"lon":-0.12386,"name":"Heaven","neighborhood":"West End","review_features":["Famous gay superclub since 1979","G-A-Y and Popcorn club nights","Under the arches at Villiers Street"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"https://g-a-yandheaven.co.uk/"},{"retrieved_at":"2026-10-06","tier":2,"url":"https://www.visitlondon.com/things-to-do/place/151231-heaven-nightclub"}],"live_counter":null},{"address":"30 Lisle Street, London WC2H 7BA","category":"bar","hours":{"sun":["12:00","00:00"],"mon":["13:00","03:00"],"tue":["13:00","03:00"],"wed":["13:00","03:00"],"thu":["13:00","03:00"],"fri":["13:00","03:00"],"sat":["12:00","03:00"]},"hours_verified":true,"id":"london-ku-bar","instagram":null,"lat":51.51179,"lon":-0.12966,"name":"Ku Bar","neighborhood":"Soho","review_features":["LGBTQ+ group, 30 years in Soho","Flagship bar with terrace","Basement Klub until 3am"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"http://www.ku-bar.co.uk/"},{"retrieved_at":"2026-10-06","tier":2,"url":"https://www.designmynight.com/london/bars/ku-bar"}],"live_counter":null},{"address":"349 Kennington Lane, London SE11 5QY","category":"bar","hours":{"thu":["20:00","02:00"],"fri":["21:00","04:00"],"sat":["21:00","04:00"],"sun":["20:00","03:00"]},"hours_verified":true,"id":"london-eagle-london","instagram":null,"lat":51.48633,"lon":-0.11934,"name":"Eagle London","neighborhood":"Vauxhall","review_features":["Vauxhall bar since 2004","Beer garden and pool table","Horse Meat Disco on Sundays"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"https://www.eaglelondon.com/"},{"retrieved_at":"2026-10-06","tier":2,"url":"https://www.patroc.com/gay/london/d/eagle.html"}],"live_counter":null},{"address":"372 Kennington Lane, London SE11 5HY","category":"bar","hours":{"mon":["19:00","00:00"],"tue":["19:00","23:45"],"wed":["19:00","23:45"],"thu":["19:00","23:45"],"fri":["22:00","04:00"],"sat":["22:00","04:00"],"sun":["16:00","23:00"]},"hours_verified":true,"id":"london-royal-vauxhall-tavern","instagram":null,"lat":51.48636,"lon":-0.12189,"name":"The Royal Vauxhall Tavern","neighborhood":"Vauxhall","review_features":["Grade II listed LGBTQ+ venue","Cabaret and club nights","Sunday cabaret"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"http://www.vauxhalltavern.com/"},{"retrieved_at":"2026-10-06","tier":2,"url":"https://www.visitlondon.com/things-to-do/place/606925-royal-vauxhall-tavern"}],"live_counter":null},{"address":"51-53 Old Compton Street, London W1D 6HN","category":"bar","hours":{"fri":["12:00","00:00"],"mon":["12:00","23:30"],"sat":["12:00","00:00"],"sun":["12:00","22:30"],"thu":["12:00","23:30"],"tue":["12:00","23:30"],"wed":["12:00","23:30"]},"hours_verified":true,"id":"london-comptons","instagram":null,"lat":51.51263,"lon":-0.13246,"name":"Comptons","neighborhood":"Soho","review_features":["Gay scene epicentre since 1986","Real ale and cask marque","Heart of gay Soho"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"https://www.comptonsofsoho.co.uk/comptons"},{"retrieved_at":"2026-10-06","tier":2,"url":"https://www.patroc.com/gay/london/map1.html"}],"live_counter":null},{"address":"57 Rupert Street, London W1D 7PL","category":"bar","hours":{"fri":["14:00","00:00"],"mon":["15:00","23:30"],"sat":["12:00","00:00"],"sun":["14:00","22:30"],"thu":["15:00","23:30"],"tue":["15:00","23:30"],"wed":["15:00","23:30"]},"hours_verified":true,"id":"london-yard-bar","instagram":null,"lat":51.51201,"lon":-0.13389,"name":"The Yard Bar","neighborhood":"Soho","review_features":["Drinks, dates and dancing","Drag DJs on weekends","Happy hour until 8pm"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"http://www.theyardbarsoho.co.uk/"},{"retrieved_at":"2026-10-06","tier":2,"url":"https://www.patroc.com/gay/london/map1.html"}],"live_counter":null},{"address":"Ramillies House, 1-2 Ramillies Street, London W1F 7LN","category":"sauna","hours":"24h","hours_verified":true,"id":"london-sweatbox-soho","instagram":null,"lat":51.51504,"lon":-0.13879,"name":"Sweatbox Soho","neighborhood":"Soho","review_features":["Male-only gym and sauna","Three floors","Open 24/7"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"http://www.sweatboxsoho.com/"},{"retrieved_at":"2026-10-06","tier":2,"url":"https://www.patroc.com/gay/london/d/saunasweatboxsoho.html"}],"live_counter":null},{"address":"7 Duncannon Street, London WC2N 4JF","category":"bar","hours":{"fri":["13:00","01:00"],"mon":["12:00","23:00"],"sat":["12:00","01:00"],"sun":["12:00","21:00"],"thu":["12:00","00:00"],"tue":["12:00","23:00"],"wed":["12:00","23:00"]},"hours_verified":true,"id":"london-halfway-to-heaven","instagram":null,"lat":51.50836,"lon":-0.12639,"name":"Halfway To Heaven","neighborhood":"West End","review_features":["LGBTQ+ cabaret pub since 1991","Cabaret seven nights a week","Two floors near Trafalgar Square"],"sources":[{"retrieved_at":"2026-10-06","tier":3,"url":"https://www.halfway2heaven.net/london"},{"retrieved_at":"2026-10-06","tier":2,"url":"https://www.misterbandb.com/gay-guide/united-kingdom/london/50-bars-clubs/10726-halfway-to-heaven"}],"live_counter":null},{"address":"139-143 Whitfield Street, London W1T 5EN","category":"cruise","hours":{"sun":["13:00","01:00"],"mon":["13:00","01:00"],"tue":["13:00","01:00"],"wed":["13:00","01:00"],"thu":["13:00","01:00"],"fri":["13:00","01:00"],"sat":["13:00","01:00"]},"hours_verified":true,"id":"london-vault-139","instagram":null,"lat":51.52357,"lon":-0.13883,"name":"Vault 139","neighborhood":"Fitzrovia","review_features":["Gay cruise club","Themed nights","Private rooms and vaults"],"sources":[{"retrieved_at":"2026-10-06","tier":2,"url":"https://www.misterbandb.com/gay-guide/united-kingdom/london/58-saunas-cruising/10173-vault-139"},{"retrieved_at":"2026-10-06","tier":2,"url":"https://thefabryk.com/blog/best-london-gay-clubs"},{"tier":3,"url":"http://www.vault139.com/","retrieved_at":"2026-10-05"}],"live_counter":null}],"events":[{"name":"Pride in London 2026","type":"pride","start":"2026-07-04","end":"2026-07-04","source":"https://prideinlondon.org/2026-parade-registration-announcement"},{"name":"Pride in London 2027","type":"pride","start":"2027-07-03","end":"2027-07-03","source":"http://prideinlondon.org"}]}
+{
+  "meta": {
+    "country": "UK",
+    "gayborhood": "Soho / Vauxhall",
+    "last_updated": "2026-10-08",
+    "lat": 51.5074,
+    "lon": -0.1278,
+    "name": "London",
+    "region": "Europe",
+    "slug": "london",
+    "status": "live",
+    "tz": "Europe/London"
+  },
+  "venues": [
+    {
+      "address": "The Arches, 9 Villiers Street, London WC2N 6NG",
+      "category": "club",
+      "hours": {
+        "sun": [
+          "22:00",
+          "04:00"
+        ],
+        "mon": [
+          "22:00",
+          "04:00"
+        ],
+        "tue": [
+          "22:00",
+          "04:00"
+        ],
+        "wed": [
+          "22:00",
+          "04:00"
+        ],
+        "thu": [
+          "22:00",
+          "04:00"
+        ],
+        "fri": [
+          "22:00",
+          "05:00"
+        ],
+        "sat": [
+          "22:00",
+          "05:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "london-heaven",
+      "instagram": null,
+      "lat": 51.50803,
+      "lon": -0.12386,
+      "name": "Heaven",
+      "neighborhood": "West End",
+      "review_features": [
+        "Famous gay superclub since 1979",
+        "G-A-Y and Popcorn club nights",
+        "Under the arches at Villiers Street"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "https://g-a-yandheaven.co.uk/"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://www.visitlondon.com/things-to-do/place/151231-heaven-nightclub"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "30 Lisle Street, London WC2H 7BA",
+      "category": "bar",
+      "hours": {
+        "sun": [
+          "12:00",
+          "00:00"
+        ],
+        "mon": [
+          "13:00",
+          "03:00"
+        ],
+        "tue": [
+          "13:00",
+          "03:00"
+        ],
+        "wed": [
+          "13:00",
+          "03:00"
+        ],
+        "thu": [
+          "13:00",
+          "03:00"
+        ],
+        "fri": [
+          "13:00",
+          "03:00"
+        ],
+        "sat": [
+          "12:00",
+          "03:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "london-ku-bar",
+      "instagram": null,
+      "lat": 51.51179,
+      "lon": -0.12966,
+      "name": "Ku Bar",
+      "neighborhood": "Soho",
+      "review_features": [
+        "LGBTQ+ group, 30 years in Soho",
+        "Flagship bar with terrace",
+        "Basement Klub until 3am"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "http://www.ku-bar.co.uk/"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://www.designmynight.com/london/bars/ku-bar"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "349 Kennington Lane, London SE11 5QY",
+      "category": "bar",
+      "hours": {
+        "thu": [
+          "20:00",
+          "02:00"
+        ],
+        "fri": [
+          "21:00",
+          "04:00"
+        ],
+        "sat": [
+          "21:00",
+          "04:00"
+        ],
+        "sun": [
+          "20:00",
+          "03:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "london-eagle-london",
+      "instagram": null,
+      "lat": 51.48633,
+      "lon": -0.11934,
+      "name": "Eagle London",
+      "neighborhood": "Vauxhall",
+      "review_features": [
+        "Vauxhall bar since 2004",
+        "Beer garden and pool table",
+        "Horse Meat Disco on Sundays"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "https://www.eaglelondon.com/"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://www.patroc.com/gay/london/d/eagle.html"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "372 Kennington Lane, London SE11 5HY",
+      "category": "bar",
+      "hours": {
+        "mon": [
+          "19:00",
+          "00:00"
+        ],
+        "tue": [
+          "19:00",
+          "23:45"
+        ],
+        "wed": [
+          "19:00",
+          "23:45"
+        ],
+        "thu": [
+          "19:00",
+          "23:45"
+        ],
+        "fri": [
+          "22:00",
+          "04:00"
+        ],
+        "sat": [
+          "22:00",
+          "04:00"
+        ],
+        "sun": [
+          "16:00",
+          "23:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "london-royal-vauxhall-tavern",
+      "instagram": null,
+      "lat": 51.48636,
+      "lon": -0.12189,
+      "name": "The Royal Vauxhall Tavern",
+      "neighborhood": "Vauxhall",
+      "review_features": [
+        "Grade II listed LGBTQ+ venue",
+        "Cabaret and club nights",
+        "Sunday cabaret"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "http://www.vauxhalltavern.com/"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://www.visitlondon.com/things-to-do/place/606925-royal-vauxhall-tavern"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "51-53 Old Compton Street, London W1D 6HN",
+      "category": "bar",
+      "hours": {
+        "fri": [
+          "12:00",
+          "00:00"
+        ],
+        "mon": [
+          "12:00",
+          "23:30"
+        ],
+        "sat": [
+          "12:00",
+          "00:00"
+        ],
+        "sun": [
+          "12:00",
+          "22:30"
+        ],
+        "thu": [
+          "12:00",
+          "23:30"
+        ],
+        "tue": [
+          "12:00",
+          "23:30"
+        ],
+        "wed": [
+          "12:00",
+          "23:30"
+        ]
+      },
+      "hours_verified": true,
+      "id": "london-comptons",
+      "instagram": null,
+      "lat": 51.51263,
+      "lon": -0.13246,
+      "name": "Comptons",
+      "neighborhood": "Soho",
+      "review_features": [
+        "Gay scene epicentre since 1986",
+        "Real ale and cask marque",
+        "Heart of gay Soho"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "https://www.comptonsofsoho.co.uk/comptons"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://www.patroc.com/gay/london/map1.html"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "57 Rupert Street, London W1D 7PL",
+      "category": "bar",
+      "hours": {
+        "fri": [
+          "14:00",
+          "00:00"
+        ],
+        "mon": [
+          "15:00",
+          "23:30"
+        ],
+        "sat": [
+          "12:00",
+          "00:00"
+        ],
+        "sun": [
+          "14:00",
+          "22:30"
+        ],
+        "thu": [
+          "15:00",
+          "23:30"
+        ],
+        "tue": [
+          "15:00",
+          "23:30"
+        ],
+        "wed": [
+          "15:00",
+          "23:30"
+        ]
+      },
+      "hours_verified": true,
+      "id": "london-yard-bar",
+      "instagram": null,
+      "lat": 51.51201,
+      "lon": -0.13389,
+      "name": "The Yard Bar",
+      "neighborhood": "Soho",
+      "review_features": [
+        "Drinks, dates and dancing",
+        "Drag DJs on weekends",
+        "Happy hour until 8pm"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "http://www.theyardbarsoho.co.uk/"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://www.patroc.com/gay/london/map1.html"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "Ramillies House, 1-2 Ramillies Street, London W1F 7LN",
+      "category": "sauna",
+      "hours": "24h",
+      "hours_verified": true,
+      "id": "london-sweatbox-soho",
+      "instagram": null,
+      "lat": 51.51504,
+      "lon": -0.13879,
+      "name": "Sweatbox Soho",
+      "neighborhood": "Soho",
+      "review_features": [
+        "Male-only gym and sauna",
+        "Three floors",
+        "Open 24/7"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-08",
+          "tier": 3,
+          "url": "https://www.sweatboxsoho.com/contact/"
+        },
+        {
+          "retrieved_at": "2026-10-08",
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/way/65489507"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://www.patroc.com/gay/london/d/saunasweatboxsoho.html"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "7 Duncannon Street, London WC2N 4JF",
+      "category": "bar",
+      "hours": {
+        "fri": [
+          "13:00",
+          "01:00"
+        ],
+        "mon": [
+          "12:00",
+          "23:00"
+        ],
+        "sat": [
+          "12:00",
+          "01:00"
+        ],
+        "sun": [
+          "12:00",
+          "21:00"
+        ],
+        "thu": [
+          "12:00",
+          "00:00"
+        ],
+        "tue": [
+          "12:00",
+          "23:00"
+        ],
+        "wed": [
+          "12:00",
+          "23:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "london-halfway-to-heaven",
+      "instagram": null,
+      "lat": 51.50836,
+      "lon": -0.12639,
+      "name": "Halfway To Heaven",
+      "neighborhood": "West End",
+      "review_features": [
+        "LGBTQ+ cabaret pub since 1991",
+        "Cabaret seven nights a week",
+        "Two floors near Trafalgar Square"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 3,
+          "url": "https://www.halfway2heaven.net/london"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://www.misterbandb.com/gay-guide/united-kingdom/london/50-bars-clubs/10726-halfway-to-heaven"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "139-143 Whitfield Street, London W1T 5EN",
+      "category": "cruise",
+      "hours": {
+        "sun": [
+          "13:00",
+          "01:00"
+        ],
+        "mon": [
+          "13:00",
+          "01:00"
+        ],
+        "tue": [
+          "13:00",
+          "01:00"
+        ],
+        "wed": [
+          "13:00",
+          "01:00"
+        ],
+        "thu": [
+          "13:00",
+          "01:00"
+        ],
+        "fri": [
+          "13:00",
+          "01:00"
+        ],
+        "sat": [
+          "13:00",
+          "01:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "london-vault-139",
+      "instagram": null,
+      "lat": 51.52357,
+      "lon": -0.13883,
+      "name": "Vault 139",
+      "neighborhood": "Fitzrovia",
+      "review_features": [
+        "Gay cruise club",
+        "Themed nights",
+        "Private rooms and vaults"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://www.misterbandb.com/gay-guide/united-kingdom/london/58-saunas-cruising/10173-vault-139"
+        },
+        {
+          "retrieved_at": "2026-10-06",
+          "tier": 2,
+          "url": "https://thefabryk.com/blog/best-london-gay-clubs"
+        },
+        {
+          "tier": 3,
+          "url": "http://www.vault139.com/",
+          "retrieved_at": "2026-10-05"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "Arch 124, Cornwall Road, London SE1 8XE",
+      "category": "sauna",
+      "hours": "24h",
+      "hours_verified": true,
+      "id": "london-pleasuredrome",
+      "instagram": null,
+      "lat": 51.50398,
+      "lon": -0.11045,
+      "name": "Pleasuredrome",
+      "neighborhood": "Waterloo",
+      "review_features": [
+        "Men's spa and sauna open 24 hours",
+        "Under a railway arch by Waterloo Station",
+        "Spa pool, steam rooms, and a bar"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-08",
+          "tier": 3,
+          "url": "https://www.pleasuredrome.com/"
+        },
+        {
+          "retrieved_at": "2026-10-08",
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/4381949296"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "6-8 Cleaver Street, London SE11 4DP",
+      "category": "sauna",
+      "hours": {
+        "mon": [
+          "11:00",
+          "23:00"
+        ],
+        "tue": [
+          "11:00",
+          "23:00"
+        ],
+        "wed": [
+          "11:00",
+          "23:00"
+        ],
+        "thu": [
+          "11:00",
+          "23:00"
+        ],
+        "fri": [
+          "11:00",
+          "23:00"
+        ],
+        "sat": [
+          "11:00",
+          "23:00"
+        ],
+        "sun": [
+          "11:00",
+          "23:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "london-the-locker-room",
+      "instagram": "tlrsauna",
+      "lat": 51.48834,
+      "lon": -0.11056,
+      "name": "The Locker Room",
+      "neighborhood": "Kennington",
+      "review_features": [
+        "Gay and bisexual men's sauna in Kennington",
+        "Dry sauna, steam room, and private cabins",
+        "Open daily from 11:00 to 23:00"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-08",
+          "tier": 3,
+          "url": "https://lockerroomsauna.co.uk/"
+        },
+        {
+          "retrieved_at": "2026-10-08",
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/2707263303"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "570-574 Commercial Road, London E14 7JD",
+      "category": "sauna",
+      "hours": {
+        "mon": [
+          "13:00",
+          "23:00"
+        ],
+        "tue": [
+          "12:00",
+          "23:00"
+        ],
+        "wed": [
+          "12:00",
+          "23:00"
+        ],
+        "thu": [
+          "12:00",
+          "23:00"
+        ],
+        "fri": [
+          "12:00",
+          "23:00"
+        ],
+        "sat": [
+          "13:00",
+          "23:00"
+        ],
+        "sun": [
+          "13:00",
+          "23:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "london-sailors-sauna",
+      "instagram": null,
+      "lat": 51.51264,
+      "lon": -0.04035,
+      "name": "Sailors Sauna",
+      "neighborhood": "Limehouse",
+      "review_features": [
+        "Gay and bisexual men's sauna in Limehouse",
+        "Spa pool, steam room, and roof garden",
+        "Private cabins and a snack bar"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-08",
+          "tier": 3,
+          "url": "https://sailorssauna.com/entry-price-hours.html"
+        },
+        {
+          "retrieved_at": "2026-10-08",
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/way/190626263"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "29 Endell Street, London WC2H 9BA",
+      "category": "sauna",
+      "hours": {
+        "mon": [
+          "12:00",
+          "23:30"
+        ],
+        "tue": [
+          "12:00",
+          "23:30"
+        ],
+        "wed": [
+          "12:00",
+          "23:30"
+        ],
+        "thu": [
+          "12:00",
+          "23:30"
+        ],
+        "fri": [
+          "12:00",
+          "23:30"
+        ],
+        "sat": [
+          "12:00",
+          "02:00"
+        ],
+        "sun": [
+          "12:00",
+          "22:30"
+        ]
+      },
+      "hours_verified": true,
+      "id": "london-covent-garden-health-spa",
+      "instagram": null,
+      "lat": 51.51448,
+      "lon": -0.12468,
+      "name": "Covent Garden Health Spa",
+      "neighborhood": "Covent Garden",
+      "review_features": [
+        "Male-only sauna on Endell Street",
+        "Open daily, later on Saturday",
+        "On-site massage by appointment"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-08",
+          "tier": 3,
+          "url": "https://www.cghspa.uk/events-rates-times/"
+        },
+        {
+          "retrieved_at": "2026-10-08",
+          "tier": 3,
+          "url": "https://www.cghspa.uk/contact/"
+        },
+        {
+          "retrieved_at": "2026-10-08",
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/12920922065"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "2 Portsea Place, London W2 2BL",
+      "category": "sauna",
+      "hours": {
+        "mon": [
+          "11:30",
+          "22:30"
+        ],
+        "tue": [
+          "11:30",
+          "22:30"
+        ],
+        "wed": [
+          "11:30",
+          "22:30"
+        ],
+        "thu": [
+          "11:30",
+          "22:30"
+        ],
+        "fri": [
+          "11:30",
+          "22:30"
+        ],
+        "sat": [
+          "11:30",
+          "22:30"
+        ],
+        "sun": [
+          "11:30",
+          "22:30"
+        ]
+      },
+      "hours_verified": true,
+      "id": "london-saunabar-portsea",
+      "instagram": null,
+      "lat": 51.51543,
+      "lon": -0.16454,
+      "name": "Saunabar Portsea",
+      "neighborhood": "Marble Arch",
+      "review_features": [
+        "Gay sauna at Marble Arch",
+        "Open daily from 11:30 to 22:30",
+        "North of Hyde Park, near Edgware Road"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-08",
+          "tier": 3,
+          "url": "https://gaysaunabar.com/html/opening_times.html"
+        },
+        {
+          "retrieved_at": "2026-10-08",
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/4377148022"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "address": "6 Leytonstone Road, London E15 1SE",
+      "category": "sauna",
+      "hours": {
+        "tue": [
+          "12:00",
+          "19:00"
+        ],
+        "wed": [
+          "12:00",
+          "19:00"
+        ],
+        "fri": [
+          "12:00",
+          "19:00"
+        ],
+        "sat": [
+          "12:00",
+          "19:00"
+        ],
+        "sun": [
+          "12:00",
+          "19:00"
+        ]
+      },
+      "hours_verified": true,
+      "id": "london-e15-club",
+      "instagram": null,
+      "lat": 51.54676,
+      "lon": 0.00653,
+      "name": "E15 Club",
+      "neighborhood": "Stratford",
+      "review_features": [
+        "Gay sauna in Stratford",
+        "Dry sauna, steam room, and infra-red sauna",
+        "Afternoon opening five days a week"
+      ],
+      "sources": [
+        {
+          "retrieved_at": "2026-10-08",
+          "tier": 3,
+          "url": "https://www.e15club.com/about-the-club/"
+        },
+        {
+          "retrieved_at": "2026-10-08",
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/4377148023"
+        }
+      ],
+      "live_counter": null
+    }
+  ],
+  "events": [
+    {
+      "name": "Pride in London 2026",
+      "type": "pride",
+      "start": "2026-07-04",
+      "end": "2026-07-04",
+      "source": "https://prideinlondon.org/2026-parade-registration-announcement"
+    },
+    {
+      "name": "Pride in London 2027",
+      "type": "pride",
+      "start": "2027-07-03",
+      "end": "2027-07-03",
+      "source": "http://prideinlondon.org"
+    }
+  ]
+}

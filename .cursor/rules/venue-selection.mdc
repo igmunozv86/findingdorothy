@@ -7,10 +7,10 @@ alwaysApply: true
 
 Cursor renders. Research runs as parallel workers under `.cursor/rules/city-research.mdc`, not in the build conversation. Do not hand-edit city content. Do not edit `apps/web/index.html`.
 
-- Workers write one city to `data/staging/cities/<slug>.json`. Mimi merges only files that pass `node scripts/merge-cities.mjs`. That script prints a diff and leaves a failing file in staging.
-- The page reads `data/cities/<slug>.json` only. Staging drafts do not block the build. The build stops if a merged file fails validation.
+- Workers write one city to `data/staging/cities/<slug>.json` and the research report to `data/staging/reports/<slug>.json`. Mimi merges only files that pass `node scripts/merge-cities.mjs`. That script prints a diff, then clears those two files from the inbox. A failing file stays in staging.
+- The page reads `data/cities/<slug>.json` only. Staging drafts do not block the build. The build stops if a merged file fails schema validation. The merge gate is stricter: fewer than 5 venues fails, and the research report is required.
 - Automated checks: schema, enums, exact region strings, at least two sources with a url and retrieved_at. Source tiers are 0, 1, 2, or 3. Tier 4 is Nacho's QA, not a source. `hours_verified` is true only when a tier 3 source is present. Unknown hours are `"no recent data"`.
-- Two-tier confirmation of a name and address, and a thin city, are review flags. They are not a reason to invent a source.
+- Two-tier confirmation of a name and address is a review flag. A category mix that is thin is a review flag. Fewer than 5 venues is a failure, not a flag. Fewer than half the venues with `hours_verified: true` is a backfill flag and must be printed before merge. None of these are a reason to invent a source.
 - Region is one of: North America, Europe, Latin America, Asia-Pacific, Middle East, Africa. Tel Aviv is Middle East.
 - Pride dates live on the city as `events`, not a yearly pride object. Each event is `{name, type, start, end, source}`. v1 type is `pride`. `start` and `end` are the full published range (`YYYY-MM-DD`); a single published date uses that date for both. `source` is the organizer page. Do not infer a range, do not copy last year forward, and do not invent an event. An empty `events` array is honest.
 - A layout change is one template edit. Adding a city is one JSON file.

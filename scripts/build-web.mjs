@@ -10,6 +10,7 @@ import { assembleForecast, dayScore, isShutdown, loadForecastInputs } from '../p
 import { freshOccupancy, signalMarkup } from '../packages/forecast/live.js';
 import { fetchWeather } from '../packages/forecast/weather.js';
 import { loadCities } from '../packages/cities/load.js';
+import { CONDITIONAL_GROUPS, FLAGS, GROUPS, groupForCategory } from '../packages/cities/taxonomy.js';
 
 function publicAuthConfig() {
   let file = {};
@@ -33,48 +34,10 @@ function allVenues() {
   return CITIES.flatMap((city) => city.venues);
 }
 
-const GROUPS = [
-  { id: 'dance', title: 'Dance and drinks', categories: ['bar', 'club'], icon: 'music' },
-  { id: 'sauna', title: 'Saunas', categories: ['sauna'], icon: 'sauna' },
-  { id: 'fun', title: 'Cruisy', categories: ['sex', 'cruise'], icon: 'fire' },
-];
-
-const SCENES = [
-  { id: 'dance', name: 'Dance and drinks', copy: 'Bars and clubs — which nights they peak, and how packed they get.' },
-  { id: 'sauna', name: 'Saunas', copy: 'Hours, and when the steam is up.' },
-  { id: 'fun', name: 'Cruisy', copy: 'Cruise bars and sex clubs, mapped honestly.' },
-];
-
 const weatherByCity = {};
 
 const RAIN_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.4 15h11.3a3.5 3.5 0 0 0 .4-7 5.1 5.1 0 0 0-9.9-1.2A4 4 0 0 0 6.4 15z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M8.2 17.2v2.3M12 17.2v3.1M15.8 17.2v2.3"/></svg>`;
 const SNOW_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.4 14h11.3a3.5 3.5 0 0 0 .4-7 5.1 5.1 0 0 0-9.9-1.2A4 4 0 0 0 6.4 14z"/><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M8 16.6v2.2M7 17.7h2M12 17v2.4M10.8 18.2h2.4M16 16.6v2.2M15 17.7h2"/></svg>`;
-
-const FLAGS = {
-  USA: '🇺🇸',
-  Spain: '🇪🇸',
-  Portugal: '🇵🇹',
-  France: '🇫🇷',
-  Germany: '🇩🇪',
-  UK: '🇬🇧',
-  Netherlands: '🇳🇱',
-  Italy: '🇮🇹',
-  Chile: '🇨🇱',
-  Brazil: '🇧🇷',
-  Argentina: '🇦🇷',
-  Colombia: '🇨🇴',
-  Peru: '🇵🇪',
-  Uruguay: '🇺🇾',
-  Mexico: '🇲🇽',
-  Canada: '🇨🇦',
-  Australia: '🇦🇺',
-  Thailand: '🇹🇭',
-  Taiwan: '🇹🇼',
-  Japan: '🇯🇵',
-  'Hong Kong': '🇭🇰',
-  Israel: '🇮🇱',
-  'South Africa': '🇿🇦',
-};
 
 function placeLabel(city) {
   return `${city.name}, ${city.country}`;
@@ -342,19 +305,18 @@ function groupHtml(group, venues, when, cityId) {
     ? `\n        <p class="aside">Removed — out of business: ${escapeHtml(gone.map((venue) => venue.name).join(', '))}.</p>`
     : '';
   return `      <section class="group" id="group-${escapeHtml(cityId)}-${escapeHtml(group.id)}">
-        <h3>${groupIcon(group)}${escapeHtml(group.title)}</h3>
+        <h3>${groupIcon(group)}${escapeHtml(group.name)}</h3>
         ${body}${aside}
       </section>`;
 }
 
 function scenesHtml() {
-  const cards = SCENES.map((scene) => {
-    const group = GROUPS.find((item) => item.id === scene.id);
-    return `          <button type="button" class="scene-card" data-group="${escapeHtml(scene.id)}">
+  const cards = GROUPS.map((group) => {
+    return `          <button type="button" class="scene-card" data-group="${escapeHtml(group.id)}">
             <span class="scene-mark">${groupIcon(group)}</span>
             <span>
-              <span class="scene-name">${escapeHtml(scene.name)}</span>
-              <span class="scene-copy">${escapeHtml(scene.copy)}</span>
+              <span class="scene-name">${escapeHtml(group.name)}</span>
+              <span class="scene-copy">${escapeHtml(group.copy)}</span>
             </span>
           </button>`;
   }).join('\n');
@@ -369,7 +331,7 @@ ${cards}
 }
 
 function sectionMenu(cityId) {
-  const items = GROUPS.map((group) => `        <button type="button" data-jump="group-${escapeHtml(cityId)}-${escapeHtml(group.id)}">${escapeHtml(group.title)}</button>`).join('\n');
+  const items = GROUPS.map((group) => `        <button type="button" data-jump="group-${escapeHtml(cityId)}-${escapeHtml(group.id)}">${escapeHtml(group.name)}</button>`).join('\n');
   return `      <nav class="jump-menu" id="jump-menu-${escapeHtml(cityId)}" aria-label="Jump to a section">
 ${items}
       </nav>`;
@@ -681,20 +643,12 @@ ${calendarNav('outlook')}
   </main>`;
 }
 
-const SCENE_GROUPS = [
-  { id: 'dance', name: 'Dance and drinks', categories: ['bar', 'club'] },
-  { id: 'sauna', name: 'Saunas', categories: ['sauna'] },
-  { id: 'sexy', name: 'Cruisy', categories: ['cruise', 'sex'] },
-];
-
 function sceneGroup(category) {
-  const match = SCENE_GROUPS.find((group) => group.categories.includes(category));
-  return match ? match.id : 'dance';
+  return groupForCategory(category).id;
 }
 
 function sceneGroupName(category) {
-  const match = SCENE_GROUPS.find((group) => group.categories.includes(category));
-  return match ? match.name : 'Dance and drinks';
+  return groupForCategory(category).name;
 }
 
 const NIGHT_HOURS = [18, 19, 20, 21, 22, 23, 0, 1, 2];
@@ -733,6 +687,43 @@ function nightPeak(venue, city, dow) {
   return best || { percent: 0, hour: 21 };
 }
 
+function isoInZone(timeZone, days) {
+  const key = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+  const [year, month, day] = key.split('-').map(Number);
+  const utc = new Date(Date.UTC(year, month - 1, day + days));
+  return utc.toISOString().slice(0, 10);
+}
+
+function eventChipOn(city) {
+  const events = city.events || [];
+  if (!events.length) return false;
+  const weekday = zonedNow(new Date(), city.tz).weekday;
+  const fridayOffset = weekday === 0 ? -2 : weekday === 6 ? -1 : weekday === 5 ? 0 : 5 - weekday;
+  const today = isoInZone(city.tz, 0);
+  const fri = isoInZone(city.tz, fridayOffset);
+  const sun = isoInZone(city.tz, fridayOffset + 2);
+  return events.some((event) => (event.start <= today && event.end >= today) || (event.start <= sun && event.end >= fri));
+}
+
+function vibeChips(city) {
+  const showEvents = eventChipOn(city);
+  const standing = GROUPS
+    .map((group) => `          <button type="button" class="vibe-chip" data-group="${group.id}" aria-pressed="${group.id === 'dance' ? 'true' : 'false'}">${escapeHtml(group.name)}</button>`)
+    .join('\n');
+  const conditional = CONDITIONAL_GROUPS
+    .map((group) => {
+      const hidden = group.when === 'today-or-weekend' && !showEvents ? ' hidden' : '';
+      return `          <button type="button" class="vibe-chip" data-group="${group.id}"${hidden}>${escapeHtml(group.name)}</button>`;
+    })
+    .join('\n');
+  return `${standing}\n${conditional}`;
+}
+
 function calendarOffset(timeZone, days) {
   const key = new Intl.DateTimeFormat('en-CA', {
     timeZone,
@@ -764,14 +755,12 @@ function snapshotVenue(venue, city) {
   const eventTonight = Boolean(event?.event_tonight);
   const curve = [];
   const open = [];
-  const hoursLines = [];
   let confidence = 'low';
   let hoursText = '';
   for (let hour = 0; hour < 24; hour += 1) {
     const forecast = forecastAt(venue, city, now.weekday, hour, eventTonight);
     curve.push(forecast.percent);
     open.push(Boolean(forecast.status.open));
-    hoursLines.push(forecast.status.text);
     if (hour === now.hour) {
       confidence = forecast.confidence;
       hoursText = forecast.status.text;
@@ -807,8 +796,8 @@ function snapshotVenue(venue, city) {
     features: venue.review_features || [],
     event: event?.event_name || null,
     eventUrl: venue.events_url || null,
+    hours: venue.hours == null ? 'no recent data' : venue.hours,
     hoursText,
-    hoursLines,
     lat: typeof venue.lat === 'number' ? venue.lat : null,
     lon: typeof venue.lon === 'number' ? venue.lon : null,
   };
@@ -857,10 +846,16 @@ function buildTonight() {
 
 const tonightData = buildTonight();
 
-function tonightLine(venue, mode) {
-  if (mode === 'weekend') return `Peaks ~${peakClock(venue.weekend.hour)}`;
-  if (venue.unsure) return `Hours not confirmed · peaks ~${peakClock(venue.peak)}`;
-  return `Open now · peaks ~${peakClock(venue.peak)}`;
+function bandLabel(percent) {
+  if (percent >= 75) return 'Very busy';
+  if (percent >= 51) return 'Busy';
+  return 'Not busy';
+}
+
+function mergedStatus(hoursText, peak) {
+  if (!hoursText || hoursText === 'Hours not confirmed') return `Hours not confirmed · ${peak}`;
+  if (hoursText === 'Open 24 hours' || hoursText.startsWith('Open now')) return `${hoursText} · ${peak}`;
+  return hoursText;
 }
 
 function busyNote() {
@@ -1029,9 +1024,11 @@ function conceptHtml(features) {
 function tonightRow(venue, hour, mode) {
   const percent = mode === 'weekend' ? venue.weekend.percent : venue.curve[hour];
   const place = venue.area ? ` · ${escapeHtml(venue.area)}` : '';
-  const note = mode === 'weekend' ? 'weekend peak' : busyNote();
+  const note = bandLabel(percent);
+  const peak = mode === 'weekend' ? `peaks ~${peakClock(venue.weekend.hour)}` : `peaks ~${peakClock(venue.peak)}`;
+  const status = mode === 'weekend' ? `Peaks ~${peakClock(venue.weekend.hour)}` : mergedStatus(venue.hoursText, peak);
   const live = mode === 'weekend' ? '' : liveLine(venue);
-  return `          <li><button type="button" class="tonight-row" data-venue="${escapeHtml(venue.id)}"><span class="tonight-name">${escapeHtml(venue.name)}</span><span class="tonight-score"><span class="forecast-badge">${percent}%</span><span class="forecast-note">${escapeHtml(note)}</span></span><span class="tonight-meta">${escapeHtml(venue.cat)}${place}</span><span class="tonight-hours">${escapeHtml(venue.hoursText)}</span>${live}<span class="tonight-when">${escapeHtml(tonightLine(venue, mode))}</span>${conceptHtml(venue.features)}</button></li>`;
+  return `          <li><button type="button" class="tonight-row" data-venue="${escapeHtml(venue.id)}"><span class="tonight-name">${escapeHtml(venue.name)}</span><span class="tonight-score"><span class="forecast-badge">${percent}%</span><span class="forecast-note">${escapeHtml(note)}</span></span><span class="tonight-meta">${escapeHtml(venue.cat)}${place}</span><span class="tonight-hours">${escapeHtml(status)}</span>${live}${conceptHtml(venue.features)}</button></li>`;
 }
 
 function tonightRail(venues, hour, mode) {
@@ -1143,10 +1140,7 @@ function homeTonightHtml() {
   const closedVenues = city.venues
     .filter((venue) => inDance(venue) && !venue.open[city.hour])
     .sort((a, b) => a.name.localeCompare(b.name));
-  const chips = `${SCENE_GROUPS
-    .map((group) => `          <button type="button" class="vibe-chip" data-group="${group.id}" aria-pressed="${group.id === 'dance' ? 'true' : 'false'}">${escapeHtml(group.name)}</button>`)
-    .join('\n')}
-          <button type="button" class="vibe-chip" data-group="events">Events</button>`;
+  const chips = vibeChips(city);
   const weekendHidden = city.weekday === 5 || city.weekday === 6 ? ' hidden' : '';
   return `    <section class="hero tonight-hero">
       <img class="tonight-hero-photo" src="assets/home-hero.jpg" alt="">
@@ -1160,15 +1154,15 @@ ${nowLineHtml(city)}
     </section>
     <div id="city-rails">
     <section class="tonight-block" id="tonight">
+      <p class="now-facts rank-note" id="now-facts" data-weather data-lat="${city.lat}" data-lon="${city.lon}">
+        <span class="now-day" data-day>${escapeHtml(barWhen(city.tz).dayName)}</span>
+        <span class="now-date" data-date>${escapeHtml(barWhen(city.tz).shortDate)}</span>
+        <span class="now-time" data-clock data-tz="${escapeHtml(city.tz)}">${escapeHtml(zonedNow(new Date(), city.tz).timeLabel)}</span>
+        <span class="now-temp" data-temp>${escapeHtml(city.weather.temp)}</span>
+        ${skyMark(city)}
+      </p>
       <div class="tonight-head">
         <h2 id="tonight-title">Right now</h2>
-        <p class="now-facts rank-note" id="now-facts" data-weather data-lat="${city.lat}" data-lon="${city.lon}">
-          <span class="now-day" data-day>${escapeHtml(barWhen(city.tz).dayName)}</span>
-          <span class="now-date" data-date>${escapeHtml(barWhen(city.tz).shortDate)}</span>
-          <span class="now-time" data-clock data-tz="${escapeHtml(city.tz)}">${escapeHtml(zonedNow(new Date(), city.tz).timeLabel)}</span>
-          <span class="now-temp" data-temp>${escapeHtml(city.weather.temp)}</span>
-          ${skyMark(city)}
-        </p>
       </div>
       <div class="vibe-row" id="vibe-row">
 ${chips}
@@ -2833,6 +2827,13 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
         border: 1px solid var(--line);
         border-radius: 16px;
       }
+      .tonight-card {
+        padding: 0.9rem 1rem;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+      }
+      .tonight-card .tonight-row { padding: 0; border: 0; border-radius: 0; }
+      .tonight-card .check-in { margin: 0.75rem 0 0; }
       .sheet {
         top: 0;
         right: 0;
@@ -2876,7 +2877,6 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       margin: 0 auto;
       padding: 2.4rem 0 1.5rem;
     }
-    .tonight-hero h1 { color: #111; }
     .tonight-hero .subhead { color: var(--muted); }
     .tonight-hero .hero-mark { width: 120px; height: 120px; }
     .pride-hero .tonight-hero-photo { object-position: center 32%; }
@@ -2907,12 +2907,13 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     .tonight-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 0.8rem; }
     .tonight-head h2 { margin: 0; font-size: 28px; font-weight: 800; }
     .now-facts {
-      display: inline-flex;
-      flex: 1 1 0;
-      min-width: 0;
+      display: flex;
+      justify-content: center;
       flex-wrap: wrap;
       align-items: center;
       gap: 0.3rem 0.45rem;
+      margin: 0.15rem 0 0.85rem;
+      text-align: center;
     }
     .now-facts .now-day,
     .now-facts .now-date,
@@ -3029,6 +3030,15 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
       color: transparent;
     }
     .forecast-note { color: var(--muted); font-size: 12px; font-weight: 500; line-height: 1.2; text-align: right; }
+    .tonight-distance {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      color: var(--muted);
+      font-weight: 400;
+      font-size: 14px;
+    }
+    .tonight-distance svg { width: 13px; height: 13px; flex: none; color: #ff7a18; }
     .tonight-live {
       grid-column: 1 / -1;
       display: flex;
@@ -3123,11 +3133,16 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     }
     .now-search { width: 24px; height: 24px; }
     @media (max-width: 759px) {
-      .now-bar { width: 100%; margin-top: 1.1rem; }
+      .tonight-hero .hero-mark { width: 72px; height: 72px; }
+      .tonight-hero-inner { padding: 0.7rem 0 0.35rem; }
+      .tonight-hero h1 { font-size: 32px; }
+      .tonight-hero .subhead { margin-top: 0.35rem; }
+      .now-bar { width: 100%; margin-top: 0.7rem; }
       #now-line { gap: 0.55rem; padding: 0.9rem 1.05rem; }
       #now-line .now-place { font-size: 18px; }
       .now-flag { font-size: 22px; }
       .now-search { width: 20px; height: 20px; }
+      #tonight.tonight-block { padding-top: 0.85rem; }
     }
     .city-picker {
       position: absolute;
@@ -3218,15 +3233,126 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
     }
     .sheet-body { padding: 0 1.15rem 1.5rem; }
     .sheet-body h3 { margin: 0; font-size: 28px; }
+    .sheet-sub { margin: 0.2rem 0 0; color: var(--muted); font-size: 14px; }
     .sheet-save {
       border: 0;
       background: transparent;
       color: #111;
       font: inherit;
+      font-weight: 600;
+      padding: 0;
       cursor: pointer;
     }
-    .sheet-save svg { width: 22px; height: 22px; fill: none; stroke: currentColor; }
-    .sheet-save.is-on svg { fill: currentColor; stroke: none; }
+    .sheet-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 0.9rem; }
+    .sheet-actions button {
+      border: 1.5px solid #e2e2e6;
+      border-radius: 999px;
+      background: #fff;
+      color: #111;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 0.4rem 0.85rem;
+      cursor: pointer;
+    }
+    .sheet-actions button.is-on {
+      border-color: #ff7a18;
+      background: #ff7a18;
+      color: #fff;
+    }
+    .sheet-body .forecast-badge {
+      display: block;
+      margin-top: 0.85rem;
+      font-size: 22px;
+      background: none;
+      -webkit-background-clip: border-box;
+      background-clip: border-box;
+      -webkit-text-fill-color: #ff7a18;
+      color: #ff7a18;
+    }
+    .sheet-body .forecast-explain { margin-top: 0.2rem; font-size: 13px; }
+    .sheet-body .rank-note { margin-top: 0.95rem; }
+    .sheet-body .curve, .sheet-body .week-curve { margin-top: 0.2rem; }
+    .sheet-body .verified { margin-top: 0.85rem; }
+    .sheet-section {
+      margin: 1.05rem 0 0.45rem;
+      color: #9a9aa3;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .sheet-body .features { margin-top: 0; }
+    .sheet-section.is-map { margin-top: 2.4rem; }
+    .sheet-body .maps { gap: 0.5rem; margin: 0; }
+    .sheet-body .maps a { border-color: #e2e2e6; font-weight: 500; }
+    .check-in, .text-action {
+      border: 0;
+      background: transparent;
+      color: #111;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 0;
+      cursor: pointer;
+    }
+    .check-in.is-on { color: #ff7a18; }
+    .tonight-card { border-bottom: 1px solid var(--line); }
+    .tonight-card .tonight-row { border-bottom: 0; padding-bottom: 0.35rem; }
+    .tonight-card .check-in,
+    .tonight-card .check-in.is-on {
+      display: inline-flex;
+      margin: 0 0 0.85rem;
+      padding: 0.4rem 0.95rem;
+      border: 1.5px solid #ff7a18;
+      border-radius: 999px;
+      background: #fff;
+      color: #111;
+    }
+    .inline-auth {
+      display: grid;
+      gap: 0.45rem;
+      margin: 0 0 0.9rem;
+      padding: 0.75rem;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fafafb;
+    }
+    .inline-auth[hidden] { display: none; }
+    .inline-reason { margin: 0; font-weight: 700; font-size: 14px; }
+    .inline-note { margin: 0; color: var(--muted); font-size: 12px; }
+    .check-mail { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; text-align: center; }
+    .inline-auth .account-field { margin-top: 0.15rem; }
+    .auth-or {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin: 0.2rem 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .auth-or::before, .auth-or::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+    .inline-auth .account-field, .review-form .account-field { width: 100%; }
+    .review-form { display: grid; gap: 0.55rem; }
+    .review-form[hidden] { display: none; }
+    .busy-row { display: flex; align-items: center; gap: 0.55rem; color: var(--muted); font-size: 13px; }
+    .busy-row input { flex: 1; accent-color: #ff7a18; }
+    .vibe-pick { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .vibe-pick button {
+      border: 1px solid #e4e4ea;
+      background: #fff;
+      border-radius: 999px;
+      padding: 0.28rem 0.65rem;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .vibe-pick button.is-on { border-color: #ff7a18; color: #ff7a18; }
     .profile-btn {
       display: inline-flex;
       align-items: center;
@@ -3376,6 +3502,13 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
         border: 1px solid var(--line);
         border-radius: 16px;
       }
+      .tonight-card {
+        padding: 0.9rem 1rem;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+      }
+      .tonight-card .tonight-row { padding: 0; border: 0; border-radius: 0; }
+      .tonight-card .check-in { margin: 0.75rem 0 0; }
       .sheet {
         top: 0;
         right: 0;
@@ -3600,13 +3733,13 @@ ${LIVE.map((_, index) => `    .world.is-open .acc-item:nth-child(${index + 1}) {
         <img src="assets/logo-v4-warm.jpg" alt="FindingDorothy">
       </a>
       <div class="header-auth" id="header-auth">
-        <button type="button" class="profile-btn" id="profile-btn" aria-label="Account">
+        <button type="button" class="btn-signup" id="join-btn">Join us</button>
+        <button type="button" class="btn-login" id="venues-btn">Venues</button>
+        <button type="button" class="profile-btn" id="profile-btn" aria-label="Account" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 19.2c1.4-3 3.8-4.4 7-4.4s5.6 1.4 7 4.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         </button>
         <span class="auth-skel" id="auth-skel" hidden></span>
         <span class="auth-skel is-wide" id="auth-skel-wide" hidden></span>
-        <button type="button" class="btn-login" id="login-btn">Login</button>
-        <button type="button" class="btn-signup" id="signup-btn">Sign up for free</button>
       </div>
       <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -3634,8 +3767,7 @@ ${pridePageHtml()}
         <a href="#home">Home</a>
         <a href="#pride">Fun Calendar</a>
         <a href="#why">Why FindingDorothy</a>
-        <a href="#login" id="foot-login">Login</a>
-        <a href="#signup" id="foot-signup">Sign up for free</a>
+        <a href="#join" id="foot-join">Join us</a>
       </nav>
       <p class="photo-credits">Photos: Dibakar Roy, Yura Forrat, Anastasiya Badun, cottonbro studio, Phat Doan, Pexels.</p>
       <p class="legal">© 2026 FindingDorothy</p>
@@ -3650,7 +3782,7 @@ ${pridePageHtml()}
   <p class="toast" id="toast" hidden role="status"></p>
   <script>
     const cities = ${cityLookup};
-    const tonight = ${JSON.stringify(tonightData)};
+    const tonight = ${JSON.stringify(tonightData, (key, value) => (key === 'hoursText' ? undefined : value))};
     const prideCities = ${prideCityLookup};
     const continentNames = ${continentNames};
     const rainIcon = ${JSON.stringify(RAIN_ICON)};
@@ -3686,6 +3818,16 @@ ${pridePageHtml()}
       toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
     });
     header.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+    document.getElementById('venues-btn').addEventListener('click', () => {
+      closeMenu();
+      const go = () => document.getElementById('tonight').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (document.getElementById('home').hidden) {
+        location.hash = 'home';
+        window.setTimeout(go, 380);
+        return;
+      }
+      go();
+    });
 
     function playView(id, anchor) {
       const shown = document.querySelector('main.view:not([hidden])');
@@ -4388,11 +4530,62 @@ ${pridePageHtml()}
       applyPrideQuery();
     }
 
-    const GROUPS = [
-      { id: 'dance', name: 'Dance and drinks' },
-      { id: 'sauna', name: 'Saunas' },
-      { id: 'sexy', name: 'Cruisy' },
-    ];
+    function hoursLabel(hours, timeZone) {
+      const fmt = new Intl.DateTimeFormat('en-US', {
+        timeZone: timeZone,
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+      });
+      const bag = {};
+      for (const part of fmt.formatToParts(new Date())) bag[part.type] = part.value;
+      let hour = Number(bag.hour);
+      if (hour === 24) hour = 0;
+      const minute = Number(bag.minute);
+      const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(bag.weekday);
+      const minutes = hour * 60 + minute;
+      if (hours == null || hours === 'no recent data') return 'Hours not confirmed';
+      if (hours === '24h') return 'Open 24 hours';
+      const keys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+      const names = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      function clockMinutes(value) {
+        const bits = String(value).split(':');
+        return Number(bits[0]) * 60 + Number(bits[1]);
+      }
+      function formatClock(total) {
+        const mins = ((total % 1440) + 1440) % 1440;
+        const hour24 = Math.floor(mins / 60);
+        const min = mins % 60;
+        const suffix = hour24 >= 12 ? 'PM' : 'AM';
+        const hour12 = hour24 % 12 || 12;
+        const mm = min < 10 ? '0' + min : String(min);
+        return hour12 + ':' + mm + ' ' + suffix;
+      }
+      function windowFor(span) {
+        if (!span || span.length < 2) return null;
+        const start = clockMinutes(span[0]);
+        const end = span[1] === '00:00' ? 1440 : clockMinutes(span[1]);
+        return { start: start, end: end, overnight: end <= start };
+      }
+      function coversToday(win, now) {
+        if (win.overnight) return now >= win.start;
+        return now >= win.start && now < win.end;
+      }
+      const yesterday = (weekday + 6) % 7;
+      const spill = windowFor(hours[keys[yesterday]]);
+      if (spill && spill.overnight && minutes < spill.end) return 'Open now · Closes at ' + formatClock(spill.end);
+      const todayWin = windowFor(hours[keys[weekday]]);
+      if (todayWin && coversToday(todayWin, minutes)) return 'Open now · Closes at ' + formatClock(todayWin.end);
+      if (todayWin && minutes < todayWin.start) return 'Closed now · Opens at ' + formatClock(todayWin.start);
+      for (let step = 1; step <= 7; step += 1) {
+        const day = (weekday + step) % 7;
+        const next = windowFor(hours[keys[day]]);
+        if (next) return 'Closed now · Opens ' + names[day] + ' at ' + formatClock(next.start);
+      }
+      return 'Closed now';
+    }
+
     const WEEK_DOW = [1, 2, 3, 4, 5, 6, 0];
     const WEEK_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     let homeCityId = tonight.defaultCity;
@@ -4437,8 +4630,86 @@ ${pridePageHtml()}
       return [];
     }
 
-    function busyNote() {
-      return 'usual for this hour';
+    function bandLabel(percent) {
+      if (percent >= 75) return 'Very busy';
+      if (percent >= 51) return 'Busy';
+      return 'Not busy';
+    }
+
+    function cardStatus(venue, mode) {
+      const peak = 'peaks ~' + peakText(mode === 'weekend' ? venue.weekend.hour : venue.peak);
+      if (mode === 'weekend') return 'Peaks ~' + peakText(venue.weekend.hour);
+      const hours = hoursLabel(venue.hours, homeCity().tz);
+      if (!hours || hours === 'Hours not confirmed') return 'Hours not confirmed · ' + peak;
+      if (hours === 'Open 24 hours' || hours.indexOf('Open now') === 0) return hours + ' · ' + peak;
+      return hours;
+    }
+
+    function preferMiles() {
+      const lang = (navigator.language || 'en-US').toLowerCase();
+      return lang === 'en-us' || lang === 'en-gb' || lang === 'en-lr' || lang === 'en-mm';
+    }
+
+    function distanceLabel(km) {
+      if (preferMiles()) {
+        const miles = km * 0.621371;
+        const text = miles < 10 ? (Math.round(miles * 10) / 10).toFixed(1) : String(Math.round(miles));
+        return text + ' ' + (text === '1' || text === '1.0' ? 'mile' : 'miles') + ' from you';
+      }
+      const text = km < 10 ? (Math.round(km * 10) / 10).toFixed(1) : String(Math.round(km));
+      return text + ' km from you';
+    }
+
+    function rowButton(venue, percent, line, note) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'tonight-row';
+      button.setAttribute('data-venue', venue.id);
+      const name = document.createElement('span');
+      name.className = 'tonight-name';
+      name.textContent = venue.name;
+      if (here && distanceKm(here, homeCity()) <= 50 && typeof venue.lat === 'number' && typeof venue.lon === 'number') {
+        const dist = document.createElement('span');
+        dist.className = 'tonight-distance';
+        const pin = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        pin.setAttribute('viewBox', '0 0 24 24');
+        pin.setAttribute('aria-hidden', 'true');
+        const mark = document.createElementNS(pin.namespaceURI, 'path');
+        mark.setAttribute('fill', 'currentColor');
+        mark.setAttribute('d', 'M12 2.5a6.2 6.2 0 0 0-6.2 6.2c0 4.6 6.2 12.8 6.2 12.8s6.2-8.2 6.2-12.8A6.2 6.2 0 0 0 12 2.5zm0 8.4a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4z');
+        pin.append(mark);
+        dist.append(pin, document.createTextNode(distanceLabel(distanceKm(here, venue))));
+        name.append(document.createTextNode(' \u2013 '), dist);
+      }
+      const score = document.createElement('span');
+      score.className = 'tonight-score';
+      const badge = document.createElement('span');
+      badge.className = 'forecast-badge';
+      badge.textContent = percent + '%';
+      const meaning = document.createElement('span');
+      meaning.className = 'forecast-note';
+      meaning.textContent = note;
+      score.append(badge, meaning);
+      const meta = document.createElement('span');
+      meta.className = 'tonight-meta';
+      meta.textContent = venue.area ? venue.cat + ' · ' + venue.area : venue.cat;
+      const hours = document.createElement('span');
+      hours.className = 'tonight-hours';
+      hours.textContent = line;
+      button.append(name, score, meta, hours);
+      appendLiveLine(button, venue);
+      const concepts = (venue.features || []).slice(0, 5);
+      if (concepts.length) {
+        const row = document.createElement('span');
+        row.className = 'tonight-concepts';
+        concepts.forEach((feature) => {
+          const chip = document.createElement('span');
+          chip.textContent = feature;
+          row.append(chip);
+        });
+        button.append(row);
+      }
+      return button;
     }
 
     function appendLiveLine(parent, venue) {
@@ -4455,48 +4726,37 @@ ${pridePageHtml()}
       parent.append(line);
     }
 
-    function rowButton(venue, percent, line, note) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'tonight-row';
-      button.setAttribute('data-venue', venue.id);
-      const name = document.createElement('span');
-      name.className = 'tonight-name';
-      name.textContent = venue.name;
-      const score = document.createElement('span');
-      score.className = 'tonight-score';
-      const badge = document.createElement('span');
-      badge.className = 'forecast-badge';
-      badge.textContent = percent + '%';
-      const meaning = document.createElement('span');
-      meaning.className = 'forecast-note';
-      meaning.textContent = note;
-      score.append(badge, meaning);
-      const meta = document.createElement('span');
-      meta.className = 'tonight-meta';
-      meta.textContent = venue.area ? venue.cat + ' · ' + venue.area : venue.cat;
-      const hours = document.createElement('span');
-      hours.className = 'tonight-hours';
-      const clockHour = activeHour(homeCity());
-      hours.textContent = venue.hoursLines ? venue.hoursLines[clockHour] : venue.hoursText;
-      const when = document.createElement('span');
-      when.className = 'tonight-when';
-      when.textContent = line;
-      button.append(name, score, meta, hours);
-      appendLiveLine(button, venue);
-      button.append(when);
-      const concepts = (venue.features || []).slice(0, 5);
-      if (concepts.length) {
-        const row = document.createElement('span');
-        row.className = 'tonight-concepts';
-        concepts.forEach((feature) => {
-          const chip = document.createElement('span');
-          chip.textContent = feature;
-          row.append(chip);
-        });
-        button.append(row);
+    function railItem(venue, percent, line, note) {
+      const item = document.createElement('li');
+      const row = rowButton(venue, percent, line, note);
+      const openNow = Boolean(venue.open[activeHour(homeCity())]);
+      if (!openNow) {
+        item.append(row);
+        return item;
       }
-      return button;
+      item.className = 'tonight-card';
+      const check = document.createElement('button');
+      check.type = 'button';
+      check.className = 'check-in';
+      check.setAttribute('data-checkin', venue.id);
+      const marked = account.checkins.some((entry) => entry.venueId === venue.id);
+      check.classList.toggle('is-on', marked);
+      check.textContent = marked ? 'Checked in' : 'Check in';
+      check.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        openSheet(venue.id, percent + '%');
+        const gate = document.getElementById('sheet-gate');
+        if (!gate || !requireLogin(gate, 'checkin', venue.id)) {
+          armSheet('checkin');
+          return;
+        }
+        checkIn(venue.id);
+        gate.hidden = true;
+        gate.replaceChildren();
+      });
+      item.append(row, check);
+      return item;
     }
 
     function fillRail(node, venues, lineFor, showAll) {
@@ -4513,10 +4773,8 @@ ${pridePageHtml()}
       list.className = 'tonight-list';
       const visible = showAll ? venues : venues.slice(0, 8);
       visible.forEach((venue) => {
-        const item = document.createElement('li');
         const lined = lineFor(venue);
-        item.append(rowButton(venue, lined.percent, lined.line, lined.note));
-        list.append(item);
+        list.append(railItem(venue, lined.percent, lined.line, lined.note));
       });
       node.append(list);
       if (showAll || venues.length <= 8) return;
@@ -4531,10 +4789,8 @@ ${pridePageHtml()}
       const rest = document.createElement('ol');
       rest.className = 'tonight-list';
       venues.slice(8).forEach((venue) => {
-        const item = document.createElement('li');
         const lined = lineFor(venue);
-        item.append(rowButton(venue, lined.percent, lined.line, lined.note));
-        rest.append(item);
+        rest.append(railItem(venue, lined.percent, lined.line, lined.note));
       });
       inner.append(rest);
       clip.append(inner);
@@ -4695,7 +4951,7 @@ ${pridePageHtml()}
         cat.textContent = venue.cat;
         const hours = document.createElement('span');
         hours.className = 'closed-hours';
-        hours.textContent = venue.hoursLines ? venue.hoursLines[activeHour(homeCity())] : venue.hoursText;
+        hours.textContent = hoursLabel(venue.hours, homeCity().tz);
         button.append(name, cat, hours);
         item.append(button);
         list.append(item);
@@ -4708,10 +4964,17 @@ ${pridePageHtml()}
       return !group || venue.vibes.indexOf(group) !== -1;
     }
 
-    function paintEventChips() {
+    function paintEventChips(city) {
+      const span = weekendWindow(city.tz);
+      const events = city.events || [];
+      const show = events.some((event) => overlaps(event, span.today, span.today) || overlaps(event, span.fri, span.sun));
       document.querySelectorAll('[data-group="events"]').forEach((button) => {
-        button.hidden = false;
+        button.hidden = !show;
       });
+      if (!show) {
+        if (nowGroup === 'events') nowGroup = 'dance';
+        if (weekendGroup === 'events') weekendGroup = 'dance';
+      }
     }
 
     function eventCard(event, today) {
@@ -4969,10 +5232,8 @@ ${pridePageHtml()}
         const nowShown = city.venues.filter((venue) => inGroup(venue, nowGroup));
         fillRail(document.getElementById('tonight-list'), nowShown.filter((venue) => venue.open[hour]).sort((a, b) => b.curve[hour] - a.curve[hour]), (venue) => ({
           percent: venue.curve[hour],
-          note: busyNote(venue),
-          line: venue.unsure
-            ? 'Hours not confirmed · peaks ~' + peakText(venue.peak)
-            : 'Open now · peaks ~' + peakText(venue.peak),
+          note: bandLabel(venue.curve[hour]),
+          line: cardStatus(venue, 'tonight'),
         }), true);
         paintClosedList(document.getElementById('closed-list'), nowShown.filter((venue) => !venue.open[hour]).sort((a, b) => a.name.localeCompare(b.name)), 'Closed');
       }
@@ -4983,8 +5244,8 @@ ${pridePageHtml()}
         const weekendShown = city.venues.filter((venue) => inGroup(venue, weekendGroup));
         fillRail(document.getElementById('weekend-list'), weekendShown.filter((venue) => venue.weekend.percent > 0).sort((a, b) => b.weekend.percent - a.weekend.percent), (venue) => ({
           percent: venue.weekend.percent,
-          note: 'weekend peak',
-          line: 'Peaks ~' + peakText(venue.weekend.hour),
+          note: bandLabel(venue.weekend.percent),
+          line: cardStatus(venue, 'weekend'),
         }));
         paintClosedList(document.getElementById('weekend-closed'), weekendShown.filter((venue) => venue.weekend.percent === 0).sort((a, b) => a.name.localeCompare(b.name)), 'Closed this weekend');
       }
@@ -5068,7 +5329,7 @@ ${pridePageHtml()}
         rect.setAttribute('width', '18');
         rect.setAttribute('height', String(height));
         rect.setAttribute('rx', '3');
-        rect.setAttribute('fill', '#ff7a18');
+        rect.setAttribute('fill', today ? '#ff7a18' : '#d8d8de');
         const label = document.createElementNS(svg.namespaceURI, 'text');
         label.setAttribute('x', String(8 + index * 34 + 9));
         label.setAttribute('y', '96');
@@ -5083,6 +5344,19 @@ ${pridePageHtml()}
       return svg;
     }
 
+    function armSheet(kind) {
+      const row = document.querySelector('.sheet-actions');
+      if (!row) return;
+      row.querySelectorAll('button').forEach((button) => {
+        const action = button.getAttribute('data-action');
+        const id = button.getAttribute('data-save') || button.getAttribute('data-checkin');
+        let on = false;
+        if (action === 'favorite') on = account.venues.indexOf(id) !== -1;
+        if (action === 'checkin') on = account.checkins.some((entry) => entry.venueId === id);
+        button.classList.toggle('is-on', on || action === kind);
+      });
+    }
+
     function openSheet(id, badgeText) {
       const city = homeCity();
       const venue = city.venues.find((item) => item.id === id);
@@ -5091,39 +5365,77 @@ ${pridePageHtml()}
       const percent = venue.curve[hour];
       const body = document.getElementById('sheet-body');
       body.replaceChildren();
-      const save = document.createElement('button');
-      save.type = 'button';
-      save.className = 'sheet-save';
-      const saved = savedIds().indexOf(venue.id) !== -1;
-      save.classList.toggle('is-on', saved);
-      save.setAttribute('aria-label', saved ? 'Saved' : 'Save');
-      save.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7-4.4-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 3.3c0 4.8-7 9.2-7 9.2z"/></svg>';
-      save.addEventListener('click', () => {
-        if (!account.user) {
-          pendingSave = { kind: 'venue', id: venue.id };
-          openAccount('auth', 'in');
+      const closedNow = !venue.open[hour];
+      const actions = document.createElement('div');
+      actions.className = 'sheet-actions';
+      const gate = document.createElement('div');
+      gate.className = 'inline-auth';
+      gate.id = 'sheet-gate';
+      gate.hidden = true;
+      const favorite = document.createElement('button');
+      favorite.type = 'button';
+      favorite.setAttribute('data-action', 'favorite');
+      favorite.setAttribute('data-save', venue.id);
+      favorite.textContent = '+ Favorite';
+      favorite.classList.toggle('is-on', savedIds().indexOf(venue.id) !== -1);
+      favorite.addEventListener('click', () => {
+        if (!requireLogin(gate, 'favorite', venue.id)) {
+          armSheet('favorite');
           return;
         }
         toggleVenue(venue.id);
-        const on = account.venues.indexOf(venue.id) !== -1;
-        save.classList.toggle('is-on', on);
-        save.setAttribute('aria-label', on ? 'Saved' : 'Save');
+        gate.hidden = true;
+        gate.replaceChildren();
+        armSheet(null);
       });
+      const check = document.createElement('button');
+      check.type = 'button';
+      check.className = 'check-in';
+      check.setAttribute('data-action', 'checkin');
+      check.setAttribute('data-checkin', venue.id);
+      const marked = account.checkins.some((row) => row.venueId === venue.id);
+      check.classList.toggle('is-on', marked);
+      check.textContent = marked ? 'Checked in' : 'Check-in';
+      check.addEventListener('click', () => {
+        if (!requireLogin(gate, 'checkin', venue.id)) {
+          armSheet('checkin');
+          return;
+        }
+        checkIn(venue.id);
+        gate.hidden = true;
+        gate.replaceChildren();
+        armSheet(null);
+      });
+      const review = document.createElement('button');
+      review.type = 'button';
+      review.setAttribute('data-action', 'review');
+      review.textContent = '+ Review';
+      review.addEventListener('click', () => {
+        if (!requireLogin(gate, 'review', venue.id)) {
+          armSheet('review');
+          return;
+        }
+        armSheet('review');
+        showReviewForm(gate, venue.id);
+      });
+      actions.append(favorite, check, review);
       const title = document.createElement('h3');
       title.id = 'sheet-title';
       title.textContent = venue.name;
+      const sub = document.createElement('p');
+      sub.className = 'sheet-sub';
+      sub.textContent = hoursLabel(venue.hours, city.tz);
       const badge = document.createElement('p');
       badge.className = 'forecast-badge';
       badge.textContent = badgeText || (percent + '%');
       const explain = document.createElement('p');
       explain.className = 'forecast-explain';
-      const closedNow = !venue.open[hour];
       explain.textContent = closedNow
         ? 'Closed right now, so this is not a live crowd.'
         : (venue.conf === 'low'
           ? 'How busy it usually is at this hour. Not a live count.'
           : 'Expected busyness right now.');
-      body.append(save, title, badge);
+      body.append(actions, gate, title, sub, badge);
       if (!closedNow) appendLiveLine(body, venue);
       body.append(explain);
       const todayLabel = document.createElement('p');
@@ -5134,9 +5446,6 @@ ${pridePageHtml()}
       weekLabel.className = 'rank-note';
       weekLabel.textContent = 'This week';
       body.append(weekLabel, weekSvg(venue.week, city.weekday));
-      const hours = document.createElement('p');
-      hours.textContent = venue.hoursLines ? venue.hoursLines[hour] : venue.hoursText;
-      body.append(hours);
       if (venue.verified) {
         const verified = document.createElement('p');
         verified.className = 'verified';
@@ -5157,7 +5466,7 @@ ${pridePageHtml()}
       }
       if (venue.features.length) {
         const label = document.createElement('p');
-        label.className = 'reviews-label';
+        label.className = 'sheet-section';
         label.textContent = 'From reviews';
         const list = document.createElement('ul');
         list.className = 'features';
@@ -5168,28 +5477,11 @@ ${pridePageHtml()}
         });
         body.append(label, list);
       }
-      if (account.user) {
-        const reviewLabel = document.createElement('p');
-        reviewLabel.className = 'rank-note';
-        reviewLabel.textContent = 'Your review';
-        const reviewBox = document.createElement('textarea');
-        reviewBox.maxLength = 500;
-        const mine = account.reviews.filter((review) => review.venueId === venue.id);
-        if (mine.length) reviewBox.value = mine[0].body;
-        const reviewSave = document.createElement('button');
-        reviewSave.type = 'button';
-        reviewSave.className = 'btn-login';
-        reviewSave.textContent = 'Save review';
-        reviewSave.addEventListener('click', () => saveReview(venue.id, reviewBox.value));
-        const visit = document.createElement('button');
-        visit.type = 'button';
-        visit.className = 'btn-signup';
-        visit.textContent = 'Log a visit';
-        visit.addEventListener('click', () => logVisit(venue.id));
-        body.append(reviewLabel, reviewBox, reviewSave, visit);
-      }
       if (venue.addr) {
         const query = encodeURIComponent(venue.name + ' ' + venue.addr);
+        const label = document.createElement('p');
+        label.className = 'sheet-section is-map';
+        label.textContent = 'Find it in the map';
         const maps = document.createElement('p');
         maps.className = 'maps';
         const google = document.createElement('a');
@@ -5202,8 +5494,8 @@ ${pridePageHtml()}
         apple.target = '_blank';
         apple.rel = 'noopener noreferrer';
         apple.textContent = 'Apple Maps';
-        maps.append(google, document.createTextNode(' '), apple);
-        body.append(maps);
+        maps.append(google, apple);
+        body.append(label, maps);
       }
       const back = document.getElementById('sheet-back');
       document.getElementById('venue-sheet').classList.remove('is-full');
@@ -5247,6 +5539,7 @@ ${pridePageHtml()}
     }
 
     function onVenueClick(event) {
+      if (event.target.closest('.check-in, .inline-auth, .card-actions')) return;
       const row = event.target.closest('[data-venue]');
       if (!row) return;
       const badge = row.querySelector('.forecast-badge');
@@ -5356,16 +5649,19 @@ ${pridePageHtml()}
     }, 60000);
     let hadCity = false;
     try { hadCity = Boolean(localStorage.getItem('fd-city')); } catch (err) {}
-    if (!hadCity && !hashCity && navigator.geolocation) {
+    if (navigator.geolocation) {
       const place = document.querySelector('[data-place]');
-      place.textContent = 'Detecting…';
+      if (!hadCity && !hashCity) place.textContent = 'Detecting…';
       navigator.geolocation.getCurrentPosition((pos) => {
         here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
         const nearest = tonight.cities.slice().sort((a, b) => distanceKm(here, a) - distanceKm(here, b))[0];
-        if (nearest) chooseCity(nearest.id, false);
-        else place.textContent = homeCity().name + ', ' + homeCity().country;
+        if (!hadCity && !hashCity && nearest && nearest.id !== homeCityId) chooseCity(nearest.id);
+        else {
+          if (!hadCity && !hashCity) place.textContent = homeCity().name + ', ' + homeCity().country;
+          paintLists();
+        }
       }, () => {
-        place.textContent = homeCity().name + ', ' + homeCity().country;
+        if (!hadCity && !hashCity) place.textContent = homeCity().name + ', ' + homeCity().country;
       }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
     }
 

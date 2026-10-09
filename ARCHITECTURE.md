@@ -1,6 +1,18 @@
 # FindingDorothy — System Architecture v0
 *2026-10-04 · Prototype-stage technical blueprint. Launch cities: San Francisco, Madrid, Paris, Cologne.*
 
+## City files (current)
+
+Staging is the research inbox. Production is `data/cities/<slug>.json`. The page reads production only.
+
+- A worker writes `data/staging/cities/<slug>.json` and `data/staging/reports/<slug>.json`. It does not copy a published city into staging, and it does not edit `data/cities/` or `apps/web/index.html`.
+- `node scripts/select-venues.mjs` calls `validateForMerge` in `packages/cities/validate.js`. That is the one validator. Schema errors, fewer than 5 venues, and a missing or incomplete research report all fail. Review flags, including under half the venues with verified hours, print before merge and do not fail the check.
+- `node scripts/merge-cities.mjs` copies a passing file into `data/cities/`, prints a diff, then deletes the staging city and its report. The inbox is empty when nothing is in flight. A failing file stays in staging.
+- `node scripts/build-web.mjs` loads `data/cities/` through `validateCity` (schema only). A city already published under the 5-venue floor stays on the page until a worker replaces it. New thin files cannot merge.
+- `data/cities.json` was a stale city index. Nothing in the build reads it. City identity lives on each `data/cities/<slug>.json`.
+- Display names, stored categories, the conditional Events chip, and country flags live in `packages/cities/taxonomy.js`. The page does not carry a second copy.
+- Open and closed labels are computed in the browser from each venue's `hours` and the city timezone. The page does not embed a 24-hour string list.
+
 ## The system in one picture
 
 ```

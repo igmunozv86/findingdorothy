@@ -8,7 +8,7 @@
     "lat": 35.68944444444445,
     "lon": 139.69166666666666,
     "status": "live",
-    "last_updated": "2026-10-06",
+    "last_updated": "2026-10-08",
     "tz": "Asia/Tokyo"
   },
   "venues": [
@@ -24,26 +24,184 @@
       "hours_verified": false,
       "review_features": [
         "Gay club on the 1st floor of Saint Four Building in Shinjuku Ni-chome",
-        "Nights are booked as separate events, each with its own door time",
-        "Photo ID checked at entry; under 20 and high-school students are refused",
-        "Photography inside the club is prohibited"
+        "The house calendar books each night as its own event with its own door time",
+        "October 2026 event calendar is published on the house site"
       ],
       "instagram": "aisotope_lounge",
       "sources": [
         {
           "tier": 3,
           "url": "https://aisotope-lounge.net/access/",
-          "retrieved_at": "2026-10-06"
+          "retrieved_at": "2026-10-08"
         },
         {
           "tier": 0,
           "url": "https://www.openstreetmap.org/node/5322316322",
-          "retrieved_at": "2026-10-06"
+          "retrieved_at": "2026-10-08"
         },
         {
           "tier": 0,
           "url": "https://www.openstreetmap.org/way/169840420",
-          "retrieved_at": "2026-10-06"
+          "retrieved_at": "2026-10-08"
+        }
+      ],
+      "events_url": "https://aisotope-lounge.net/schedule/",
+      "live_counter": null
+    },
+    {
+      "id": "tokyo-aiiro-cafe",
+      "name": "AiiRO CAFE",
+      "category": "bar",
+      "neighborhood": "Shinjuku Ni-chome",
+      "address": "Dai-7 Tenka Building 1F, 2-18-1 Shinjuku, Shinjuku-ku, Tokyo",
+      "lat": 35.6907831,
+      "lon": 139.7083405,
+      "hours": {
+        "mon": ["18:00", "02:00"],
+        "tue": ["18:00", "02:00"],
+        "wed": ["18:00", "02:00"],
+        "thu": ["18:00", "02:00"],
+        "fri": ["18:00", "05:00"],
+        "sat": ["18:00", "05:00"],
+        "sun": ["18:00", "00:00"]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Open-air standing gay bar under a rainbow torii in Shinjuku Ni-chome",
+        "All-gender bar; the house site says there is no table charge",
+        "DJ nights on Thursday, Friday, Saturday, and Sunday",
+        "The house site lists English among the languages spoken"
+      ],
+      "instagram": "aiirocafe",
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://aiiro-cafe.net/",
+          "retrieved_at": "2026-10-08"
+        },
+        {
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/5322316321",
+          "retrieved_at": "2026-10-08"
+        },
+        {
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/way/153133382",
+          "retrieved_at": "2026-10-08"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "id": "tokyo-24-kaikan-shinjuku",
+      "name": "24 Kaikan Shinjuku",
+      "category": "sauna",
+      "neighborhood": "Shinjuku Ni-chome",
+      "address": "2-13-1 Shinjuku, Shinjuku-ku, Tokyo",
+      "lat": 35.6899626,
+      "lon": 139.7087117,
+      "hours": "24h",
+      "hours_verified": true,
+      "review_features": [
+        "Gay sauna in Shinjuku Ni-chome, open 24 hours every day",
+        "Bath, sauna, and private rooms on several floors",
+        "The house site says condoms are provided"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "http://www.juno.dti.ne.jp/kazuo24/shinjyuku/shinjyuku.htm",
+          "retrieved_at": "2026-10-08"
+        },
+        {
+          "tier": 3,
+          "url": "http://www.juno.dti.ne.jp/~kazuo24/english/english",
+          "retrieved_at": "2026-10-08"
+        },
+        {
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/way/169840468",
+          "retrieved_at": "2026-10-08"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "id": "tokyo-j-spark",
+      "name": "J Spark",
+      "category": "cruise",
+      "neighborhood": "Shinjuku 5-chome",
+      "address": "Shinjuku Mie Building 1F, 5-9-8 Shinjuku, Shinjuku-ku, Tokyo",
+      "lat": 35.6925761,
+      "lon": 139.708221,
+      "hours": "24h",
+      "hours_verified": true,
+      "review_features": [
+        "Cruising spot for ages 18 to 35, a short walk north of Ni-chome",
+        "Underwear inside; the house site prohibits nudity in the common areas",
+        "Stated as 24-hour, with a Tuesday 12:00–15:00 maintenance closure",
+        "Lockers, showers, and towels are provided"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "https://jspark.tokyo/data/jp/system/",
+          "retrieved_at": "2026-10-08"
+        },
+        {
+          "tier": 3,
+          "url": "https://jspark.tokyo/data/jp/access/",
+          "retrieved_at": "2026-10-08"
+        },
+        {
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/12051953043",
+          "retrieved_at": "2026-10-08"
+        }
+      ],
+      "live_counter": null
+    },
+    {
+      "id": "tokyo-back-drop",
+      "name": "BACK DROP",
+      "category": "sex",
+      "neighborhood": "Shinjuku Ni-chome",
+      "address": "Sunflower Building 4F, 2-17-1 Shinjuku, Shinjuku-ku, Tokyo",
+      "lat": 35.6911479,
+      "lon": 139.7085316,
+      "hours": {
+        "sun": ["12:00", "23:00"],
+        "mon": ["12:00", "23:00"],
+        "tue": ["12:00", "23:00"],
+        "wed": ["12:00", "23:00"],
+        "thu": ["12:00", "23:00"],
+        "fri": ["12:00", "06:00"],
+        "sat": ["12:00", "06:00"]
+      },
+      "hours_verified": true,
+      "review_features": [
+        "Male video-box club on the 4th floor of Sunflower Building",
+        "Private rooms are limited to two people",
+        "Ages 25 and under pay a lower entry fee with ID"
+      ],
+      "instagram": null,
+      "sources": [
+        {
+          "tier": 3,
+          "url": "http://backdrop.x.fc2.com/pc/index.html",
+          "retrieved_at": "2026-10-08"
+        },
+        {
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/node/12051953042",
+          "retrieved_at": "2026-10-08"
+        },
+        {
+          "tier": 0,
+          "url": "https://www.openstreetmap.org/way/153133250",
+          "retrieved_at": "2026-10-08"
         }
       ],
       "live_counter": null

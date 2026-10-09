@@ -2,18 +2,24 @@
 // venue_count and verified_pct are computed later. They must not be stored.
 // Run: node packages/cities/validate.js
 
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import { EVENT_TYPES, STORED_CATEGORIES } from './taxonomy.js';
 
 const REGIONS = ['North America', 'Europe', 'Latin America', 'Asia-Pacific', 'Middle East', 'Africa'];
-const CATEGORIES = ['bar', 'club', 'sauna', 'cruise', 'sex'];
+const CATEGORIES = STORED_CATEGORIES;
 const DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 const CLOCK = /^([01]\d|2[0-3]):[0-5]\d$/;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const TZ = /^[A-Za-z0-9_+-]+(?:\/[A-Za-z0-9_+-]+)+$/;
 const VENUE_KEYS = ['id', 'name', 'category', 'neighborhood', 'address', 'lat', 'lon', 'hours', 'hours_verified', 'review_features', 'instagram', 'sources', 'events_url', 'live_counter'];
+const MIN_VENUES = 5;
+const REPORT_KEYS = ['slug', 'retrieved_at', 'categories', 'anchors'];
+const AUDIT_KEYS = ['category', 'queries', 'sources_checked', 'candidates'];
+const CANDIDATE_KEYS = ['name', 'kept', 'reason'];
+const ANCHOR_KEYS = ['name', 'decision', 'reason', 'source'];
 
-export { REGIONS, CATEGORIES };
+export { REGIONS, CATEGORIES, MIN_VENUES };
 
 export function validateCity(city, filename) {
   const errors = [];
@@ -98,7 +104,7 @@ function validateVenue(slug, venue, seen) {
   }
   errors.push(...validateSources(label, venue.sources));
   if (venue.hours_verified === true && !(venue.sources || []).some((source) => source && source.tier === 3)) {
-    errors.push(`${label}: verified hours need a tier 3 source, the venue's own site or Instagram`);
+    errors.push(`${label}: verified hours need a tier 3 source, the venue's own site, Instagram, or Facebook page`);
   }
   return errors;
 }
@@ -143,26 +149,161 @@ function validateSources(label, sources) {
 }
 
 // Agent review, not a merge failure by itself. Tier 4 is Nacho's QA and is not a source.
+// A city under half verified hours is a backfill flag. It prints before merge.
 export function reviewFlags(city) {
   const slug = city?.meta?.slug || 'city';
   const flags = [];
-  for (const venue of city?.venues || []) {
+  const venues = city?.venues || [];
+  for (const venue of venues) {
     const tiers = new Set((venue.sources || []).map((source) => source && source.tier).filter((tier) => Number.isInteger(tier)));
     if (tiers.size < 2) {
       flags.push(`${slug}: ${venue.id || venue.name}: name and address are not confirmed in two tiers`);
     }
   }
-  const venues = city?.venues || [];
   const dance = venues.filter((venue) => venue.category === 'bar' || venue.category === 'club').length;
   const sauna = venues.filter((venue) => venue.category === 'sauna').length;
   const fun = venues.filter((venue) => venue.category === 'cruise' || venue.category === 'sex').length;
   if (dance < 4 || sauna < 2 || fun < 2) {
     flags.push(`${slug}: thin result, dance=${dance} sauna=${sauna} fun=${fun}`);
   }
+  const verified = venues.filter((venue) => venue.hours_verified === true).length;
+  if (venues.length && verified * 2 < venues.length) {
+    flags.push(`${slug}: ${verified} of ${venues.length} venues have verified hours — run the hours backfill before merge`);
+  }
   return flags;
 }
 
-const EVENT_TYPES = ['pride'];
+// Merge gate on top of the schema. The build keeps using validateCity so a city
+// already published under this floor stays on the page until its worker replaces it.
+// A new or refreshed file with fewer than 5 venues must not merge.
+export function completenessErrors(city, filename) {
+  const slug = String(filename || city?.meta?.slug || 'city').replace(/\.json$/, '');
+  const count = Array.isArray(city?.venues) ? city.venues.length : 0;
+  if (count < MIN_VENUES) {
+    return [`${slug}: ${count} venues — a city file with fewer than ${MIN_VENUES} venues fails validation`];
+  }
+  return [];
+}
+
+function httpUrl(value) {
+  return typeof value === 'string' && /^https?:\/\//.test(value);
+}
+
+// Worker audit. One file per city at data/staging/reports/<slug>.json.
+// Every stored category needs the queries that were run and the pages that were opened.
+export function validateReport(report, city) {
+  const slug = city?.meta?.slug || 'city';
+  if (!report || typeof report !== 'object' || Array.isArray(report)) {
+    return [`${slug}: research report is required at data/staging/reports/${slug}.json`];
+  }
+  const errors = [];
+  for (const key of Object.keys(report)) {
+    if (!REPORT_KEYS.includes(key)) errors.push(`${slug}: report field ${key} is unknown`);
+  }
+  if (report.slug !== slug) errors.push(`${slug}: report slug must match the city`);
+  if (!ISO_DATE.test(report.retrieved_at || '')) errors.push(`${slug}: report retrieved_at must be YYYY-MM-DD`);
+  const audits = Array.isArray(report.categories) ? report.categories : null;
+  if (!audits) {
+    errors.push(`${slug}: report categories must cover ${CATEGORIES.join(', ')}`);
+  } else {
+    const seen = new Set();
+    for (const audit of audits) {
+      if (!audit || typeof audit !== 'object' || Array.isArray(audit)) {
+        errors.push(`${slug}: each category audit must be an object`);
+        continue;
+      }
+      for (const key of Object.keys(audit)) {
+        if (!AUDIT_KEYS.includes(key)) errors.push(`${slug}: category audit field ${key} is unknown`);
+      }
+      if (!CATEGORIES.includes(audit.category)) {
+        errors.push(`${slug}: category audit must be one of ${CATEGORIES.join(', ')}`);
+        continue;
+      }
+      if (seen.has(audit.category)) errors.push(`${slug}: duplicate category audit ${audit.category}`);
+      seen.add(audit.category);
+      const label = `${slug}: ${audit.category}`;
+      if (!Array.isArray(audit.queries) || !audit.queries.length || audit.queries.some((query) => typeof query !== 'string' || !query.trim())) {
+        errors.push(`${label}: queries must list the searches that were run`);
+      }
+      if (!Array.isArray(audit.sources_checked) || !audit.sources_checked.length || audit.sources_checked.some((url) => !httpUrl(url))) {
+        errors.push(`${label}: sources_checked must list the pages that were opened`);
+      }
+      if (!Array.isArray(audit.candidates)) {
+        errors.push(`${label}: candidates must be an array, empty only after the queries were run`);
+        continue;
+      }
+      for (const candidate of audit.candidates) {
+        if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)) {
+          errors.push(`${label}: each candidate must be an object`);
+          continue;
+        }
+        for (const key of Object.keys(candidate)) {
+          if (!CANDIDATE_KEYS.includes(key)) errors.push(`${label}: candidate field ${key} is unknown`);
+        }
+        if (!candidate.name || typeof candidate.name !== 'string') errors.push(`${label}: candidate name is required`);
+        if (candidate.kept !== true && candidate.kept !== false) errors.push(`${label}: ${candidate.name || 'candidate'} kept must be true or false`);
+        if (!candidate.reason || typeof candidate.reason !== 'string' || !candidate.reason.trim()) {
+          errors.push(`${label}: ${candidate.name || 'candidate'} needs a reason for kept or dropped`);
+        }
+        if (candidate.kept === true) {
+          const names = (city?.venues || []).map((venue) => String(venue.name || '').trim().toLowerCase());
+          if (!names.includes(String(candidate.name).trim().toLowerCase())) {
+            errors.push(`${label}: kept ${candidate.name} is not in the city file`);
+          }
+        }
+      }
+    }
+    for (const category of CATEGORIES) {
+      if (!seen.has(category)) errors.push(`${slug}: missing category audit for ${category}`);
+    }
+  }
+  const anchors = Array.isArray(report.anchors) ? report.anchors : null;
+  if (!anchors || anchors.length < 2 || anchors.length > 3) {
+    errors.push(`${slug}: anchors must name 2 or 3 venues a local guide would list first`);
+  } else {
+    for (const anchor of anchors) {
+      if (!anchor || typeof anchor !== 'object' || Array.isArray(anchor)) {
+        errors.push(`${slug}: each anchor must be an object`);
+        continue;
+      }
+      for (const key of Object.keys(anchor)) {
+        if (!ANCHOR_KEYS.includes(key)) errors.push(`${slug}: anchor field ${key} is unknown`);
+      }
+      if (!anchor.name || typeof anchor.name !== 'string') errors.push(`${slug}: anchor name is required`);
+      if (anchor.decision !== 'included' && anchor.decision !== 'ruled_out') {
+        errors.push(`${slug}: ${anchor.name || 'anchor'} decision must be included or ruled_out`);
+      }
+      if (!anchor.reason || typeof anchor.reason !== 'string' || !anchor.reason.trim()) {
+        errors.push(`${slug}: ${anchor.name || 'anchor'} needs a reason`);
+      }
+      if (anchor.decision === 'ruled_out' && !httpUrl(anchor.source)) {
+        errors.push(`${slug}: ${anchor.name || 'anchor'} ruled out needs a source url`);
+      }
+      if (anchor.decision === 'included') {
+        const names = (city?.venues || []).map((venue) => String(venue.name || '').trim().toLowerCase());
+        if (!names.includes(String(anchor.name || '').trim().toLowerCase())) {
+          errors.push(`${slug}: anchor ${anchor.name} is marked included but is not in the city file`);
+        }
+      }
+    }
+  }
+  return errors;
+}
+
+export function validateForMerge(city, filename, report) {
+  return [
+    ...validateCity(city, filename),
+    ...completenessErrors(city, filename),
+    ...validateReport(report, city),
+  ];
+}
+
+export function loadReport(slug) {
+  const url = new URL(`../../data/staging/reports/${slug}.json`, import.meta.url);
+  if (!existsSync(url)) return null;
+  return JSON.parse(readFileSync(url, 'utf8'));
+}
+
 const EVENT_KEYS = ['name', 'type', 'start', 'end', 'source'];
 
 function validateEvents(slug, events) {
@@ -191,7 +332,38 @@ function validateEvents(slug, events) {
   return errors;
 }
 
+function assertResearchGate() {
+  const thin = completenessErrors({ meta: { slug: 'tokyo' }, venues: [{ name: 'Only' }] }, 'tokyo.json');
+  if (!thin.some((error) => error.includes('fewer than 5'))) {
+    throw new Error('a city under 5 venues must fail the merge gate');
+  }
+  const missing = validateReport(null, { meta: { slug: 'tokyo' } });
+  if (!missing.length) throw new Error('a missing research report must fail the merge gate');
+  const half = reviewFlags({
+    meta: { slug: 'sample' },
+    venues: [
+      { name: 'A', category: 'bar', hours_verified: true, sources: [{ tier: 0 }, { tier: 3 }] },
+      { name: 'B', category: 'sauna', hours_verified: false, sources: [{ tier: 0 }, { tier: 3 }] },
+      { name: 'C', category: 'cruise', hours_verified: false, sources: [{ tier: 0 }, { tier: 3 }] },
+    ],
+  });
+  if (!half.some((flag) => flag.includes('hours backfill before merge'))) {
+    throw new Error('under half verified hours must flag the backfill before merge');
+  }
+  const even = reviewFlags({
+    meta: { slug: 'sample' },
+    venues: [
+      { name: 'A', category: 'bar', hours_verified: true, sources: [{ tier: 0 }, { tier: 3 }] },
+      { name: 'B', category: 'sauna', hours_verified: true, sources: [{ tier: 0 }, { tier: 3 }] },
+    ],
+  });
+  if (even.some((flag) => flag.includes('hours backfill'))) {
+    throw new Error('exactly half verified hours is not under the backfill line');
+  }
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  assertResearchGate();
   const dir = new URL('../../data/cities/', import.meta.url);
   const names = readdirSync(dir).filter((name) => name.endsWith('.json')).sort();
   const errors = [];
@@ -205,4 +377,5 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     process.exit(1);
   }
   console.log(`ok ${names.length} city files`);
+  console.log('research gate rejects fewer than 5 venues, a missing audit, and flags the hours backfill');
 }
