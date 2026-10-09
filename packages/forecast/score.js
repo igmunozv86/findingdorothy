@@ -181,18 +181,6 @@ export function scoreForecast({ cell, signals = [], weights, closed = false }) {
   };
 }
 
-/**
- * Low confidence never makes a now-claim. It shows the pattern.
- * Medium and high use the same percent, with a busy / quiet word.
- */
-// Short badge next to the percent. Low confidence stays "Pattern", not a now-claim.
-export function bandLabel(percent, confidence) {
-  if (confidence === 'low') return 'Pattern';
-  if (percent >= 70) return 'Busy';
-  if (percent >= 45) return 'Heating up';
-  return 'Quiet';
-}
-
 export function labelFor(percent, confidence, context = {}) {
   if (context.closed) return { label: 'Closed right now.', action: 'skip' };
   const day = context.dayName || 'Tonight';
